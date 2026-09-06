@@ -31,6 +31,31 @@ pnpm exec tsc --noEmit
 
 Settings provide day, evening, night, and live Tokyo time. Live mode uses the current device date converted to Asia/Tokyo; dawn is 05:00–07:00, dusk is 16:00–20:00. This is a clock-driven artistic cycle, not astronomical solar positioning or live weather.
 
+The following camera now dollies from **4.2 to 60 meters**, using proportional wheel/pinch/button increments. Beyond street distance it gradually rises to reveal the neighborhood, with manual orbit, third-person follow, and building/canopy collision still active. Obstacles can shorten the actual camera distance to keep the character visible.
+
+## Cycles baking
+
+The character and both maps include real Cycles ambient-occlusion atlases and baked procedural surface color. Each map also has a separate Cycles diffuse irradiance bake of shop lights and emissive signs. Sunlight is excluded from that light bake, so changing the time still changes direct lighting and shadows. The warm irradiance follows the same emission multiplier as the shops. Moving characters retain dynamic shadows; their short-range AO records local clothing and body detail rather than a fixed street shadow.
+
+```sh
+blender --background --factory-startup --python-exit-code 1 --python scripts/bake_assets.py -- character crossing park
+blender --background --factory-startup --python-exit-code 1 --python scripts/bake_surfaces.py -- character crossing park
+blender --background --factory-startup --python-exit-code 1 --python scripts/verify_bake_coverage.py
+# If coverage flags fine props, bake those into mesh color attributes:
+blender --background --factory-startup --python-exit-code 1 --python scripts/bake_fine_props.py
+blender --background --factory-startup --python-exit-code 1 --python scripts/finalize_bakes.py
+blender --background --factory-startup --python-exit-code 1 --python scripts/verify_bake_coverage.py
+blender --background --factory-startup --python-exit-code 1 --python scripts/render_baked_review.py
+```
+
+Run these after rebuilding or changing mesh geometry. `bake_assets.py` gives each asset a non-overlapping `BakeUV` atlas while preserving original billboard UVs. AO is exported through standard glTF occlusion textures. Light maps use material extras `bakedLightmap` and `bakedLightmapScale` and UV1. The runtime waits for the selected map's light atlas, shares it among materials, and disposes it on scene changes. Cycles uses OptiX when available, with CPU fallback. The script needs a Blender build with its bundled glTF exporter.
+
+The 1024px character and 2048px map texture masters live in `assets/bakes/` and are packed into the editable `.blend` files. Browser assets use embedded WebP textures with Draco geometry; only the two small WebP irradiance files are separate downloads, one per selected map. Surface color and local AO work in Balanced as well as High graphics. High additionally enables bloom. `public/renders/crossing-evening-cycles.png` and `crossing-night-cycles.png` are Cycles comparisons using the same starting camera and avatar position as the web game (1280 × 800).
+
+Thin props that fall below atlas resolution use Cycles-baked color attributes instead. Their local AO is limited to a subtle 30% tint, keeping road markings readable and foliage free of black texture holes. A white occlusion carrier preserves UV1 for their independent light maps. The character is merged by material within each animation pivot, reducing draw calls without merging moving limbs together. The coverage check tests actual face-center pixels and baked vertex samples, in addition to the GLB structure tests.
+
+Baking improves material depth and diffuse light spill; it does not reproduce Cycles' live reflections, all light transport, or the concept's missing geometry. This is a closer art pass, not pixel-identical rendering. The current light maps store scaled LDR irradiance, so the brightest local highlights are bounded. The prototype still needs more detailed facade/interior modeling, foliage, and animation to reach the supplied concept's finish.
+
 ## Blender assets
 
 Editable scenes live in `assets/blender/`. Rebuild with:

@@ -24,6 +24,18 @@ for (const [iso,phase,next,blend,clock] of [
 ]) { const t=resolveTime('live',new Date(iso));assert.equal(t.phase,phase);assert.equal(t.next,next);assert.equal(t.blend,blend);assert.equal(t.clock,clock); }
 assert.equal(resolveTime('evening',new Date()).clock,'17:30');
 
+const cameraContext = { exports: {}, Math };
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/game/camera.ts','utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText, cameraContext);
+const { zoomDistance, elevatedPitch, MIN_ZOOM, MAX_ZOOM } = cameraContext.exports;
+let zoom = 8.8;
+for(let i=0;i<100;i++) zoom=zoomDistance(zoom,1);
+assert.equal(zoom,60,'Dolly reaches the requested neighborhood view');
+for(let i=0;i<100;i++) zoom=zoomDistance(zoom,-1);
+assert.equal(zoom,MIN_ZOOM,'Dolly cannot enter first person');
+assert.ok(elevatedPitch(.24,MAX_ZOOM)>1,'Wide zoom rises over the street');
+assert.equal(elevatedPitch(.24,8.8),.24,'Close camera retains manual pitch');
+assert.ok(elevatedPitch(1.02,MAX_ZOOM)<Math.PI/2,'Orbit cannot flip over');
+
 const report = [];
 for (const name of ['character','crossing','park','car','motorcycle']) {
   const buf=fs.readFileSync(`public/models/${name}.glb`);
@@ -32,6 +44,20 @@ for (const name of ['character','crossing','park','car','motorcycle']) {
   assert.ok(json.meshes.length>0);
   for (const node of json.nodes) if(node.translation) assert.ok(node.translation.every(Number.isFinite));
   if(name==='character') for(const joint of ['Character','Arm_L','Arm_R','Leg_L','Leg_R']) assert.ok(json.nodes.some(n=>n.name===joint),`${joint} preserved`);
+  if(['character','crossing','park'].includes(name)) {
+    const baked=json.materials.filter(m=>m.occlusionTexture);
+    assert.ok(baked.length>5,`${name} includes genuine AO textures`);
+    for(const mesh of json.meshes) for(const primitive of mesh.primitives) {
+      if(json.materials[primitive.material]?.occlusionTexture) {
+        assert.equal(json.materials[primitive.material].occlusionTexture.texCoord,1);
+        assert.ok(primitive.attributes.TEXCOORD_1!==undefined,`${name} includes UV1 for bakes`);
+      }
+    }
+    if(name!=='character') for(const m of baked) {
+      assert.ok(m.extras?.bakedLightmap);
+      assert.ok(fs.existsSync('public'+m.extras.bakedLightmap),'Irradiance texture exists');
+    }
+  }
   if(['crossing','park'].includes(name)) {
     const m=JSON.parse(fs.readFileSync(`public/models/${name}.json`,'utf8'));
     assert.ok(m.colliders.length>0);
@@ -41,5 +67,5 @@ for (const name of ['character','crossing','park','car','motorcycle']) {
   report.push({ name, bytes:buf.length, gzipBytes:zlib.gzipSync(buf).length, meshes:json.meshes.length, triangles:json.meshes.reduce((n,m)=>n+m.primitives.reduce((s,p)=>s+json.accessors[p.indices].count/3,0),0), compressed:!!json.extensionsUsed?.includes('KHR_draco_mesh_compression') });
 }
 fs.mkdirSync('work',{recursive:true});fs.writeFileSync('work/asset-report.json',JSON.stringify(report,null,2));
-console.log('PASS: collisions, wall sliding, vehicle clearance, map bounds, Tokyo time transitions, glTF structure, animation pivots, safe map spawns.');
+console.log('PASS: collisions, wall sliding, vehicle clearance, map bounds, Tokyo time transitions, 60m third-person zoom, glTF structure, baked textures/UVs, animation pivots, safe map spawns.');
 console.table(report);

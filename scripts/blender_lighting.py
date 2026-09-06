@@ -18,6 +18,8 @@ def apply_preset(preset='evening'):
         s.world.use_nodes=True;bg=s.world.node_tree.nodes.get('Background')
         bg.inputs[0].default_value=(*linear_rgb(p['sky']),1);bg.inputs[1].default_value=p['ambient']*.37
     for o in s.objects:
+        if o.type=='LIGHT' and o.get('baked_shop'):
+            o.data.energy=o.get('base_power',o.data.energy)*p['emission']
         if o.type=='LIGHT' and o.data.type=='SUN':
             o.data.color=linear_rgb(p['sun']);o.data.energy=p['power'];o.data.angle=.12
             o.location=(-22,-14,28);o.rotation_euler=(-o.location).to_track_quat('-Z','Y').to_euler()

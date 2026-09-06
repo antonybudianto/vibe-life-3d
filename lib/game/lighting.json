@@ -1,5 +1,5 @@
 {
-  "day": { "sky": "#b4c9e2", "sun": "#ffeed2", "power": 3.3, "ambient": 2.0, "emission": 0.35, "exposure": 1.10 },
-  "evening": { "sky": "#8a91b4", "sun": "#ffbb82", "power": 2.7, "ambient": 1.75, "emission": 1.0, "exposure": 1.23 },
-  "night": { "sky": "#161e37", "sun": "#8eabf3", "power": 0.65, "ambient": 0.8, "emission": 2.3, "exposure": 1.35 }
+  "day": { "sky": "#adc5e2", "sun": "#ffeed2", "power": 3.3, "ambient": 1.2, "environment": 0.45, "emission": 0.25, "exposure": 1.08 },
+  "evening": { "sky": "#687397", "sun": "#ffbb82", "power": 2.7, "ambient": 0.72, "environment": 0.3, "emission": 1.0, "exposure": 1.10 },
+  "night": { "sky": "#141d35", "sun": "#8eabf3", "power": 0.4, "ambient": 0.23, "environment": 0.12, "emission": 1.8, "exposure": 1.20 }
 }

@@ -42,4 +42,5 @@ work-*.log
 *.blend2
 
 __pycache__/
+optix7cache.db*
 *.pyc

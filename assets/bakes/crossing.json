@@ -1,0 +1,10 @@
+{
+  "ao": "crossing-ao.png",
+  "resolution": 2048,
+  "aoStd": 0.1924772709608078,
+  "lightmap": "crossing-light.webp",
+  "lightmapScale": 4,
+  "lightmapMaximum": 7.225218772888184,
+  "asset": "crossing",
+  "seconds": 65.7
+}

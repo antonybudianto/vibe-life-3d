@@ -8,6 +8,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { moveWithCollision, resolveTime, type Collider } from './physics';
 import phases from './lighting.json';
+import { elevatedPitch, zoomDistance } from './camera';
 
 export type TravelMode = 'walk' | 'motorcycle' | 'car';
 export type TimeMode = 'day' | 'evening' | 'night' | 'live';
@@ -18,7 +19,7 @@ const INITIAL: Status = { loading: true, progress: 0, map: 'crossing', x: 0, z: 
 
 export class World {
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(55, 1, .12, 150);
+  camera = new THREE.PerspectiveCamera(55, 1, .12, 240);
   renderer: THREE.WebGLRenderer;
   composer: EffectComposer;
   bloom: UnrealBloomPass;
@@ -85,10 +86,10 @@ export class World {
     const room = new RoomEnvironment();
     this.envTarget = pmrem.fromScene(room, .04);
     this.scene.environment = this.envTarget.texture;
-    this.scene.environmentIntensity = .5;
+    this.scene.environmentIntensity = .35;
     room.dispose(); pmrem.dispose();
     this.scene.background = new THREE.Color(0x8896b8);
-    this.scene.fog = new THREE.Fog(0x8896b8, 45, 125);
+    this.scene.fog = new THREE.Fog(0x8896b8, 85, 200);
     this.sun.position.set(-22, 28, 14);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
@@ -123,12 +124,38 @@ export class World {
         if (world) o.matrixAutoUpdate = false;
         const materials = Array.isArray(o.material) ? o.material : [o.material];
         for (const m of materials) if (m instanceof THREE.MeshStandardMaterial) {
-          m.envMapIntensity = .5;
+          m.envMapIntensity = .55;
+          m.aoMapIntensity = .85;
+          if (m.aoMap) m.aoMap.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
           m.userData.baseEmission = m.emissiveIntensity;
         }
       }
     });
     return group;
+  }
+
+  private async loadBakedLighting(group: THREE.Group) {
+    const textures = new Map<string, Promise<THREE.Texture>>();
+    const loaded: THREE.Texture[] = [];
+    const materials = new Set<THREE.MeshStandardMaterial>();
+    group.traverse((o) => {
+      if (o instanceof THREE.Mesh) for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
+        if (m instanceof THREE.MeshStandardMaterial && m.userData.bakedLightmap) materials.add(m);
+      }
+    });
+    try {
+      await Promise.all([...materials].map(async (m) => {
+        const path = m.userData.bakedLightmap as string;
+        if (!textures.has(path)) textures.set(path, new THREE.TextureLoader().loadAsync(path).then((texture) => {
+          texture.flipY = false; texture.channel = 1; texture.colorSpace = THREE.SRGBColorSpace;
+          texture.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
+          loaded.push(texture); return texture;
+        }));
+        m.lightMap = await textures.get(path)!;
+        m.lightMapIntensity = m.userData.bakedLightmapScale ?? 4;
+        m.needsUpdate = true;
+      }));
+    } catch (error) { loaded.forEach((texture) => texture.dispose()); throw error; }
   }
 
   private async initialize() {
@@ -156,6 +183,8 @@ export class World {
         }),
         fetch(`/models/${id}.json`).then((r) => { if (!r.ok) throw new Error('Map description unavailable'); return r.json() as Promise<MapData>; }),
       ]);
+      try { await this.loadBakedLighting(asset.scene); }
+      catch (error) { this.disposeObject(asset.scene); throw error; }
       if (!this.alive || serial !== this.loadSerial) { this.disposeObject(asset.scene); return; }
       const next = this.prep(asset.scene, true);
       if (this.environment) { this.scene.remove(this.environment); this.disposeObject(this.environment); }
@@ -192,7 +221,7 @@ export class World {
   setTime(mode: TimeMode) { this.time = mode; this.lastPhase = ''; this.applyTime(); this.emit(); }
   setRunning(value: boolean) { this.running = value; }
   setPaused(value: boolean) { this.paused = value; this.clearInput(); }
-  zoom(delta: number) { this.distance = THREE.MathUtils.clamp(this.distance + delta, 4.2, 17); }
+  zoom(delta: number) { this.distance = zoomDistance(this.distance, delta); }
   recenter() { this.yaw = this.heading - Math.PI; this.pitch = .30; }
   jump() { if (!this.paused && !this.status.loading && this.travel === 'walk' && this.player.y <= .002) this.verticalVelocity = 5.3; }
   setQuality(value: 'high' | 'balanced') { this.quality = value; this.bloom.enabled = value === 'high'; this.resize(); }
@@ -257,10 +286,13 @@ export class World {
     const sky = new THREE.Color(a.sky).lerp(new THREE.Color(b.sky), t);
     this.scene.background = sky;
     (this.scene.fog as THREE.Fog).color.copy(sky);
+    this.hemi.color.copy(sky).lerp(new THREE.Color(0xc5d3ef), .25);
+    this.hemi.groundColor.set(0x3b303d);
     this.sun.color.set(a.sun).lerp(new THREE.Color(b.sun), t);
     this.sun.intensity = THREE.MathUtils.lerp(a.power, b.power, t);
     this.hemi.intensity = THREE.MathUtils.lerp(a.ambient, b.ambient, t);
-    this.fill.intensity = this.hemi.intensity * .45;
+    this.fill.intensity = this.hemi.intensity * .18;
+    this.scene.environmentIntensity = THREE.MathUtils.lerp(a.environment, b.environment, t);
     this.renderer.toneMappingExposure = THREE.MathUtils.lerp(a.exposure, b.exposure, t);
     const emission = THREE.MathUtils.lerp(a.emission, b.emission, t);
     const seen = new Set<THREE.Material>();
@@ -268,6 +300,7 @@ export class World {
       if (o instanceof THREE.Mesh) for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
         if (m instanceof THREE.MeshStandardMaterial && !seen.has(m)) {
           seen.add(m); m.emissiveIntensity = (m.userData.baseEmission ?? m.emissiveIntensity) * emission;
+          if (m.lightMap) m.lightMapIntensity = (m.userData.bakedLightmapScale ?? 4) * emission;
         }
       }
     });
@@ -333,7 +366,8 @@ export class World {
     const height = this.travel === 'walk' ? 1.35 : 1.4;
     this.focus.copy(this.player); this.focus.y += height;
     const distance = this.distance + (this.travel === 'car' ? 2 : 0);
-    this.desired.set(Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), Math.cos(this.yaw) * Math.cos(this.pitch)).multiplyScalar(distance).add(this.focus);
+    const pitch = elevatedPitch(this.pitch, this.distance);
+    this.desired.set(Math.sin(this.yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(this.yaw) * Math.cos(pitch)).multiplyScalar(distance).add(this.focus);
     // Clip the spring arm against building volumes; remain outside the avatar.
     if (this.data) {
       const dir = this.desired.clone().sub(this.focus).normalize(); this.ray.set(this.focus, dir);

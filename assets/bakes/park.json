@@ -1,0 +1,10 @@
+{
+  "ao": "park-ao.png",
+  "resolution": 2048,
+  "aoStd": 0.35893526673316956,
+  "lightmap": "park-light.webp",
+  "lightmapScale": 4,
+  "lightmapMaximum": 0.9666793942451477,
+  "asset": "park",
+  "seconds": 42.8
+}
