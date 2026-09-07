@@ -32,6 +32,10 @@ deck_paving=g.material('Deck paving',(.23,.235,.25),.83)
 deck_yellow=g.material('Deck stair nosings',(.69,.40,.06),.82)
 porcelain=g.material('Landmark white ceramic',(.57,.59,.61),.73,.12)
 silver=g.material('Landmark silver aluminum',(.46,.49,.52),.38,.58)
+bookblue=g.material('Taiseido cobalt enamel',(.012,.10,.43),.53,.04)
+bookred=g.material('Taiseido red sign border',(.56,.012,.022),.56)
+magred=g.material('MAGNET red enamel',(.48,.018,.043),.46,.08)
+magcyan=g.material('MAGNET cyan enamel',(.008,.38,.48),.46,.08)
 hotelglass=g.material('Mark City blue gray glass',(.115,.19,.23),.24,.52)
 yellow=g.material('Tactile ochre',(.69,.40,.06),.82)
 wood=g.material('Walnut shop joinery',(.15,.073,.035),.7)
@@ -470,57 +474,112 @@ def streets():
         box((x,y,.7),(.63,.62,1.3),metal);box((x,y-.32,1.12),(.46,.04,.20),black)
         sign('MAP',x+.68,y,1.49,.67,1.12,blue,.26)
 
-def taiseido():
-    """Small Center-gai bookshop: white tile, blue/red wrap fascia and open racks.
+def facade_strip(path,z,height,mat,offset=0):
+    """A continuous vertical ribbon following the building's actual outline."""
+    for a,b in zip(path,path[1:]):
+        angle=math.atan2(b[1]-a[1],b[0]-a[0]);nx,ny=math.sin(angle),-math.cos(angle)
+        aa=(a[0]+nx*offset,a[1]+ny*offset);bb=(b[0]+nx*offset,b[1]+ny*offset)
+        g.mesh([(*aa,z-height/2),(*bb,z-height/2),(*bb,z+height/2),(*aa,z+height/2)],[(0,1,2,3)],mat)
 
-    Primary exterior/location references are recorded in assets/references.
-    The low-rise silhouette and sign treatment are intentionally unlike the
-    generic office generator. Dimensions are estimated for the concept scale.
-    """
+
+def path_label(body,path,z,size,mat,offset=.12,inset=.75,font=jp):
+    lengths=[math.dist(a,b) for a,b in zip(path,path[1:])];total=sum(lengths)
+    for index,letter in enumerate(body):
+        distance=inset+(total-2*inset)*(index+.5)/len(body)
+        for a,b,length in zip(path,path[1:],lengths):
+            if distance<=length:
+                t=distance/length;angle=math.atan2(b[1]-a[1],b[0]-a[0])
+                px=a[0]+(b[0]-a[0])*t+math.sin(angle)*offset
+                py=a[1]+(b[1]-a[1])*t-math.cos(angle)*offset
+                g.text(letter,(px,py,z),size,mat,angle,font);break
+            distance-=length
+
+
+def taiseido():
+    """Photographed Center-gai shop: bowed signs, small entrance, upper ad board."""
     x,y,w,d,h=-54,20,10,16,18
-    front=y-d/2
+    front=y-d/2;bow=1.05
+    edge=[(x-w/2+w*i/24,front+bow*(2*i/24-1)**2) for i in range(25)]
+    outline=edge+[(x+w/2,y+d/2),(x-w/2,y+d/2)]
     obstacle(x,y,w,d,h)
-    footprint(x,y,w,d,2.0,.1,h,porcelain)
-    for z in [3.25,6.55,9.8,13.1,16.4,18]:
-        footprint(x,y,w+.08,d+.08,2.0,z,.12,silver)
-    # Tile joints, narrow upper windows and the low shop entrance.
-    for z in np.arange(.6,18,.55):box((x,front-.018,float(z)),(w-.15,.025,.018),stone)
-    for dx in [-3.5,-1.75,0,1.75,3.5]:
-        box((x+dx,front-.024,9),(.016,.025,17.8),stone)
-        for z in [8.2,11.5,14.8]:g.panel((x+dx,front-.05,z),1.18,1.6,blueglass)
-    for dx in [-3,0,3]:
-        g.panel((x+dx,front-.08,1.55),2.15,2.7,warm[1])
-        if dx==0:g.panel((x,front-.12,1.45),1.6,2.6,black)
-        else:
-            for row in range(4):
-                box((x+dx,front-.4,.45+row*.48),(1.8,.40,.07),metal)
-                for col in range(6):box((x+dx-.71+col*.28,front-.45,.62+row*.48),(.22,.07,.30),books[(row+col)%4])
-    # Letter colors and red inset border match the shop's own exterior photo.
-    for xx,yy,angle,span,body in [(x,front-.16,0,9.2,'大盛堂書店'),(x+w/2+.04,y-2,math.pi/2,9.0,'大盛堂書店')]:
-        box((xx,yy,4.85),(span+.1,.16,2.75),blue,angle)
-        g.panel((xx+math.sin(angle)*.10,yy-math.cos(angle)*.10,4.85),span-.14,2.51,brandred,angle)
-        g.panel((xx+math.sin(angle)*.12,yy-math.cos(angle)*.12,4.85),span-.28,2.35,porcelain,angle)
-        g.text(body,(xx+math.sin(angle)*.14,yy-math.cos(angle)*.14,4.9),1.70,blue,angle,jp)
-    sign('TAISEIDO  BOOKS',x,front-.2,3.25,9.4,.40,blue,.29)
-    roof_detail(x,y,w,d,h,1)
+    # The upper frontage is occupied by advertising, not an office-window grid.
+    prism(outline,3.1,h-3.1,porcelain)
+    prism(outline,.10,.12,porcelain)
+    box((x,y+2,1.6),(w,d-4,3.0),porcelain)
+    for dx in [-4.45,4.45]:box((x+dx,front+1.0,1.6),(1.1,2.0,3.0),porcelain)
+    for z in np.arange(.4,3.1,.34):
+        for dx in [-4.45,4.45]:box((x+dx,front-.03,float(z)),(1.06,.04,.017),stone)
+    # Recessed doorway and outward-facing magazine racks, as in the shop photo.
+    g.panel((x,front+1.0,1.55),2.25,2.8,black)
+    box((x,front+.13,.24),(2.4,1.75,.07),black)
+    for dx in [-2.35,2.35]:
+        g.panel((x+dx,front+.22,1.65),2.0,2.65,warm[1])
+        for row in range(5):
+            z=.38+row*.46
+            box((x+dx,front-.20,z),(1.8,.58,.07),metal)
+            for col in range(6):
+                xx=x+dx-.73+col*.29
+                box((xx,front-.42,z+.21),(.255,.055,.38),books[(row+col)%4])
+                g.panel((xx,front-.455,z+.22),.17,.045,porcelain)
+    for dx in [-1.16,1.16]:box((x+dx,front+.90,1.55),(.07,.14,2.8),silver)
+    # Blue canopy and white sign bend across the entire convex shop front.
+    facade_strip(edge,3.28,.28,bookblue,.34)
+    path_label('TAISEIDO',edge,3.28,.27,porcelain,.39,inset=2.1,font=font)
+    facade_strip(edge,4.90,2.88,bookblue,.08)
+    facade_strip(edge,4.90,2.60,porcelain,.13)
+    for z in [3.77,6.03]:facade_strip(edge[3:-3],z,.065,bookred,.19)
+    for p in [edge[3],edge[-4]]:g.rod((p[0],p[1]-.22,3.77),(p[0],p[1]-.22,6.03),.034,bookred,6)
+    path_label('大盛堂書店',edge,4.95,2.55,bookblue,.24,inset=.18)
+    g.text('BOOKS TAISEIDO',(x+3.25,front+.20,3.99),.18,bookred,font=font)
+    # A metal maintenance grate and floodlights sit immediately above the sign.
+    for a,b in zip(edge,edge[1:]):
+        for dy in [.20,.75]:g.rod((a[0],a[1]-dy,6.51),(b[0],b[1]-dy,6.51),.028,metal,5)
+        g.rod((a[0],a[1]-.20,6.51),(a[0],a[1]-.75,6.51),.019,metal,5)
+    # DMM is documented here; the neutral board is not a claimed current campaign.
+    curved_screen(x,front-.12,11.58,w-.24,9.68,cladding[3],bow)
+    ad_edge=[(x-4.3+8.6*i/20,front-.12+bow*(2*(x-4.3+8.6*i/20-(x-w/2))/w-1)**2) for i in range(21)]
+    path_label('DMM',ad_edge,8.45,3.25,porcelain,.12,inset=.25,font=font)
+    for dx in [-3.7,0,3.7]:
+        yy=front+bow*(dx/(w/2))**2
+        g.rod((x+dx,yy-.2,6.52),(x+dx,yy-.72,7.02),.035,metal,6)
+        box((x+dx,yy-.72,7.05),(.55,.29,.23),metal)
+    for z in [16.55,18.04]:facade_strip(edge,z,.10,silver,.04)
+    sign('大\n盛\n堂\n商\n事\nビ\nル',x+w/2+.20,front+3.0,12.0,1.25,7.0,bookblue,.71,math.pi/2,True)
+    prism(outline,h,.15,silver)
+    facade_strip(edge,h+.3,.42,porcelain,.01)
+    for dx in [-2.7,1.1]:
+        box((x+dx,y+3,h+.48),(1.45,1.55,.8),stone)
+        for dz in [-.23,0,.23]:box((x+dx,y+2.21,h+.48+dz),(1.15,.035,.055),metal)
+    for yy in [y+1,y+6]:g.rod((x-4.5,yy,h+.25),(x+4.5,yy,h+.25),.03,metal,5)
+    shop_positions.append((x,front-.7,2.5,8))
 
 
 def magnet():
-    """MAGNET: ceramic horizontal wing + taller blue-glass corner and big board."""
+    """MAGNET's rounded ceramic hinge, ribbon windows and taller glass frontage."""
     x,y,w,d,h=70,25,22,28,34
     front=y-d/2
     obstacle(x,y,w,d,h)
     # The white wing ends where the glass tower starts. Overlapping solids here
     # used to leave coplanar white/glass front faces shimmering down the middle.
-    box((x-6,y,13.8),(10,d,27.6),porcelain)
-    for z in [6.8,10.1,13.4,16.7,20,23.3]:
-        g.panel((x-6,front-.055,z),9.2,.54,blueglass)
-        g.panel((x-11.05,y,z),d-.7,.54,blueglass,-math.pi/2)
-    for z in np.arange(.8,27.5,.8):
-        box((x-6,front-.022,float(z)),(9.8,.026,.015),stone)
-        box((x-11.02,y,float(z)),(.026,d-.2,.015),stone)
-    for xx in np.arange(x-10.5,x-1,.8):box((float(xx),front-.026,15),(.014,.026,24),stone)
-    for yy in np.arange(front+.5,y+d/2,.8):box((x-11.025,float(yy),15),(.026,.014,24),stone)
+    radius=4.6;cx=x-11+radius;cy=front+radius
+    # Follow the western elevation into the curved front-left corner. The
+    # original box lost this distinctive junction in every street-level view.
+    wing_edge=[(x-11,y+d/2),(x-11,cy)]
+    wing_edge.extend((cx+radius*math.cos(math.pi+i*math.pi/40),cy+radius*math.sin(math.pi+i*math.pi/40)) for i in range(1,21))
+    wing_edge.append((x-1,front))
+    wing_outline=wing_edge+[(x-1,y+d/2)]
+    prism(wing_outline,0,27.6,porcelain)
+    for z in [9.4,12.9,16.4,19.9,23.4]:
+        facade_strip(wing_edge,z,.83,blueglass,.055)
+        for dz in [-.46,.46]:facade_strip(wing_edge,z+dz,.055,silver,.07)
+    for z in np.arange(6.5,27.5,.70):facade_strip(wing_edge,float(z),.015,stone,.025)
+    for a in [math.pi+i*math.pi/10 for i in range(6)]:
+        px=cx+(radius+.028)*math.cos(a);py=cy+(radius+.028)*math.sin(a)
+        g.rod((px,py,6.4),(px,py,27.5),.009,stone,4)
+    # Narrow vertical advertising blade beside the curved wing.
+    box((x-11.16,front+10.5,17),(.24,2.3,19),metal)
+    g.panel((x-11.34,front+10.5,17),2.1,18.5,porcelain,-math.pi/2)
+    g.text('M\nA\nG\nN\nE\nT',(x-11.40,front+10.5,17),1.25,magred,-math.pi/2,font)
     # Taller glazed square tower at the station-facing corner; stepped crown.
     box((x+5,y-3,h/2),(12,d-6,h),blueglass)
     box((x+2,y+11,15.5),(6,6,31),blueglass)
@@ -529,25 +588,44 @@ def magnet():
         box((x+11.035,y-3,float(zz)),(.065,d-6,.055),silver)
     for xx in np.arange(x-.9,x+11,1.5):box((float(xx),front-.04,17),(.055,.065,34),silver)
     for yy in np.arange(front+.8,y+8,1.5):box((x+11.04,float(yy),17),(.065,.055,34),silver)
+    # The tower's exposed upper western elevation also has a curtain-wall grid.
+    for zz in [28.8,30.6,32.4,33.95]:box((x-1.035,y-3,zz),(.065,d-6,.055),silver)
+    for yy in np.arange(front+.8,y+8,1.5):box((x-1.035,float(yy),30.8),(.065,.055,6.4),silver)
+    for zz in [28.8,30.6]:box((x-1.035,y+11,zz),(.065,6,.055),silver)
+    for yy in [y+8,y+9.5,y+11,y+12.5,y+14]:box((x-1.035,yy,29.3),(.065,.055,3.4),silver)
     # Deep rectangular advertising frame on the glass tower, and small lower screen.
     box((x+5,front-.55,20),(9.6,.95,17.2),metal)
     g.panel((x+5,front-1.04,20),8.7,16.25,cladding[0])
-    g.panel((x+5,front-1.065,19),7.4,5.7,blueglass)
-    sign('MAGNET',x+5,front-1.12,26.3,8.0,1.2,metal,.91)
-    g.text('by SHIBUYA109',(x+5,front-1.28,25.25),.47,white,font=font)
-    sign('SHIBUYA',x+5,front-1.1,19.5,7.1,3.3,blue,.9)
-    sign('MAGNET',x-6,front-.18,3.65,9.3,.8,metal,1.0)
+    g.panel((x+5,front-1.10,19.3),7.9,7.4,blueglass)
+    # Retain the operator's red/cyan identity instead of white generic lettering.
+    serif=bpy.data.fonts.load('C:/Windows/Fonts/georgiab.ttf')
+    for dx,dy,mat in [(.045,.04,magcyan),(0,0,magred)]:
+        label=g.text('MAGNET',(x+5+dx,front-1.16+dy,24.8),1.45,mat,font=serif)
+        label.data.space_character=1.05
+    g.text('by SHIBUYA109',(x+5,front-1.17,23.75),.46,magred,font=serif)
+    # Crossing-shaped stripes approximate the official angular M emblem.
+    for a,b,mat in [((-1.0,.95),(.95,-.90),magred),((-1.0,.40),(.35,-.90),magcyan),((-1.0,-.15),(-.20,-.90),magred),
+                    ((.12,.20),(1.0,1.03),magcyan),((.46,-.15),(1.0,.36),magred),((.78,-.49),(1.0,-.29),magcyan)]:
+        vx,vz=b[0]-a[0],b[1]-a[1];length=math.hypot(vx,vz);nx,nz=-vz/length*.105,vx/length*.105
+        yy=front-(1.25 if mat==magred else 1.19)
+        g.mesh([(x+5+xx,yy,26.8+zz) for xx,zz in [(a[0]+nx,a[1]+nz),(a[0]-nx,a[1]-nz),(b[0]-nx,b[1]-nz),(b[0]+nx,b[1]+nz)]],[(0,1,2,3)],mat)
+    g.text('MAGNET',(x-5.4,front-.17,5.5),.90,magred,font=serif)
+    g.text('by SHIBUYA109',(x-5.4,front-.18,4.78),.28,magred,font=serif)
     # Roof viewing terrace, open steel safety fence and glazed corner lookout.
-    box((x-6,y,27.7),(9.6,d-.6,.20),roofing)
-    for yy in [front+.25,y+d/2-.25]:
-        g.rod((x-10.6,yy,28.8),(x-1.4,yy,28.8),.04,metal)
-        for xx in np.arange(x-10.6,x-1.3,.5):g.rod((float(xx),yy,27.7),(float(xx),yy,28.8),.02,metal,5)
-    for yy in np.arange(front+.25,y+d/2,.6):g.rod((x-10.6,float(yy),27.7),(x-10.6,float(yy),28.8),.02,metal,5)
-    for xx in [x-8,x-5]:g.panel((xx,front+.35,28.35),2.7,1.25,glass)
-    for xx in [x-8,x-5,x-2]:
+    prism(wing_outline,27.6,.14,roofing)
+    for a,b in zip(wing_edge,wing_edge[1:]):
+        g.rod((*a,28.82),(*b,28.82),.035,metal,6)
+        steps=max(1,math.ceil(math.dist(a,b)/.55))
+        for i in range(steps):
+            xx=a[0]+(b[0]-a[0])*i/steps;yy=a[1]+(b[1]-a[1])*i/steps
+            g.rod((xx,yy,27.74),(xx,yy,28.82),.018,metal,5)
+    for xx in [x-5,x-2]:
         g.panel((xx,front-.10,1.5),2.55,2.6,glass)
         box((xx,front+.55,1.4),(2.4,.10,2.6),warm[1])
+    box((x-4.25,front-.33,3.12),(5.55,.82,.16),metal)
+    g.panel((x+4.5,front-.10,4.55),10.4,1.95,glass)
     for xx in [x+1,x+9]:g.rod((xx,y+5,34),(xx,y+5,36),.04,metal)
+    shop_positions.append((x-4.0,front-.9,2.6,6))
 
 
 def mark_city():
@@ -716,7 +794,7 @@ for o in objects:
     if 'Glazing' in o.name or o.data.materials[0].get('surface_role')=='road-marking':o.visible_shadow=False
 setup_lights()
 g.export(ROOT/'public/models/crossing.glb',objects)
-metadata={'id':'crossing','name':'Shibuya Crossing','spawn':[0,0,16],'bounds':[-114,114,-118,104],'colliders':colliders,'artRevision':6,'roadHalfWidth':9,'crossingCenter':11.25,'cornerChamfer':2.8,'terrainBounds':[-120,120,-125,110],'landmarks':['Taiseido Bookstore','MAGNET by SHIBUYA109','Shibuya Mark City East','Shibuya Mark City West'],'districtScale':'Concept-scale dimensions and compressed distances; see assets/references/shibuya-landmarks.md','pedestrianDeck':{'scenic':True,'height':6.0,'roadClearance':5.54}}
+metadata={'id':'crossing','name':'Shibuya Crossing','spawn':[0,0,16],'bounds':[-114,114,-118,104],'colliders':colliders,'artRevision':7,'roadHalfWidth':9,'crossingCenter':11.25,'cornerChamfer':2.8,'terrainBounds':[-120,120,-125,110],'landmarks':['Taiseido Bookstore','MAGNET by SHIBUYA109','Shibuya Mark City East','Shibuya Mark City West'],'districtScale':'Concept-scale dimensions and compressed distances; see assets/references/shibuya-landmarks.md','pedestrianDeck':{'scenic':True,'height':6.0,'roadClearance':5.54}}
 # Moving traffic owns its current collision volumes in lib/game/traffic.ts.
 (ROOT/'public/models/crossing.json').write_text(json.dumps(metadata,indent=2),encoding='utf8')
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets/blender/crossing.blend'),compress=True)

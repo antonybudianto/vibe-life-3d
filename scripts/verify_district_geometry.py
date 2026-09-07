@@ -55,9 +55,13 @@ for name in ['Rain-dark asphalt','District asphalt']:
 # At MAGNET's former overlap, ceramic and glass must not share an exterior plane.
 ceramic=BVHTree.FromObject(bpy.data.objects['Landmark white ceramic'],depsgraph)
 glazing=BVHTree.FromObject(bpy.data.objects['Dark reflective glass'],depsgraph)
+for x in [59.3,60.2,61.5,63.0]:
+    hit=ceramic.ray_cast(Vector((x,0,8.9)),Vector((0,1,0)),30)[0]
+    expected=15.6-math.sqrt(4.6**2-(x-63.6)**2)
+    assert hit is not None and abs(hit.y-expected)<.015,(x,'MAGNET rounded ceramic corner missing')
 for x in [69.2,70.5,72.5]:
     for origin,direction in [(Vector((x,0,8.9)),Vector((0,1,0))),(Vector((x,45,8.9)),Vector((0,-1,0)))]:
         a=ceramic.ray_cast(origin,direction,45)[0];b=glazing.ray_cast(origin,direction,45)[0]
         assert b is not None,(x,'MAGNET glass missing')
         assert a is None or (a-b).length>.02,(x,'MAGNET coplanar facade overlap')
-print('DISTRICT_GEOMETRY_OK',count,'terrain samples; building corners; paint clearance; bake UVs; MAGNET facades')
+print('DISTRICT_GEOMETRY_OK',count,'terrain samples; building corners; paint clearance; bake UVs; MAGNET curved corner and separated facades')

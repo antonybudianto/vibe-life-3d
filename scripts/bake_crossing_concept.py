@@ -11,8 +11,8 @@ objects=[o for o in s.objects if o.type=='MESH']
 ground_names=['Rain-dark asphalt','Pavement stone','Crosswalk ivory paint','Tactile ochre',
               'District asphalt','District paving','District road paint','District ochre markings']
 ground=[o for o in objects if o.name in ground_names]
-detail=[o for o in objects if o.name not in ground_names and not o.name.startswith(('Glazing','Concept','Lettering')) and o.data.materials[0].get('base_emission',0)==0]
-saved=[];report={'asset':'crossing','artRevision':6,'vertexBakes':[]}
+detail=[o for o in objects if o.name not in ground_names and not o.name.startswith(('Glazing','Concept')) and o.data.materials[0].get('base_emission',0)==0]
+saved=[];report={'asset':'crossing','artRevision':7,'vertexBakes':[]}
 for o in detail:
     attrs=o.data.color_attributes
     attr=attrs.get('BakedLocalShade') or attrs.new(name='BakedLocalShade',type='FLOAT_COLOR',domain='CORNER')

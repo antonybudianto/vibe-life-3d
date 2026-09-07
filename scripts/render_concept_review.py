@@ -69,6 +69,16 @@ xlo,xhi=min(p.x for p in points),max(p.x for p in points);ylo,yhi=min(p.y for p 
 cam.location+=cam.rotation_euler.to_matrix()@Vector(((xlo+xhi)/2,(ylo+yhi)/2,0))
 cam.data.ortho_scale=max(xhi-xlo,(yhi-ylo)*1700/1100)*1.06
 render_image('crossing-district.png')
+# Individual architectural reviews expose details hidden in the wide overview.
+apply_preset('day')
+s.render.resolution_x=1100;s.render.resolution_y=1100
+for name,position,target,framing in [
+    ('taiseido-detail.png',(-74,-14,19),(-54,19,9),26),
+    ('magnet-detail.png',(45,-32,28),(69,20,16),44),
+]:
+    cam.location=position;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler()
+    cam.data.ortho_scale=framing
+    render_image(name)
 cam.matrix_world=pose;cam.data.ortho_scale=scale
 for o in append('character'):s.collection.objects.link(o)
 spawn=json.loads((ROOT/'public/models/crossing.json').read_text())['spawn']

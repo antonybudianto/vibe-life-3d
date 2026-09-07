@@ -1,6 +1,6 @@
 {
   "asset": "crossing",
-  "artRevision": 6,
+  "artRevision": 7,
   "vertexBakes": [
     {
       "mesh": "Slate concrete",
@@ -22,13 +22,13 @@
     },
     {
       "mesh": "Charcoal architectural metal",
-      "corners": 168812,
+      "corners": 171216,
       "minimum": 0.03575001284480095,
       "maximum": 0.05499999225139618
     },
     {
       "mesh": "Champagne aluminum",
-      "corners": 119550,
+      "corners": 119370,
       "minimum": 0.15599995851516724,
       "maximum": 0.2399999350309372
     },
@@ -46,25 +46,25 @@
     },
     {
       "mesh": "Book spines 0",
-      "corners": 14760,
+      "corners": 14856,
       "minimum": 0.2470000684261322,
       "maximum": 0.3800000846385956
     },
     {
       "mesh": "Book spines 1",
-      "corners": 12024,
+      "corners": 12120,
       "minimum": 0.1430000513792038,
       "maximum": 0.21999996900558472
     },
     {
       "mesh": "Book spines 2",
-      "corners": 9360,
+      "corners": 9408,
       "minimum": 0.42249995470046997,
       "maximum": 0.6499998569488525
     },
     {
       "mesh": "Book spines 3",
-      "corners": 12096,
+      "corners": 12144,
       "minimum": 0.25349998474121094,
       "maximum": 0.38999998569488525
     },
@@ -78,11 +78,11 @@
       "mesh": "Interior amber 3",
       "corners": 32112,
       "minimum": 0.0715000256896019,
-      "maximum": 0.10944856703281403
+      "maximum": 0.10944855213165283
     },
     {
       "mesh": "Zinc roof panels",
-      "corners": 624,
+      "corners": 720,
       "minimum": 0.09750001132488251,
       "maximum": 0.15000003576278687
     },
@@ -94,7 +94,7 @@
     },
     {
       "mesh": "Warm concrete",
-      "corners": 56136,
+      "corners": 55720,
       "minimum": 0.17549997568130493,
       "maximum": 0.27000001072883606
     },
@@ -112,7 +112,7 @@
     },
     {
       "mesh": "Facade cladding 3",
-      "corners": 976,
+      "corners": 1072,
       "minimum": 0.14949995279312134,
       "maximum": 0.23000000417232513
     },
@@ -124,8 +124,8 @@
     },
     {
       "mesh": "Dark reflective glass",
-      "corners": 496,
-      "minimum": 0.05854102596640587,
+      "corners": 828,
+      "minimum": 0.0585000142455101,
       "maximum": 0.09000001847743988
     },
     {
@@ -138,7 +138,7 @@
       "mesh": "Ginkgo leaves 1",
       "corners": 56358,
       "minimum": 0.1170000284910202,
-      "maximum": 0.17975394427776337
+      "maximum": 0.17975395917892456
     },
     {
       "mesh": "Ginkgo leaves 0",
@@ -166,21 +166,45 @@
     },
     {
       "mesh": "Soft black rubber",
-      "corners": 100,
+      "corners": 124,
       "minimum": 0.01495000533759594,
       "maximum": 0.023000000044703484
     },
     {
       "mesh": "Landmark white ceramic",
-      "corners": 2072,
+      "corners": 2944,
       "minimum": 0.3965000510215759,
       "maximum": 0.6099998950958252
     },
     {
       "mesh": "Landmark silver aluminum",
-      "corners": 9168,
+      "corners": 10642,
       "minimum": 0.33799993991851807,
       "maximum": 0.520000159740448
+    },
+    {
+      "mesh": "Taiseido cobalt enamel",
+      "corners": 196,
+      "minimum": 0.3620006740093231,
+      "maximum": 0.43000003695487976
+    },
+    {
+      "mesh": "Taiseido red sign border",
+      "corners": 216,
+      "minimum": 0.36553117632865906,
+      "maximum": 0.5569376349449158
+    },
+    {
+      "mesh": "MAGNET red enamel",
+      "corners": 12,
+      "minimum": 0.4799998700618744,
+      "maximum": 0.4799998700618744
+    },
+    {
+      "mesh": "MAGNET cyan enamel",
+      "corners": 12,
+      "minimum": 0.46424993872642517,
+      "maximum": 0.4799998700618744
     },
     {
       "mesh": "Mark City blue gray glass",
@@ -199,12 +223,42 @@
       "corners": 768,
       "minimum": 0.44849997758865356,
       "maximum": 0.6723906397819519
+    },
+    {
+      "mesh": "Lettering Landmark white ceramic",
+      "corners": 429,
+      "minimum": 0.5955442190170288,
+      "maximum": 0.6099998950958252
+    },
+    {
+      "mesh": "Lettering Taiseido cobalt enamel",
+      "corners": 1392,
+      "minimum": 0.4272565543651581,
+      "maximum": 0.43000003695487976
+    },
+    {
+      "mesh": "Lettering Taiseido red sign border",
+      "corners": 624,
+      "minimum": 0.3645103871822357,
+      "maximum": 0.5600001811981201
+    },
+    {
+      "mesh": "Lettering MAGNET red enamel",
+      "corners": 4116,
+      "minimum": 0.4406249523162842,
+      "maximum": 0.4799998700618744
+    },
+    {
+      "mesh": "Lettering MAGNET cyan enamel",
+      "corners": 660,
+      "minimum": 0.32687509059906006,
+      "maximum": 0.47234365344047546
     }
   ],
   "ao": "crossing-ao.png",
   "resolution": 4096,
-  "aoStd": 0.2556052505970001,
+  "aoStd": 0.25557267665863037,
   "lightmap": "crossing-light.webp",
   "lightmapScale": 4,
-  "lightmapMaximum": 4.4118123054504395
+  "lightmapMaximum": 4.3927812576293945
 }
