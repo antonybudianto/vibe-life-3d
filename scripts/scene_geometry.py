@@ -46,14 +46,19 @@ def box(pos,size,mat,rot=0,name=None):
     mesh(v,[(0,3,2,1),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)],mat,name)
 
 def sphere(pos,scale,mat,segments=12,rings=8,name=None):
-    v=[];f=[]
-    for j in range(rings+1):
+    # Shared pole vertices avoid zero-area quads, which cannot receive a bake.
+    v=[(pos[0],pos[1],pos[2]+scale[2])];f=[]
+    for j in range(1,rings):
         phi=math.pi*j/rings
         for i in range(segments):
             a=2*math.pi*i/segments;v.append((pos[0]+scale[0]*math.sin(phi)*math.cos(a),pos[1]+scale[1]*math.sin(phi)*math.sin(a),pos[2]+scale[2]*math.cos(phi)))
-    for j in range(rings):
+    bottom=len(v);v.append((pos[0],pos[1],pos[2]-scale[2]))
+    for i in range(segments):f.append((0,1+i,1+(i+1)%segments))
+    for j in range(rings-2):
         for i in range(segments):
-            a=j*segments+i;b=j*segments+(i+1)%segments;f.append((a,b,b+segments,a+segments))
+            a=1+j*segments+i;b=1+j*segments+(i+1)%segments;f.append((a,a+segments,b+segments,b))
+    last=1+(rings-2)*segments
+    for i in range(segments):f.append((last+i,bottom,last+(i+1)%segments))
     mesh(v,f,mat,name,True)
 
 def rod(a,b,r,mat,segments=8,r2=None,name=None):

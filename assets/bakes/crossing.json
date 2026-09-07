@@ -1,144 +1,210 @@
 {
   "asset": "crossing",
-  "artRevision": 3,
+  "artRevision": 6,
   "vertexBakes": [
     {
       "mesh": "Slate concrete",
-      "corners": 7896,
+      "corners": 131232,
       "minimum": 0.11050000786781311,
       "maximum": 0.17000001668930054
     },
     {
-      "mesh": "Warm concrete",
-      "corners": 28992,
-      "minimum": 0.17549997568130493,
-      "maximum": 0.27000001072883606
+      "mesh": "Pale granite curb",
+      "corners": 912,
+      "minimum": 0.22100001573562622,
+      "maximum": 0.3400000333786011
     },
     {
-      "mesh": "Champagne aluminum",
-      "corners": 79368,
-      "minimum": 0.15599995851516724,
-      "maximum": 0.2399999350309372
-    },
-    {
-      "mesh": "Walnut shop joinery",
-      "corners": 41736,
-      "minimum": 0.09750001132488251,
-      "maximum": 0.15000003576278687
+      "mesh": "Drain iron",
+      "corners": 1848,
+      "minimum": 0.02665000781416893,
+      "maximum": 0.04100000858306885
     },
     {
       "mesh": "Charcoal architectural metal",
-      "corners": 111668,
+      "corners": 168812,
       "minimum": 0.03575001284480095,
       "maximum": 0.05499999225139618
     },
     {
+      "mesh": "Champagne aluminum",
+      "corners": 119550,
+      "minimum": 0.15599995851516724,
+      "maximum": 0.2399999350309372
+    },
+    {
+      "mesh": "Asphalt repairs",
+      "corners": 96,
+      "minimum": 0.020799998193979263,
+      "maximum": 0.03200000524520874
+    },
+    {
+      "mesh": "Walnut shop joinery",
+      "corners": 54816,
+      "minimum": 0.09750001132488251,
+      "maximum": 0.15000003576278687
+    },
+    {
       "mesh": "Book spines 0",
-      "corners": 10728,
+      "corners": 14760,
       "minimum": 0.2470000684261322,
       "maximum": 0.3800000846385956
     },
     {
       "mesh": "Book spines 1",
-      "corners": 8424,
+      "corners": 12024,
       "minimum": 0.1430000513792038,
       "maximum": 0.21999996900558472
     },
     {
       "mesh": "Book spines 2",
-      "corners": 7416,
+      "corners": 9360,
       "minimum": 0.42249995470046997,
       "maximum": 0.6499998569488525
     },
     {
       "mesh": "Book spines 3",
-      "corners": 9720,
+      "corners": 12096,
       "minimum": 0.25349998474121094,
       "maximum": 0.38999998569488525
     },
     {
       "mesh": "Store plaster",
-      "corners": 11360,
+      "corners": 15872,
       "minimum": 0.2989999055862427,
       "maximum": 0.46000000834465027
     },
     {
       "mesh": "Interior amber 3",
-      "corners": 14424,
+      "corners": 32112,
       "minimum": 0.0715000256896019,
-      "maximum": 0.10012435913085938
+      "maximum": 0.10944856703281403
+    },
+    {
+      "mesh": "Zinc roof panels",
+      "corners": 624,
+      "minimum": 0.09750001132488251,
+      "maximum": 0.15000003576278687
     },
     {
       "mesh": "Facade cladding 1",
-      "corners": 960,
+      "corners": 1516,
       "minimum": 0.20149996876716614,
       "maximum": 0.3099999725818634
     },
     {
+      "mesh": "Warm concrete",
+      "corners": 56136,
+      "minimum": 0.17549997568130493,
+      "maximum": 0.27000001072883606
+    },
+    {
       "mesh": "Facade cladding 0",
-      "corners": 2872,
+      "corners": 908,
       "minimum": 0.24050000309944153,
       "maximum": 0.3699999451637268
     },
     {
       "mesh": "Facade cladding 2",
-      "corners": 300,
+      "corners": 1008,
       "minimum": 0.260000079870224,
       "maximum": 0.3999999761581421
     },
     {
       "mesh": "Facade cladding 3",
-      "corners": 600,
+      "corners": 976,
       "minimum": 0.14949995279312134,
       "maximum": 0.23000000417232513
     },
     {
+      "mesh": "Terracotta tile cladding",
+      "corners": 1680,
+      "minimum": 0.13649997115135193,
+      "maximum": 0.21000002324581146
+    },
+    {
+      "mesh": "Dark reflective glass",
+      "corners": 496,
+      "minimum": 0.05854102596640587,
+      "maximum": 0.09000001847743988
+    },
+    {
       "mesh": "Textured tree bark",
-      "corners": 6120,
+      "corners": 5472,
       "minimum": 0.06824998557567596,
       "maximum": 0.1045214980840683
     },
     {
-      "mesh": "Ginkgo leaves 4",
-      "corners": 43578,
-      "minimum": 0.17549997568130493,
-      "maximum": 0.2692617177963257
-    },
-    {
       "mesh": "Ginkgo leaves 1",
-      "corners": 43362,
+      "corners": 56358,
       "minimum": 0.1170000284910202,
-      "maximum": 0.17950785160064697
-    },
-    {
-      "mesh": "Ginkgo leaves 2",
-      "corners": 42606,
-      "minimum": 0.15599995851516724,
-      "maximum": 0.23945306241512299
-    },
-    {
-      "mesh": "Ginkgo leaves 3",
-      "corners": 42984,
-      "minimum": 0.09424997866153717,
-      "maximum": 0.14480175077915192
+      "maximum": 0.17975394427776337
     },
     {
       "mesh": "Ginkgo leaves 0",
-      "corners": 43470,
+      "corners": 56016,
       "minimum": 0.0715000256896019,
-      "maximum": 0.10979946702718735
+      "maximum": 0.10989972203969955
+    },
+    {
+      "mesh": "Ginkgo leaves 4",
+      "corners": 55044,
+      "minimum": 0.17549997568130493,
+      "maximum": 0.2696308493614197
+    },
+    {
+      "mesh": "Ginkgo leaves 3",
+      "corners": 56016,
+      "minimum": 0.09424997866153717,
+      "maximum": 0.1447356641292572
+    },
+    {
+      "mesh": "Ginkgo leaves 2",
+      "corners": 54702,
+      "minimum": 0.15599995851516724,
+      "maximum": 0.23967181146144867
     },
     {
       "mesh": "Soft black rubber",
-      "corners": 96,
+      "corners": 100,
       "minimum": 0.01495000533759594,
       "maximum": 0.023000000044703484
+    },
+    {
+      "mesh": "Landmark white ceramic",
+      "corners": 2072,
+      "minimum": 0.3965000510215759,
+      "maximum": 0.6099998950958252
+    },
+    {
+      "mesh": "Landmark silver aluminum",
+      "corners": 9168,
+      "minimum": 0.33799993991851807,
+      "maximum": 0.520000159740448
+    },
+    {
+      "mesh": "Mark City blue gray glass",
+      "corners": 432,
+      "minimum": 0.14949995279312134,
+      "maximum": 0.23000000417232513
+    },
+    {
+      "mesh": "Deck paving",
+      "corners": 816,
+      "minimum": 0.16249996423721313,
+      "maximum": 0.25
+    },
+    {
+      "mesh": "Deck stair nosings",
+      "corners": 768,
+      "minimum": 0.44849997758865356,
+      "maximum": 0.6723906397819519
     }
   ],
   "ao": "crossing-ao.png",
-  "resolution": 2048,
-  "aoStd": 0.4269622266292572,
+  "resolution": 4096,
+  "aoStd": 0.2556052505970001,
   "lightmap": "crossing-light.webp",
   "lightmapScale": 4,
-  "lightmapMaximum": 11.37818717956543
+  "lightmapMaximum": 4.4118123054504395
 }

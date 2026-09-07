@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { World, Status, TravelMode, TimeMode, MapId } from '@/lib/game/world';
+import { MiniMap } from '@/lib/game/mini-map';
 const baseStatus: Status = { loading: true, progress: 0, map: 'crossing', x: 0, z: 10, speed: 0, fps: 0, clock: '17:30', phase: 'evening', error: null };
 
 export default function Game() {
@@ -65,11 +66,7 @@ export default function Game() {
     {hint && !status.loading && !status.error && <div className="look-hint glass"><span className="mouse-symbol"/><span>Drag to look around <b>·</b> Scroll to zoom</span><button onClick={() => setHint(false)} aria-label="Dismiss camera hint"><X size={14}/></button></div>}
     <footer className="game-footer">
       <div className="map-and-name"><div className="minimap glass" aria-label={`Map: player at ${status.x.toFixed(0)}, ${status.z.toFixed(0)}`}>
-        <svg viewBox="0 0 160 150" role="img" aria-label="Local navigation map"><defs><pattern id="mapGrid" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M 16 0 L 0 0 0 16" fill="none" stroke="#ffffff" strokeWidth=".3" opacity=".1"/></pattern></defs><rect width="160" height="150" fill="url(#mapGrid)"/>
-          {status.map === 'crossing' ? <g><path d="M65 0H93V150H65ZM0 61H160V87H0Z" fill="#778190" opacity=".25"/><g fill="#64716f" stroke="#92a39d" strokeWidth=".5" opacity=".6"><rect x="11" y="12" width="39" height="36" rx="3"/><rect x="105" y="9" width="40" height="40" rx="3"/><rect x="13" y="100" width="40" height="35" rx="3"/><rect x="106" y="101" width="43" height="29" rx="3"/></g><path d="M67 62L94 87M68 86L94 61" stroke="#c6cec9" strokeWidth="2" opacity=".5"/></g> : <g><rect x="9" y="9" width="142" height="132" rx="30" fill="#769b7a" opacity=".2"/><path d="M73 8H86V141H73ZM8 69H152V81H8Z" fill="#bec2a5" opacity=".5"/><rect x="65" y="22" width="30" height="18" fill="#ba7968" rx="2"/></g>}
-          {status.map === 'crossing' && <g><title>Hachikō Square, southwest of the crossing</title><circle cx="55" cy="100" r="4" fill="#e6be78" stroke="#342f2a" strokeWidth="1.5"/><text x="52" y="115" textAnchor="middle" fontSize="8" fill="#f5dab1">Hachikō</text></g>}
-          <circle cx={80 + status.x * (status.map === 'crossing' ? 1.25 : 2)} cy={75 + status.z * (status.map === 'crossing' ? 1.25 : 2)} r="12" fill="#e8a4bf" opacity=".14"/><path d="M0 -5L4 4L0 2L-4 4Z" transform={`translate(${80 + status.x * (status.map === 'crossing' ? 1.25 : 2)} ${75 + status.z * (status.map === 'crossing' ? 1.25 : 2)})`} fill="#f6c2d5"/>
-        </svg><span className="north">N</span><span className="map-coordinate">{status.map === 'crossing' ? '35.6595° N · 139.7005° E' : 'YOYOGI · GARDEN'}</span></div>
+        <MiniMap map={status.map} x={status.x} z={status.z}/><span className="north">N</span><span className="map-coordinate">{status.map === 'crossing' ? '35.6595° N · 139.7005° E' : 'YOYOGI · GARDEN'}</span></div>
         <button className="character-chip" onClick={() => setPanel('character')}><span className="avatar"><img src="/renders/character.webp" alt="Haru, the cap-and-backpack explorer"/></span><span><strong>Haru</strong><small>City explorer</small></span><ChevronRight size={16}/></button>
       </div>
       <div className="travel-area"><div className="mode-label"><span className="live-dot"/>{travel === 'walk' ? 'EXPLORE AT YOUR OWN PACE' : travel === 'motorcycle' ? 'TAKE THE LONG WAY HOME' : 'YOUR NEXT STOP IS UP TO YOU'}</div><div className="travel-dock glass"><ToggleGroup value={[travel]} onValueChange={(v) => { if (v[0]) void setMode(v[0] as TravelMode); }} aria-label="Travel mode" className="travel-group" disabled={status.loading}>

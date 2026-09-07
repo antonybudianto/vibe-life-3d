@@ -1,8 +1,17 @@
 """Use the same Blender assets, crowd placement and camera convention as the game."""
-import bpy,sys,json,math,hashlib
+import bpy,sys,json,math,hashlib,time
 from pathlib import Path
 from mathutils import Vector,Matrix
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
+def render_image(name):
+    # Write outside the watched public folder before replacing the finished image.
+    path=ROOT/'work'/name;destination=ROOT/'public/renders'/name
+    bpy.context.scene.render.filepath=str(path);bpy.ops.render.render(write_still=True)
+    for attempt in range(10):
+        try:path.replace(destination);return
+        except PermissionError:
+            if attempt==9:raise
+            time.sleep(.25)
 from bake_assets import cycles
 from blender_lighting import apply_preset
 bpy.ops.wm.open_mainfile(filepath=str(ROOT/'assets/blender/crossing.blend'))
@@ -44,16 +53,32 @@ for name in ['taxi','citybus']:
         for source in parts:
             o=source.copy();o.data=source.data;s.collection.objects.link(o);o.matrix_world=transform@source.matrix_world
 apply_preset('evening')
-s.render.image_settings.file_format='PNG';s.render.filepath=str(ROOT/'public/renders/crossing.png')
-bpy.ops.render.render(write_still=True)
+s.render.image_settings.file_format='PNG';render_image('crossing.png')
+# A second overview includes the real-landmark additions outside the playable core.
+cam=s.camera;pose=cam.matrix_world.copy();scale=cam.data.ortho_scale
+cam.location=(91,-150,128);cam.rotation_euler=(Vector((-13,10,14))-cam.location).to_track_quat('-Z','Y').to_euler()
+s.render.resolution_x=1700;s.render.resolution_y=1100
+bpy.context.view_layer.update()
+inverse=cam.matrix_world.inverted();points=[]
+for c in json.loads((ROOT/'public/models/crossing.json').read_text())['colliders']:
+    if c['height']<6:continue
+    for sx in [-1,1]:
+        for sy in [-1,1]:
+            for z in [0,c['height']+8]:points.append(inverse@Vector((c['x']+sx*c['halfX'],-c['z']+sy*c['halfZ'],z)))
+xlo,xhi=min(p.x for p in points),max(p.x for p in points);ylo,yhi=min(p.y for p in points),max(p.y for p in points)
+cam.location+=cam.rotation_euler.to_matrix()@Vector(((xlo+xhi)/2,(ylo+yhi)/2,0))
+cam.data.ortho_scale=max(xhi-xlo,(yhi-ylo)*1700/1100)*1.06
+render_image('crossing-district.png')
+cam.matrix_world=pose;cam.data.ortho_scale=scale
 for o in append('character'):s.collection.objects.link(o)
-character=bpy.data.objects.get('Character');character.location=(0,-13,0);character.rotation_euler[2]=math.pi
+spawn=json.loads((ROOT/'public/models/crossing.json').read_text())['spawn']
+character=bpy.data.objects.get('Character');character.location=(spawn[0],-spawn[2],0);character.rotation_euler[2]=math.pi
 cam=s.camera;cam.data.type='PERSP';cam.data.sensor_fit='VERTICAL';cam.data.sensor_height=32;cam.data.lens=32/(2*math.tan(math.radians(55)/2))
-cam.location=(math.sin(.22)*math.cos(.24)*8.8,-13-math.cos(.22)*math.cos(.24)*8.8,1.35+math.sin(.24)*8.8)
-cam.rotation_euler=(Vector((0,-13,2.35))-cam.location).to_track_quat('-Z','Y').to_euler()
+cam.location=(spawn[0]+math.sin(.22)*math.cos(.24)*8.8,-spawn[2]-math.cos(.22)*math.cos(.24)*8.8,1.35+math.sin(.24)*8.8)
+cam.rotation_euler=(Vector((spawn[0],-spawn[2],2.35))-cam.location).to_track_quat('-Z','Y').to_euler()
 s.render.resolution_x=1280;s.render.resolution_y=800
 for phase in ['evening','night']:
-    apply_preset(phase);s.render.filepath=str(ROOT/'public/renders'/f'crossing-{phase}-cycles.png');bpy.ops.render.render(write_still=True)
+    apply_preset(phase);render_image(f'crossing-{phase}-cycles.png')
 apply_preset('evening')
 bpy.data.orphans_purge(do_recursive=True)
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets/blender/crossing-review.blend'),compress=True)

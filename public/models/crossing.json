@@ -4,137 +4,193 @@
   "spawn": [
     0,
     0,
-    13
+    16
   ],
   "bounds": [
-    -45,
-    45,
-    -45,
-    45
+    -114,
+    114,
+    -118,
+    104
   ],
   "colliders": [
     {
-      "x": 20,
-      "z": -23,
-      "halfX": 9.5,
+      "x": 27,
+      "z": -23.5,
+      "halfX": 10.0,
       "halfZ": 11.0,
-      "height": 29
+      "height": 33
     },
     {
-      "x": 37,
-      "z": -19.5,
-      "halfX": 6.0,
-      "halfZ": 7.0,
+      "x": 43,
+      "z": -20,
+      "halfX": 5.0,
+      "halfZ": 7.5,
+      "height": 19.3
+    },
+    {
+      "x": -27,
+      "z": -22,
+      "halfX": 8.5,
+      "halfZ": 10.0,
+      "height": 25
+    },
+    {
+      "x": -41,
+      "z": -23,
+      "halfX": 4.5,
+      "halfZ": 10.5,
+      "height": 21
+    },
+    {
+      "x": -15.5,
+      "z": -23,
+      "halfX": 2.7,
+      "halfZ": 6.0,
       "height": 18
     },
     {
-      "x": -24,
-      "z": -22,
-      "halfX": 7.0,
-      "halfZ": 10.0,
-      "height": 23
+      "x": -15.2,
+      "z": -35.7,
+      "halfX": 4.4,
+      "halfZ": 4.4,
+      "height": 36
+    },
+    {
+      "x": 13,
+      "z": -22.5,
+      "halfX": 3.7,
+      "halfZ": 5.5,
+      "height": 29
+    },
+    {
+      "x": -26,
+      "z": -40,
+      "halfX": 4.25,
+      "halfZ": 5.5,
+      "height": 29
     },
     {
       "x": -38,
-      "z": -22,
-      "halfX": 5.0,
-      "halfZ": 9.0,
-      "height": 20
+      "z": -44,
+      "halfX": 6.0,
+      "halfZ": 5.0,
+      "height": 31
     },
     {
-      "x": -12.8,
-      "z": -36,
-      "halfX": 4.5,
+      "x": 31,
+      "z": -43,
+      "halfX": 8.0,
       "halfZ": 6.0,
+      "height": 29
+    },
+    {
+      "x": -40,
+      "z": 30,
+      "halfX": 6.0,
+      "halfZ": 11.0,
+      "height": 15
+    },
+    {
+      "x": 42,
+      "z": 36,
+      "halfX": 5.0,
+      "halfZ": 8.5,
+      "height": 14
+    },
+    {
+      "x": -30,
+      "z": 39,
+      "halfX": 3.5,
+      "halfZ": 4.0,
+      "height": 5.8
+    },
+    {
+      "x": -43,
+      "z": -57,
+      "halfX": 4.0,
+      "halfZ": 4.0,
       "height": 24
     },
     {
-      "x": -1.0,
-      "z": -31,
-      "halfX": 3.8,
-      "halfZ": 4.5,
-      "height": 26
+      "x": -30,
+      "z": -57,
+      "halfX": 5.5,
+      "halfZ": 4.0,
+      "height": 35
     },
     {
-      "x": 9.0,
-      "z": -39,
-      "halfX": 4.1,
-      "halfZ": 6.5,
+      "x": -16,
+      "z": -53,
+      "halfX": 5.0,
+      "halfZ": 4.0,
+      "height": 23
+    },
+    {
+      "x": 16,
+      "z": -54,
+      "halfX": 5.0,
+      "halfZ": 4.0,
+      "height": 34
+    },
+    {
+      "x": 31,
+      "z": -58,
+      "halfX": 6.5,
+      "halfZ": 4.0,
+      "height": 38
+    },
+    {
+      "x": 45,
+      "z": -55,
+      "halfX": 4.5,
+      "halfZ": 4.0,
       "height": 27
     },
     {
       "x": -28,
-      "z": -43,
-      "halfX": 7.5,
-      "halfZ": 6.0,
-      "height": 29
-    },
-    {
-      "x": 35,
-      "z": -40,
-      "halfX": 8.5,
-      "halfZ": 8.0,
-      "height": 30
-    },
-    {
-      "x": -40,
-      "z": 33,
+      "z": -75,
       "halfX": 5.0,
-      "halfZ": 8.5,
-      "height": 13
+      "halfZ": 4.5,
+      "height": 27
     },
     {
-      "x": 41,
-      "z": 37,
-      "halfX": 5.0,
-      "halfZ": 7.0,
-      "height": 12
-    },
-    {
-      "x": -40,
-      "z": -53,
-      "halfX": 6.5,
-      "halfZ": 4.0,
-      "height": 23
-    },
-    {
-      "x": -20,
-      "z": -53,
-      "halfX": 6.5,
-      "halfZ": 4.0,
-      "height": 24
+      "x": -15,
+      "z": -82,
+      "halfX": 6.0,
+      "halfZ": 4.5,
+      "height": 35
     },
     {
       "x": 0,
-      "z": -53,
+      "z": -88,
       "halfX": 6.5,
-      "halfZ": 4.0,
-      "height": 28
+      "halfZ": 4.5,
+      "height": 22
     },
     {
-      "x": 20,
-      "z": -53,
-      "halfX": 6.5,
-      "halfZ": 4.0,
-      "height": 17
+      "x": 15,
+      "z": -80,
+      "halfX": 5.5,
+      "halfZ": 4.5,
+      "height": 31
     },
     {
-      "x": 40,
-      "z": -53,
-      "halfX": 6.5,
-      "halfZ": 4.0,
-      "height": 26
+      "x": 28,
+      "z": -75,
+      "halfX": 6.0,
+      "halfZ": 4.5,
+      "height": 25
     },
     {
       "x": 21,
       "z": 18,
       "halfX": 4.45,
       "halfZ": 3.3,
-      "height": 3.6
+      "height": 4.5
     },
     {
-      "x": -11.4,
-      "z": -15,
+      "x": -12.2,
+      "z": -14,
       "halfX": 0.234,
       "halfZ": 0.234,
       "height": 7.5600000000000005,
@@ -142,26 +198,8 @@
       "cameraMinY": 3.9600000000000004
     },
     {
-      "x": -11.6,
-      "z": -25,
-      "halfX": 0.26,
-      "halfZ": 0.26,
-      "height": 8.4,
-      "cameraRadius": 2.75,
-      "cameraMinY": 4.4
-    },
-    {
-      "x": -11.5,
-      "z": -37,
-      "halfX": 0.234,
-      "halfZ": 0.234,
-      "height": 7.5600000000000005,
-      "cameraRadius": 2.475,
-      "cameraMinY": 3.9600000000000004
-    },
-    {
-      "x": 11.5,
-      "z": -16,
+      "x": -11.8,
+      "z": -44,
       "halfX": 0.247,
       "halfZ": 0.247,
       "height": 7.9799999999999995,
@@ -169,13 +207,13 @@
       "cameraMinY": 4.18
     },
     {
-      "x": 11.6,
-      "z": -31,
-      "halfX": 0.28600000000000003,
-      "halfZ": 0.28600000000000003,
-      "height": 9.24,
-      "cameraRadius": 3.0250000000000004,
-      "cameraMinY": 4.84
+      "x": 12.6,
+      "z": -13.3,
+      "halfX": 0.221,
+      "halfZ": 0.221,
+      "height": 7.14,
+      "cameraRadius": 2.3375,
+      "cameraMinY": 3.7399999999999993
     },
     {
       "x": 11.8,
@@ -188,7 +226,7 @@
     },
     {
       "x": -11.5,
-      "z": 15,
+      "z": 16,
       "halfX": 0.247,
       "halfZ": 0.247,
       "height": 7.9799999999999995,
@@ -205,8 +243,8 @@
       "cameraMinY": 4.84
     },
     {
-      "x": 11.5,
-      "z": 13,
+      "x": 12.9,
+      "z": 14,
       "halfX": 0.26,
       "halfZ": 0.26,
       "height": 8.4,
@@ -223,7 +261,7 @@
       "cameraMinY": 4.84
     },
     {
-      "x": -25,
+      "x": -28,
       "z": 11.5,
       "halfX": 0.247,
       "halfZ": 0.247,
@@ -232,7 +270,7 @@
       "cameraMinY": 4.18
     },
     {
-      "x": -36,
+      "x": -38,
       "z": 11.5,
       "halfX": 0.26,
       "halfZ": 0.26,
@@ -250,8 +288,8 @@
       "cameraMinY": 4.4
     },
     {
-      "x": 41,
-      "z": -11.5,
+      "x": 42,
+      "z": -10.7,
       "halfX": 0.234,
       "halfZ": 0.234,
       "height": 7.5600000000000005,
@@ -266,7 +304,210 @@
       "height": 7.14,
       "cameraRadius": 2.3375,
       "cameraMinY": 3.7399999999999993
+    },
+    {
+      "x": -22,
+      "z": 12.1,
+      "halfX": 2.75,
+      "halfZ": 0.95,
+      "height": 3.0
+    },
+    {
+      "x": -34,
+      "z": 14,
+      "halfX": 2.15,
+      "halfZ": 0.6,
+      "height": 1.25
+    },
+    {
+      "x": -30,
+      "z": 29,
+      "halfX": 2.7,
+      "halfZ": 0.7,
+      "height": 1.25
+    },
+    {
+      "x": -16,
+      "z": 31,
+      "halfX": 2.6,
+      "halfZ": 0.6,
+      "height": 1.25
+    },
+    {
+      "x": -31,
+      "z": 38,
+      "halfX": 2.25,
+      "halfZ": 0.65,
+      "height": 1.25
+    },
+    {
+      "x": 30,
+      "z": 29,
+      "halfX": 2.5,
+      "halfZ": 0.65,
+      "height": 1.25
+    },
+    {
+      "x": 37,
+      "z": 13,
+      "halfX": 2.0,
+      "halfZ": 0.6,
+      "height": 1.25
+    },
+    {
+      "x": 14.8,
+      "z": -13.8,
+      "halfX": 0.6,
+      "halfZ": 1.15,
+      "height": 1.25
+    },
+    {
+      "x": -30,
+      "z": 26.5,
+      "halfX": 1.0,
+      "halfZ": 0.36,
+      "height": 1.2
+    },
+    {
+      "x": -16,
+      "z": 28.5,
+      "halfX": 1.0,
+      "halfZ": 0.36,
+      "height": 1.2
+    },
+    {
+      "x": 31,
+      "z": 26.5,
+      "halfX": 1.0,
+      "halfZ": 0.36,
+      "height": 1.2
+    },
+    {
+      "x": -54,
+      "z": -20,
+      "halfX": 5.0,
+      "halfZ": 8.0,
+      "height": 18
+    },
+    {
+      "x": 70,
+      "z": -25,
+      "halfX": 11.0,
+      "halfZ": 14.0,
+      "height": 34
+    },
+    {
+      "x": -78,
+      "z": 36,
+      "halfX": 29.0,
+      "halfZ": 11.0,
+      "height": 6.2
+    },
+    {
+      "x": -59,
+      "z": 33,
+      "halfX": 9.0,
+      "halfZ": 10.0,
+      "height": 57
+    },
+    {
+      "x": -94,
+      "z": 36,
+      "halfX": 11.0,
+      "halfZ": 11.0,
+      "height": 70
+    },
+    {
+      "x": -48.4,
+      "z": 34.2,
+      "halfX": 0.325,
+      "halfZ": 0.325,
+      "height": 5.55
+    },
+    {
+      "x": -48.4,
+      "z": 40.5,
+      "halfX": 0.325,
+      "halfZ": 0.325,
+      "height": 5.55
+    },
+    {
+      "x": -48.4,
+      "z": 46.8,
+      "halfX": 0.325,
+      "halfZ": 0.325,
+      "height": 5.55
+    },
+    {
+      "x": -42.848,
+      "z": 48.0,
+      "halfX": 0.325,
+      "halfZ": 0.325,
+      "height": 5.55
+    },
+    {
+      "x": -13.699999999999996,
+      "z": 48.0,
+      "halfX": 0.325,
+      "halfZ": 0.325,
+      "height": 5.55
+    },
+    {
+      "x": 15.448000000000008,
+      "z": 48.0,
+      "halfX": 0.325,
+      "halfZ": 0.325,
+      "height": 5.55
+    },
+    {
+      "x": 21.0,
+      "z": 47.68,
+      "halfX": 0.325,
+      "halfZ": 0.325,
+      "height": 5.55
+    },
+    {
+      "x": 21.0,
+      "z": 46.0,
+      "halfX": 0.325,
+      "halfZ": 0.325,
+      "height": 5.55
+    },
+    {
+      "x": 21.0,
+      "z": 44.32,
+      "halfX": 0.325,
+      "halfZ": 0.325,
+      "height": 5.55
+    },
+    {
+      "x": 21,
+      "z": 38,
+      "halfX": 1.9,
+      "halfZ": 6.0,
+      "height": 6.1
     }
   ],
-  "artRevision": 3
+  "artRevision": 6,
+  "roadHalfWidth": 9,
+  "crossingCenter": 11.25,
+  "cornerChamfer": 2.8,
+  "terrainBounds": [
+    -120,
+    120,
+    -125,
+    110
+  ],
+  "landmarks": [
+    "Taiseido Bookstore",
+    "MAGNET by SHIBUYA109",
+    "Shibuya Mark City East",
+    "Shibuya Mark City West"
+  ],
+  "districtScale": "Concept-scale dimensions and compressed distances; see assets/references/shibuya-landmarks.md",
+  "pedestrianDeck": {
+    "scenic": true,
+    "height": 6.0,
+    "roadClearance": 5.54
+  }
 }

@@ -20,7 +20,7 @@ class Sidewalks {
   constructor(colliders: Collider[]) {
     this.obstacles = colliders.filter(c => !c.cameraMinY || c.height! > 1).map(c => ({ ...c, halfX: c.cameraRadius && c.halfX < .4 ? .78 : c.halfX, halfZ: c.cameraRadius && c.halfZ < .4 ? .78 : c.halfZ }));
     // The bus shelter and standalone benches are walk-around furniture.
-    this.obstacles.push({ x:-19,z:11.3,halfX:2.8,halfZ:.95 },{ x:-31,z:12.2,halfX:1.1,halfZ:.45 },{ x:32,z:12,halfX:1.1,halfZ:.45 });
+    this.obstacles.push({ x:-31,z:12.2,halfX:1.1,halfZ:.45 },{ x:32,z:12,halfX:1.1,halfZ:.45 });
     const cells = new Map<string, number>();
     for(let x=-EXTENT;x<=EXTENT;x++) for(let z=-EXTENT;z<=EXTENT;z++) {
       const p={x:x*STEP,z:z*STEP};
@@ -35,17 +35,19 @@ class Sidewalks {
     });
     // Keep the connected public sidewalk around each corner; omit enclosed gaps.
     for(let r=0;r<4;r++) {
-      const gate=this.nearest({x:r%2?9.75:-9.75,z:r>1?9.75:-9.75},r);this.gates.push(gate);
+      const gate=this.nearest({x:r%2?11.25:-11.25,z:r>1?11.25:-11.25},r);this.gates.push(gate);
       const seen=new Set([gate]),queue=[gate];
       for(let i=0;i<queue.length;i++) for(const id of this.nodes[queue[i]].neighbors) if(!seen.has(id)){seen.add(id);queue.push(id);}
       this.regions[r]=queue;
     }
   }
 
-  walkable(p: Point, margin=.36) {
+  // Leave passing space around furniture. The former .36 m margin admitted a
+  // single-file slit between the Hachiko benches and trees, trapping opposing flows.
+  walkable(p: Point, margin=.60) {
     if(Math.abs(p.x)<9.65||Math.abs(p.z)<9.65||Math.abs(p.x)>33||Math.abs(p.z)>30) return false;
-    // The northeast frontage is a walkable strip; the building fills its north side.
-    if(p.x>0&&p.z< -11.55) return false;
+    // Stay behind the chamfered curb; real building volumes define each frontage.
+    if(Math.abs(p.x)+Math.abs(p.z)<21.35) return false;
     return !this.obstacles.some(c => Math.abs(p.x-c.x)<c.halfX+margin&&Math.abs(p.z-c.z)<c.halfZ+margin);
   }
   clear(a: Point,b: Point) {
@@ -169,8 +171,8 @@ export class PedestrianSimulation {
       }
       if(w.crossing) {
         // Stay inside the zebra band while giving oncoming walkers room to pass.
-        if(Math.abs(target.x)<10&&Math.abs(dx)<.3)nx=Math.max(target.x-.65,Math.min(target.x+.65,nx));
-        if(Math.abs(target.z)<10&&Math.abs(dz)<.3)nz=Math.max(target.z-.65,Math.min(target.z+.65,nz));
+        if(Math.abs(target.x)<12&&Math.abs(dx)<.3)nx=Math.max(target.x-.8,Math.min(target.x+.8,nx));
+        if(Math.abs(target.z)<12&&Math.abs(dz)<.3)nz=Math.max(target.z-.8,Math.min(target.z+.8,nz));
       }
       const moved=Math.hypot(nx-w.x,nz-w.z);w.x=nx;w.z=nz;w.travelled+=moved;w.gait+=moved*7.5;
       w.stalled=!w.waiting&&!w.crossing&&moved/dt<.15 ? w.stalled+dt : 0;

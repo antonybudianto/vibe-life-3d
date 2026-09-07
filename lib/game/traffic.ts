@@ -20,7 +20,7 @@ export class TrafficSimulation {
   }
 
   get colliders(): Collider[] {
-    return this.cars.filter((v) => Math.abs(v.x) < 48 && Math.abs(v.z) < 48).map((v) => ({ x: v.x, z: v.z, halfX: v.dx ? v.halfLength : v.halfWidth, halfZ: v.dz ? v.halfLength : v.halfWidth, height: v.model === 'citybus' ? 3.2 : 1.9 }));
+    return this.cars.map((v) => ({ x: v.x, z: v.z, halfX: v.dx ? v.halfLength : v.halfWidth, halfZ: v.dz ? v.halfLength : v.halfWidth, height: v.model === 'citybus' ? 3.2 : 1.9 }));
   }
 
   step(dt: number, people: RoadUser[], player: RoadUser) {
@@ -28,7 +28,7 @@ export class TrafficSimulation {
     // Bound each update, including after a background-tab pause.
     dt = Math.min(dt, 1 / 30);
     this.phaseTime += dt;
-    const occupied = people.some(p=>p.crossing) || this.cars.some((v) => Math.abs(v.x) < 12 + v.halfLength * Math.abs(v.dx) && Math.abs(v.z) < 12 + v.halfLength * Math.abs(v.dz));
+    const occupied = people.some(p=>p.crossing) || this.cars.some((v) => Math.abs(v.x) < 14 + v.halfLength * Math.abs(v.dx) && Math.abs(v.z) < 14 + v.halfLength * Math.abs(v.dz));
     if (this.phase === 'clear') {
       if (this.phaseTime >= 2 && !occupied) {
         this.phase = this.sequence[this.next]; this.next = (this.next + 1) % 3; this.phaseTime = 0;
@@ -45,7 +45,7 @@ export class TrafficSimulation {
       const along = v.x * v.dx + v.z * v.dz;
       let gap = Infinity;
       const green = (v.dz !== 0 && this.phase === 'north-south') || (v.dx !== 0 && this.phase === 'east-west');
-      const stop = -13.4 - v.halfLength;
+      const stop = -14.6 - v.halfLength;
       // Cars that already passed the stop line finish clearing the junction.
       if (!green && along <= stop + .02) gap = Math.min(gap, stop - along);
       for (const [i, other] of before.entries()) {
@@ -65,7 +65,7 @@ export class TrafficSimulation {
       const distance = Math.max(0, Math.min(v.speed * dt, gap));
       if (distance === 0) v.speed = 0;
       v.x += v.dx * distance; v.z += v.dz * distance;
-      // Recycle beyond the walkable map, hiding models beyond the road end.
+      // Ambient traffic circulates around the central crossing.
       if (along > 54) { v.x -= v.dx * 108; v.z -= v.dz * 108; v.speed = 0; }
     });
   }

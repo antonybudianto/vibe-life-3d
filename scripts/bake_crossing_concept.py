@@ -8,10 +8,11 @@ from surface_textures import add_street_grain
 bpy.ops.wm.open_mainfile(filepath=str(ROOT/'assets/blender/crossing.blend'))
 s=bpy.context.scene;cycles(s);s.cycles.samples=24
 objects=[o for o in s.objects if o.type=='MESH']
-ground_names=['Rain-dark asphalt','Pavement stone','Crosswalk ivory paint','Tactile ochre']
+ground_names=['Rain-dark asphalt','Pavement stone','Crosswalk ivory paint','Tactile ochre',
+              'District asphalt','District paving','District road paint','District ochre markings']
 ground=[o for o in objects if o.name in ground_names]
 detail=[o for o in objects if o.name not in ground_names and not o.name.startswith(('Glazing','Concept','Lettering')) and o.data.materials[0].get('base_emission',0)==0]
-saved=[];report={'asset':'crossing','artRevision':3,'vertexBakes':[]}
+saved=[];report={'asset':'crossing','artRevision':6,'vertexBakes':[]}
 for o in detail:
     attrs=o.data.color_attributes
     attr=attrs.get('BakedLocalShade') or attrs.new(name='BakedLocalShade',type='FLOAT_COLOR',domain='CORNER')
@@ -43,15 +44,15 @@ for o in ground:
     for p in o.data.polygons:
         for li in p.loop_indices:
             v=o.matrix_world@o.data.vertices[o.data.loops[li].vertex_index].co
-            uv.data[li].uv=((v.x+47)/94,(v.y+47)/94) if p.normal.z>.9 and v.z>-.06 else (-1,-1)
+            uv.data[li].uv=((v.x+120)/240,(v.y+110)/235) if p.normal.z>.9 and v.z>-.06 else (-1,-1)
     o.data.uv_layers[0].active_render=True
 mats=list({o.data.materials[0] for o in ground})
-report.update(occlusion(ground,mats,'crossing',2048))
-report.update(irradiance(ground,mats,'crossing',2048))
+report.update(occlusion(ground,mats,'crossing',4096))
+report.update(irradiance(ground,mats,'crossing',4096))
 for o in ground:o.data.uv_layers.active_index=0
 for m in bpy.data.materials:
     if m.use_nodes and m.node_tree.nodes.get('Cycles bake target'):m.node_tree.nodes.remove(m.node_tree.nodes['Cycles bake target'])
-s['baking_pipeline']='Cycles vertex AO for detailed architecture + 2048px planar AO and shop irradiance for streets'
+s['baking_pipeline']='Cycles vertex AO for architecture + shared 4096px district AO and shop irradiance'
 add_street_grain()
 g.compact_baked_colors(objects)
 g.export(ROOT/'public/models/crossing.glb',objects)

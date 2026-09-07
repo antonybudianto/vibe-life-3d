@@ -19,21 +19,40 @@ stone=g.material('Warm concrete',(.27,.25,.24),.89)
 concrete=g.material('Slate concrete',(.12,.135,.17),.9)
 cladding=[g.material('Facade cladding '+str(i),c,.72,.12) for i,c in enumerate([(.30,.32,.37),(.21,.24,.31),(.40,.38,.36),(.15,.17,.23)])]
 sidewalk=g.material('Pavement stone',(.23,.235,.25),.83)
-asphalt=g.material('Rain-dark asphalt',(.025,.031,.045),.48,.06)
+asphalt=g.material('Rain-dark asphalt',(.031,.036,.048),.48,.06)
 paint=g.material('Crosswalk ivory paint',(.64,.65,.65),.6)
+paint['surface_role']='road-marking'
+# Separate batches share world-aligned surface textures and the district atlas.
+district_asphalt=g.material('District asphalt',(.031,.036,.048),.48,.06)
+district_paving=g.material('District paving',(.23,.235,.25),.83)
+district_paint=g.material('District road paint',(.64,.65,.65),.6)
+district_paint['surface_role']='road-marking'
+district_yellow=g.material('District ochre markings',(.69,.40,.06),.82)
+deck_paving=g.material('Deck paving',(.23,.235,.25),.83)
+deck_yellow=g.material('Deck stair nosings',(.69,.40,.06),.82)
+porcelain=g.material('Landmark white ceramic',(.57,.59,.61),.73,.12)
+silver=g.material('Landmark silver aluminum',(.46,.49,.52),.38,.58)
+hotelglass=g.material('Mark City blue gray glass',(.115,.19,.23),.24,.52)
 yellow=g.material('Tactile ochre',(.69,.40,.06),.82)
 wood=g.material('Walnut shop joinery',(.15,.073,.035),.7)
 black=g.material('Soft black rubber',(.012,.015,.023),.83)
 cream=g.material('Store plaster',(.46,.38,.28),.85)
 glass=g.material('Glazing architectural',(.19,.25,.31),.16,.45,alpha=.19)
 blueglass=g.material('Dark reflective glass',(.024,.055,.09),.19,.6)
-warm=[g.material('Interior amber '+str(i),c,.7,0,e) for i,(c,e) in enumerate([((.57,.28,.10),.36),((.44,.23,.12),.22),((.73,.46,.20),.52),((.075,.087,.11),0)])]
+upperglass=g.material('Glazing smoked curtain wall',(.033,.060,.095),.13,.62,alpha=.74)
+brick=g.material('Terracotta tile cladding',(.21,.105,.085),.84)
+granite=g.material('Pale granite curb',(.34,.33,.32),.83)
+drain=g.material('Drain iron',(.034,.038,.041),.63,.6)
+roofing=g.material('Zinc roof panels',(.10,.125,.15),.54,.5)
+patch=g.material('Asphalt repairs',(.020,.025,.032),.68)
+warm=[g.material('Interior amber '+str(i),c,.7,0,e) for i,(c,e) in enumerate([((.57,.28,.10),.54),((.44,.23,.12),.36),((.73,.46,.20),.78),((.075,.087,.11),0)])]
 white=g.material('Ivory neon lettering',(.86,.86,.75),.5,0,1.7)
 lamp=g.material('Warm lamps', (1,.52,.18),.35,0,3.2)
 pink=g.material('Sakura neon',(.85,.09,.34),.4,0,2.0)
 blue=g.material('Electric blue signage',(.025,.23,.62),.45,0,1.1)
 green=g.material('Station emerald',(.014,.24,.10),.65,0,.35)
 red=g.material('Karaoke vermilion',(.48,.014,.029),.6,0,.18)
+brandred=g.material('Scarlet brand lettering',(.68,.014,.030),.5,0,.9)
 bark=g.material('Textured tree bark',(.105,.057,.031),.96)
 leaves=[g.material('Ginkgo leaves '+str(i),c,.78) for i,c in enumerate([(.034,.11,.028),(.065,.18,.033),(.14,.24,.055),(.038,.145,.082),(.21,.27,.078)])]
 books=[g.material('Book spines '+str(i),c,.85) for i,c in enumerate([(.38,.055,.05),(.025,.18,.22),(.65,.49,.21),(.39,.31,.27)])]
@@ -64,6 +83,42 @@ def screen(x,y,z,w,h,mat):
     box((x,y,z),(w+.32,.35,h+.32),metal);g.panel((x,y-.185,z),w,h,mat)
     for sx in [-1,1]:box((x+sx*(w/2+.16),y-.2,z),(.045,.07,h+.1),trim)
 
+def curved_screen(x,y,z,w,h,mat,bow=1.1):
+    """Continuous artwork UVs over a genuinely curved, framed LED surface."""
+    for i in range(24):
+        u0=i/24;u1=(i+1)/24
+        a=(x+(u0-.5)*w,y+bow*(2*u0-1)**2)
+        b=(x+(u1-.5)*w,y+bow*(2*u1-1)**2)
+        g.mesh([(a[0],a[1],z-h/2),(b[0],b[1],z-h/2),(b[0],b[1],z+h/2),(a[0],a[1],z+h/2)],[(0,1,2,3)],mat,uvs=[(u0,0),(u1,0),(u1,1),(u0,1)])
+        for zz in [z-h/2-.12,z+h/2+.12]:g.rod((*a,zz),(*b,zz),.12,metal,6)
+    for xx in [x-w/2,x+w/2]:g.rod((xx,y+bow,z-h/2),(xx,y+bow,z+h/2),.12,metal,6)
+
+def prism(points,z,height,mat):
+    n=len(points)
+    g.mesh([(x,y,z+dz) for dz in [0,height] for x,y in points],
+           [tuple(reversed(range(n))),tuple(range(n,2*n))]+[(i,(i+1)%n,(i+1)%n+n,i+n) for i in range(n)],mat)
+
+def roof_detail(x,y,w,d,h,variant=0):
+    """Different roof silhouettes, occupied plant rooms and connected services."""
+    box((x,y,h+.14),(w,d,.25),roofing)
+    for dx in [-w/2+.16,w/2-.16]:
+        for dz in [.35,1.02]:g.rod((x+dx,y-d/2,h+dz),(x+dx,y+d/2,h+dz),.029,metal)
+        for k in range(int(d)+1):g.rod((x+dx,y-d/2+k,h+.25),(x+dx,y-d/2+k,h+1.02),.022,metal,6)
+    if variant%3!=1:
+        box((x+w*.16,y+d*.19,h+1.25),(w*.42,d*.32,2.2),cladding[variant%4])
+        box((x+w*.16,y+d*.19,h+2.42),(w*.45,d*.35,.18),metal)
+        g.panel((x+w*.16,y+d*.03-.02,h+1.16),.8,1.85,metal)
+    count=2+variant%4
+    for i in range(count):
+        xx=x-w*.37+i*w*.64/max(1,count-1);yy=y-d*.24
+        box((xx,yy,h+.57),(1.38,1.5,.9),stone)
+        for j in range(5):box((xx,yy-.76,h+.25+j*.15),(1.14,.025,.048),metal)
+        g.rod((xx,yy,h+1.04),(xx,yy,h+1.11),.43,metal,16)
+        g.rod((xx,yy+.75,h+.42),(xx,yy+2.1,h+.42),.16,trim,10)
+    for yy in [y-d*.37,y+d*.35]:g.rod((x-w*.39,yy,h+.24),(x+w*.39,yy,h+.24),.045,metal,6)
+    g.rod((x-w*.3,y+d*.22,h),(x-w*.3,y+d*.22,h+3.6),.035,metal,8)
+    for dz in [2.5,2.95,3.4]:g.rod((x-w*.3-.6,y+d*.22,h+dz),(x-w*.3+.6,y+d*.22,h+dz),.02,metal,6)
+
 def footprint(x,y,w,d,r,z,height,mat):
     points=[(x-w/2,y-d/2),(x+w/2-r,y-d/2)]
     for i in range(1,9):
@@ -87,23 +142,27 @@ def shop_furniture(x,y,z,w,index):
     else:
         for dx in [-.22,.22]:g.rod((x+dx,y+.72,z+.55),(x+dx,y+.72,z+.69),.047,cream,8)
 
-def building(x,y,w,d,h,shop=None,rounded=False):
-    front=y-d/2;levels=round(h/2.7);step=h/levels;r=2.4 if rounded else .12
+def building(x,y,w,d,h,shop=None,rounded=False,style=0):
+    front=y-d/2;levels=round(h/(3.1 if style==2 else 2.8));step=h/levels;r=3.8 if rounded else .12
     obstacle(x,y,w,d,h)
     box((x,y+.5,h/2),(w-2.8,d-2.4,h),concrete)
-    for floor in range(levels+1):footprint(x,y,w+.10,d+.10,r,floor*step,.16,trim if rounded else stone)
+    for floor in range(levels+1):footprint(x,y,w+.10,d+.10,r,floor*step,.10 if style==2 else .18,trim if rounded or style==2 else stone)
     # Facades have real shallow rooms and mullions, not flat glowing rectangles.
-    columns=max(3,int((w-(r if rounded else 0))/1.85));spacing=(w-(r if rounded else 0))/columns
+    columns=max(3,int((w-(r if rounded else 0))/(1.45 if style==2 else 2.1)));spacing=(w-(r if rounded else 0))/columns
     for floor in range(levels):
         z=floor*step+.16
         for col in range(columns):
             xx=x-w/2+(col+.5)*spacing
-            light=warm[2 if floor<2 else (floor*7+col*3)%4]
-            opaque=floor>=2 and not rounded and (col+int(abs(x)))%3!=0
+            light=warm[(col+floor)%3 if floor<2 else (1 if (floor*7+col*3)%7==0 else 3)]
+            opaque=floor>=2 and not rounded and style!=2 and (col+int(abs(x)))%3!=0
             box((xx,front+1.28,z+step*.46),(spacing-.05,.07,step-.15),light)
             box((xx,front+.66,z+.035),(spacing-.06,1.34,.065),wood if floor<2 else stone)
             box((xx,front-.04,z+step/2),(.055,.12,step),trim)
-            g.panel((xx,front-.10,z+step/2),spacing-.07,step-.15,cladding[int(abs(x))%4] if opaque else glass)
+            g.panel((xx,front-.10,z+step/2),spacing-.07,step-.15,(brick if style==1 else cladding[(style+floor//3)%4]) if opaque else (upperglass if floor>=2 else glass))
+            if opaque:
+                box((xx,front-.17,z+step*.16),(spacing-.15,.14,.075),trim)
+                if style==1:
+                    for row in range(1,7):box((xx,front-.105,z+row*step/7),(spacing-.1,.015,.012),stone)
             if floor<2:shop_furniture(xx,front,z,spacing,col)
             elif (floor+col)%3==0:
                 box((xx,front+.58,z+.71),(spacing*.72,.55,.09),wood)
@@ -116,8 +175,8 @@ def building(x,y,w,d,h,shop=None,rounded=False):
                 if rounded and side==1 and yy<front+r:continue
                 xx=x+side*w/2
                 box((xx-side*.9,yy,z+step/2),(.06,1.72,step-.19),warm[(col+floor*3)%4])
-                opaque=floor>=2 and not rounded and (col+floor//3)%3!=0
-                g.panel((xx+side*.05,yy,z+step/2),1.74,step-.18,cladding[int(abs(x))%4] if opaque else glass,side*math.pi/2)
+                opaque=floor>=2 and not rounded and style!=2 and (col+floor//3)%3!=0
+                g.panel((xx+side*.05,yy,z+step/2),1.74,step-.18,(brick if style==1 else cladding[(style+floor//3)%4]) if opaque else (upperglass if floor>=2 else glass),side*math.pi/2)
                 box((xx,yy-.91,z+step/2),(.12,.055,step),trim)
         if rounded:
             for i in range(8):
@@ -127,24 +186,66 @@ def building(x,y,w,d,h,shop=None,rounded=False):
                 box((cx+(r-.48)*math.cos(a),cy+(r-.48)*math.sin(a),z+step/2),(.6,.6,step-.17),warm[(floor+i)%3])
                 g.rod((px,py,z),(px,py,z+step),.029,trim,6)
     for dx in [-w/2,w/2]:box((x+dx,front-.13,h/2),(.14,.18,h),metal)
-    # Roof railings, plant rooms, ducts, aerials and cable runs.
-    box((x,y,h+.25),(w,d,.28),concrete)
-    for dx in [-w/2+.15,w/2-.15]:
-        for dz in [.35,.94]:g.rod((x+dx,y-d/2,h+dz),(x+dx,y+d/2,h+dz),.025,metal)
-        for k in range(int(d)):g.rod((x+dx,y-d/2+k,h+.25),(x+dx,y-d/2+k,h+1),.018,metal,6)
-    for i in range(3):
-        xx=x-w*.29+i*w*.27
-        box((xx,y+.6,h+.85),(w*.19,1.7,1.2),stone)
-        for j in range(5):box((xx,y-.264,h+.43+j*.18),(w*.15,.025,.048),metal)
-        g.rod((xx+.28,y+.7,h+1.48),(xx+.28,y+.7,h+1.57),.33,metal,16)
-        g.rod((xx,y+1.7,h+.6),(xx,y+2.6,h+.6),.19,trim,10)
-    g.rod((x-w*.28,y+d*.2,h),(x-w*.28,y+d*.2,h+3),.035,metal,8)
-    for z in [h+2.1,h+2.5]:g.rod((x-w*.28-.5,y+d*.2,z),(x-w*.28+.5,y+d*.2,z),.018,metal,6)
+    roof_detail(x,y,w,d,h,int(abs(x))+style)
     if shop:
         if rounded or shop=='STARBUCKS':sign(shop,x,front-.29,6.05,w-.25,1.35,metal,1.12 if rounded else .98)
         else:sign(shop,x,front-.29,3.13,w-.25,.80,metal,.60)
         box((x,front-.60,3.72),(w+.25,1.30,.13),metal)
         shop_positions.append((x,front-1.05,2.6,w))
+
+def tsutaya():
+    x,y,w,d,h=27,23.5,20,22,33
+    front=y-d/2;bow=2.25;columns=14;step=3.0
+    # The front bows toward the crossing; columns follow the actual curved edge.
+    edge=[(x-w/2+w*i/columns,front+bow*(2*i/columns-1)**2) for i in range(columns+1)]
+    outline=edge+[(x+w/2,y+d/2),(x-w/2,y+d/2)]
+    obstacle(x,y,w,d,h)
+    box((x,y+3,h/2),(w-3,d-8,h),concrete)
+    for floor in range(12):prism(outline,floor*step,.13,trim if floor<3 else metal)
+    for floor in range(11):
+        z=floor*step+.14
+        for i,(a,b) in enumerate(zip(edge,edge[1:])):
+            xx=(a[0]+b[0])/2;yy=(a[1]+b[1])/2
+            span=math.dist(a,b);angle=math.atan2(b[1]-a[1],b[0]-a[0])
+            g.panel((xx,yy-.025,z+1.4),span-.045,2.76,glass if floor<4 else upperglass,angle)
+            g.rod((*a,z),(*a,z+2.88),.037,trim,6)
+            box((xx,yy+1.28,z+1.35),(1.34,.1,2.7),warm[(i+floor)%3] if floor<4 else warm[1 if (i+floor*2)%9==0 else 3])
+            if floor<4:
+                shop_furniture(xx,yy+.06,z,1.4,i+floor)
+                box((xx,yy+.5,z+2.6),(.35,.32,.06),lamp)
+        for side in [-1,1]:
+            for col in range(9):
+                xx=x+side*w/2;yy=front+bow+(col+.5)*(d-bow)/9
+                g.panel((xx+side*.03,yy,z+1.4),(d-bow)/9-.06,2.76,glass if floor<4 else upperglass,side*math.pi/2)
+                box((xx-side*.75,yy,z+1.4),(.1,2.04,2.7),warm[1 if (col+floor)%6==0 or floor<2 else 3])
+                g.rod((xx,yy-1.05,z),(xx,yy-1.05,z+2.88),.035,trim,6)
+    roof_detail(x,y,w,d,h,5)
+    sign('TSUTAYA',x,front-.2,6.65,19.6,1.15,metal,1.36)
+    shop_positions.append((x,front-1,2.8,w))
+    return x,front
+
+def tower_109():
+    x,y,r,h=-15.2,35.7,4.4,36
+    obstacle(x,y,r*2,r*2,h)
+    g.rod((x,y,.1),(x,y,h),r,stone,64)
+    # Vertical seams and narrow recessed windows make a full-height landmark.
+    for i in range(48):
+        a=i*math.tau/48;xx=x+(r+.018)*math.cos(a);yy=y+(r+.018)*math.sin(a)
+        g.rod((xx,yy,1),(xx,yy,29.1),.018,trim,5)
+        if i%4==0:
+            for z in [7.3,10.6,13.9,17.2,20.5,23.8,27.1]:g.panel((xx,yy,z),.33,1.55,blueglass,a+math.pi/2)
+    for z in np.arange(3,36,3):g.rod((x,y,float(z)),(x,y,float(z)+.045),r+.035,trim,64)
+    g.rod((x,y,29.7),(x,y,35.8),r+.065,cladding[3],64)
+    for z in [29.7,35.8]:g.rod((x,y,z),(x,y,z+.10),r+.16,trim,64)
+    g.text('SHIBUYA',(x,y-r-.13,34.2),1.11,pink,font=font)
+    g.text('109',(x,y-r-.14,31.85),3.45,pink,font=font)
+    sign('SHIBUYA 109',x,y-r-.15,3.2,7.7,.85,metal,.65)
+    for dx in [-2.6,-1.3,0,1.3,2.6]:
+        yy=y-math.sqrt(r*r-dx*dx)-.03
+        g.panel((x+dx,yy,1.4),1.12,2.4,glass)
+    # The separate square UNIQLO sign stands beside, rather than covers, 109.
+    box((x-6.25,y-2.4,25.9),(3.4,2.1,5.2),concrete)
+    sign('UNI\nQLO',x-6.25,y-3.51,26.15,3.4,3.6,red,1.13)
 
 def tree(x,y,scale=1):
     height=6.5*scale;radius=2.75*scale
@@ -154,10 +255,10 @@ def tree(x,y,scale=1):
     for i in range(9):
         a=i*2.4;rr=(.8+random.random()*.7)*scale
         g.rod((x,y,height-1.8),(x+math.cos(a)*rr,y+math.sin(a)*rr,height+random.uniform(-.5,.4)),.065*scale,bark,6,.018*scale)
-    for i in range(800):
+    for i in range(1100):
         a=random.random()*math.tau;r=radius*random.random()**.5
-        px=x+math.cos(a)*r;py=y+math.sin(a)*r;pz=height+random.uniform(-1.6,1.6)*scale*math.sqrt(max(.15,1-(r/radius)**2))
-        angle=random.random()*math.tau;length=random.uniform(.21,.41)*scale;width=length*.55
+        px=x+math.cos(a)*r;py=y+math.sin(a)*r;pz=height+random.uniform(-2.1,2.1)*scale*math.sqrt(max(.15,1-(r/radius)**2))
+        angle=random.random()*math.tau;length=random.uniform(.28,.48)*scale;width=length*.62
         axis=Vector((math.cos(angle)*length,math.sin(angle)*length,random.uniform(-.16,.16)*scale))
         cross=Vector((-math.sin(angle)*width,math.cos(angle)*width,.025*scale));center=Vector((px,py,pz))
         verts=[tuple(center-axis),tuple(center-axis*.3+cross),tuple(center+axis*.55+cross*.75),tuple(center+axis),tuple(center+axis*.55-cross*.75),tuple(center-axis*.3-cross),tuple(center+Vector((0,0,.045*scale)))]
@@ -192,34 +293,145 @@ def signal(x,y):
     for i,mt in enumerate([red,yellow,green]):g.sphere((x,y-.213,3.74-i*.28),(.087,.024,.087),mt,10,6)
     box((x+.28,y,2.5),(.24,.18,.33),metal);g.text('人',(x+.28,y-.1,2.5),.22,green,font=jp)
 
+def planter(x,y,w,d):
+    obstacle(x,y,w,d,1.25)
+    box((x,y,.35),(w,d,.60),granite)
+    box((x,y,.67),(w-.22,d-.22,.07),bark)
+    for i in range(max(2,int(w/.45))):
+        for j in range(max(1,int(d/.45))):
+            xx=x-w/2+.3+i*.43;yy=y-d/2+.3+j*.40
+            g.sphere((xx,yy,.84+random.uniform(-.06,.08)),(.37,.33,.31),leaves[(i+j)%5],8,5)
+
 def ground():
-    box((0,0,-2.62),(94,94,.5),concrete)
-    box((0,0,-.065),(94,18,.08),asphalt)
-    for y in [-28,28]:box((0,y,-.065),(18,38,.08),asphalt)
+    box((0,7.5,-2.62),(240,235,.5),concrete)
+    box((0,0,-.055),(94,94,.12),asphalt)
+    # Four adjoining tiles completely surround the baked core, without coplanar
+    # overlap. Every backdrop building now has actual terrain underneath it.
+    for x,y,w,d in [(-83.5,7.5,73,235),(83.5,7.5,73,235),(0,86,94,78),(0,-78.5,94,63)]:
+        box((x,y,-.055),(w,d,.12),district_asphalt)
+    # Streets continue through the expanded side blocks and meet a rear T street.
+    for x,y,w,d in [(-28,54.5,38,15),(28,54.5,38,15),(0,98.5,240,53),
+                    (-54,35.5,14,53),(-95.5,35.5,49,53),(89.5,35.5,61,53),
+                    (-83.5,-59.5,73,101),(89.5,-59.5,61,101),
+                    (28,-78.5,38,63),(-28,-78.5,38,63)]:
+        box((x,y,-.015),(w,d,.20),district_paving)
+    # Curbs and paving joints reveal continuous sidewalks in rear/orbit views.
+    for sx in [-1,1]:
+        box((sx*9,54.5,.02),(.23,15,.19),granite)
+        box((sx*9,-78.5,.02),(.23,63,.19),granite)
+        for sy in [-1,1]:
+            spans=[(59,120)] if sx==1 else ([(47,61),(71,120)] if sy==1 else [(47,120)])
+            for lo,hi in spans:box((sx*(lo+hi)/2,sy*9,.02),(hi-lo,.23,.19),granite)
+    box((0,72,.02),(240,.23,.19),granite)
+    # Leave the rear road's mouth open at the T junction.
+    for xx in [-64.5,64.5]:box((xx,62,.02),(111,.23,.19),granite)
+    for x in [-71,-61,59]:box((x,35.5,.02),(.23,53,.19),granite)
+    # Continue the same slab size and staggered joints along all new approaches.
+    def paving_strip(x0,x1,y0,y1):
+        for row in range(int((y1-y0)/.9)):
+            yy=y0+row*.9
+            box(((x0+x1)/2,yy,.088),(x1-x0,.012,.008),concrete)
+            for xx in np.arange(x0+(row%2)*.9,x1,1.8):box((float(xx),yy+.44,.088),(.012,.88,.008),concrete)
+    for x0,x1,y0,y1 in [(-119,-71.2,9.2,12.0),(-60.8,-47,9.2,12.0),(59.2,119,-12,-9.2),(-119,-47,-12,-9.2),
+                         (59.2,119,9.2,12),(9.2,13,-109,-47),(-13,-9.2,-109,-47),
+                         (-47,-9.2,47,61.8),(9.2,47,47,61.8)]:paving_strip(x0,x1,y0,y1)
     for sx in [-1,1]:
         for sy in [-1,1]:
-            # Pavement around the station stairwell is deliberately open.
+            # The eastern side avenue has an open mouth at x=47..59.
+            spans=[(59.2,118)] if sx==1 else ([(47,60.8),(71.2,118)] if sy==1 else [(47,118)])
+            for lo,end in spans:
+                box((sx*(lo+end)/2,sy*9.85,.096),(end-lo,.43,.02),district_yellow)
+                box((sx*(lo+end)/2,sy*8.75,.030),(end-lo,.12,.004),district_yellow)
+        box((sx*9.85,-78.5,.096),(.43,63,.02),district_yellow)
+        box((sx*8.75,-78.5,.030),(.12,63,.004),district_yellow)
+        box((sx*9.85,54.5,.096),(.43,15,.02),district_yellow)
+        box((sx*8.75,54.5,.030),(.12,15,.004),district_yellow)
+    # Side-street drains and inspection covers use the same metalwork as the core.
+    for x,y in [(-61,8.65),(-83,-8.65),(-104,8.65),(75,-8.65),(98,8.65),(8.65,-66),(-8.65,-88)]:
+        box((x,y,.015),(.76,.38,.02),drain)
+        for k in range(6):box((x-.31+k*.12,y,.029),(.045,.31,.009),metal)
+    for x,y in [(-72,5),(86,-4),(-5,-72),(5,-96)]:g.rod((x,y,.010),(x,y,.024),.42,drain,32)
+    for x in range(-114,119,5):
+        box((x,66.9,.028),(2.5,.12,.006),district_paint)
+    for yy in range(14,60,5):
+        for xx in [-66,53]:box((xx,yy,.030),(.10,2,.008),district_paint)
+    for sx in [-1,1]:
+        for sy in [-1,1]:
+            # Chamfered curb corners leave room for the diagonal scramble crossing.
+            points=[(9,11.8),(11.8,9),(47,9),(47,47),(9,47)]
+            points=[(sx*x,sy*y) for x,y in points]
+            if sx*sy<0:points.reverse()
+            # The station stairwell remains an actual opening in the pavement.
             if sx==1 and sy==-1:
-                for x,y,w,d in [(12.8,-28,7.6,38),(36.2,-28,21.6,38),(21,-11.2,8.8,4.4),(21,-35.8,8.8,22.4)]:box((x,y,-.015),(w,d,.20),sidewalk)
-            else:box((sx*28,sy*28,-.015),(38,38,.20),sidewalk)
-            box((sx*9.15,sy*28,.03),(.26,38,.24),stone)
-            box((sx*28,sy*9.15,.03),(38,.26,.24),stone)
-            box((sx*10.2,sy*28,.10),(.24,38,.015),yellow)
-            box((sx*28,sy*10.2,.10),(38,.24,.015),yellow)
-            for k in range(10,47):
-                box((sx*28,sy*k,.091),(38,.018,.008),concrete)
-                box((sx*k,sy*28,.092),(.018,38,.008),concrete)
-    # Four separated crossings and one diagonal; no overlapping zebra grids.
-    for i in range(-7,8):
-        for y in [-9.3,9.3]:box((i*.89,y,.009),(.44,2.65,.01),paint)
-        for x in [-9.3,9.3]:box((x,i*.89,.009),(2.65,.44,.01),paint)
+                for x,y,w,d in [(12.8,-29.4,7.6,35.2),(36.2,-28,21.6,38),(21,-11.2,8.8,4.4),(21,-35.8,8.8,22.4)]:box((x,y,-.015),(w,d,.20),sidewalk)
+                prism([(9,-11.8),(16.6,-11.8),(16.6,-9),(11.8,-9)],-.115,.20,sidewalk)
+            else:prism(points,-.115,.20,sidewalk)
+            for a,b in [((9,11.8),(11.8,9)),((9,11.8),(9,47)),((11.8,9),(47,9))]:
+                ax,ay=sx*a[0],sy*a[1];bx,by=sx*b[0],sy*b[1]
+                length=math.hypot(bx-ax,by-ay);angle=math.atan2(by-ay,bx-ax)
+                box(((ax+bx)/2,(ay+by)/2,.02),(length,.23,.19),granite,angle)
+            for k in range(13,47):
+                box((sx*9.02,sy*k,.119),(.27,.018,.015),concrete)
+                box((sx*k,sy*9.02,.119),(.018,.27,.015),concrete)
+            box((sx*9.85,sy*29.4,.096),(.43,35.2,.02),yellow)
+            box((sx*29.4,sy*9.85,.096),(35.2,.43,.02),yellow)
+            # Wider tactile pads at the crossing arrivals, with raised dot geometry.
+            for x,y in [(10.8,12.4),(12.4,10.8)]:
+                box((sx*x,sy*y,.096),(1.0,.85,.022),yellow)
+                for i in range(5):
+                    for j in range(4):g.rod((sx*(x-.36+i*.18),sy*(y-.27+j*.18),.11),(sx*(x-.36+i*.18),sy*(y-.27+j*.18),.125),.027,yellow,6)
+            # Rectangular stone slabs with staggered joints, rather than a square grid.
+            for row in range(41):
+                y=10.2+row*.9;lo=11.8 if y<11.8 else 9.25
+                spans=[(lo,47)] if not(sx==1 and sy==-1 and 13.4<y<24.6) else [(lo,16.6),(25.4,47)]
+                for a,b in spans:box((sx*(a+b)/2,sy*y,.088),(b-a,.012,.008),concrete)
+                for col in range(21):
+                    x=lo+col*1.8+(row%2)*.9
+                    hole=sx==1 and sy==-1 and 16.6<x<25.4 and 12.5<y<24.6
+                    if x<46.9 and not hole:box((sx*x,sy*(y+.44),.088),(.012,.88,.008),concrete)
+    # Paint is clipped into disjoint bands where straight and diagonal routes meet.
+    def clip(poly,a,b,c):
+        result=[]
+        for p,q in zip(poly,poly[1:]+poly[:1]):
+            fp=a*p[0]+b*p[1]-c;fq=a*q[0]+b*q[1]-c
+            if fp>=0:result.append(p)
+            if (fp>=0)!=(fq>=0):
+                t=fp/(fp-fq);result.append((p[0]+t*(q[0]-p[0]),p[1]+t*(q[1]-p[1])))
+        return result
+    def marking(poly):
+        # 25 mm clearance survives Draco quantization and distant depth testing.
+        if len(poly)>=3:g.mesh([(x,y,.030) for x,y in poly],[tuple(range(len(poly)))],paint)
     for i in range(-9,10):
-        p=i*.63;box((p,p,.011),(.45,2.6,.01),paint,math.pi/4)
-    for i in range(15,47,5):
-        for s in [-1,1]:box((s*2.2,s*i,.007),(.10,2,.008),paint);box((s*i,s*2.2,.007),(2,.10,.008),paint)
+        for s in [-1,1]:
+            for swap in [False,True]:
+                x=i*.94;y=s*11.25
+                poly=[(x-.29,y-1.8),(x+.29,y-1.8),(x+.29,y+1.8),(x-.29,y+1.8)]
+                if swap:poly=[(v,u) for u,v in poly][::-1]
+                # Reserve the diagonal band continuously to its chamfered curb.
+                marking(clip(poly,1,-1,2.08));marking(clip(poly,-1,1,2.08))
+    for i in range(-15,16):
+        p=i*.68;co=math.sqrt(.5)
+        poly=[(p+(a-b)*co,p+(a+b)*co) for a,b in [(-.27,-2.08),(.27,-2.08),(.27,2.08),(-.27,2.08)]]
+        marking(clip(clip(poly,1,1,-20.77),-1,-1,-20.77))
+    for i in range(19,117,5):
+        mat=paint if i<47 else district_paint
+        for s in [-1,1]:
+            if (s==1 and i<61) or (s==-1 and i<108):box((s*2.2,s*i,.030),(.10,2,.008),mat)
+            box((s*i,s*2.2,.030),(2,.10,.008),mat)
     for s in [-1,1]:
-        box((0,s*13,.009),(7,.18,.01),paint)
-        box((s*13,0,.009),(.18,7,.01),paint)
+        box((s*4.5,s*14.1,.030),(8.1,.32,.005),paint)
+        box((s*14.1,-s*4.5,.030),(.32,8.1,.005),paint)
+        # Painted edge lines, repaired seams, drains and utility covers.
+        for k in [-1,1]:
+            box((k*8.75,s*30,.030),(.12,30,.004),yellow)
+            box((s*30,k*8.75,.030),(30,.12,.004),yellow)
+        for y in [17,28,40]:
+            box((s*8.65,s*y,.008),(.38,.86,.009),drain)
+            for j in range(7):box((s*8.65,s*y-.35+j*.11,.014),(.29,.037,.005),metal)
+    for x,y,r in [(-6,-23,.44),(6,19,.40),(-25,5,.38),(28,-4,.46)]:
+        g.rod((x,y,.006),(x,y,.012),r,drain,32)
+        for j in range(-3,4):box((x,y+j*.09,.017),(math.sqrt(max(.01,r*r-(j*.09)**2))*1.6,.023,.006),trim)
+    for x,y,w,d in [(-6,-31,2.7,4.5),(5,26,2.4,3.2),(-32,5,4.1,2.2),(31,-6,3.4,2.1)]:box((x,y,.0065),(w,d,.002),patch)
 
 def station():
     x,y=21,-18
@@ -227,22 +439,27 @@ def station():
     for xx in [16.8,25.2]:
         box((xx,y,-.2),(.32,6.3,3.7),stone)
         g.rod((xx,-21.1,.9),(xx,-15.3,.9),.05,trim)
-        g.rod((xx,-21,0),(xx,-21,3.4),.10,metal,8)
-    box((x,y,3.49),(9.1,6.6,.20),metal)
-    sign('JR   渋谷駅',x,-21.35,2.84,8.9,1.12,green,.82,japanese=True)
-    g.text('Shibuya Station',(x,-21.51,2.43),.28,white,font=font)
-    obstacle(x,-18,8.9,6.6,3.6)
+        box((xx,-21,.95),(.48,.55,2.1),granite)
+        box((xx,-21,3.1),(.48,.55,2.2),granite)
+    box((x,y,4.29),(9.1,6.6,.25),roofing)
+    sign('JR   渋谷駅',x,-21.35,3.55,8.9,1.27,green,.89,japanese=True)
+    g.text('Shibuya Station',(x,-21.51,3.09),.29,white,font=font)
+    for xx in [18,21,24]:box((xx,-19,4.11),(.95,.42,.06),lamp)
+    obstacle(x,-18,8.9,6.6,4.5)
 
 def streets():
-    for x,y,s in [(-11.4,15,.9),(-11.6,25,1),(-11.5,37,.9),(11.5,16,.95),(11.6,31,1.1),(11.8,43,1),(-11.5,-15,.95),(-11.6,-29,1.1),(11.5,-13,1.0),(11.7,-32,1.1),(-25,-11.5,.95),(-36,-11.5,1),(33,-11.4,1),(41,11.5,.9),(-31,10.7,.85)]:tree(x,y,s)
+    for x,y,s in [(-12.2,14,.9),(-11.8,44,.95),(12.6,13.3,.85),(11.8,43,1),(-11.5,-16,.95),(-11.6,-29,1.1),(12.9,-14,1.0),(11.7,-32,1.1),(-28,-11.5,.95),(-38,-11.5,1),(33,-11.4,1),(42,10.7,.9),(-31,10.7,.85)]:tree(x,y,s)
     for sx in [-1,1]:
         for sy in [-1,1]:
-            signal(sx*10.1,sy*10.1)
+            signal(sx*12.7,sy*10.15)
             for y in [18,29,40]:lamp_post(sx*9.6,sy*y)
             for y in range(14,45,4):
                 g.rod((sx*9.6,sy*y,.1),(sx*9.6,sy*y,.75),.068,metal)
                 if y<41:g.rod((sx*9.6,sy*y,.62),(sx*9.6,sy*(y+4),.62),.026,metal)
-    shelter(-19,-11.3);bench(-31,-12.2);bench(32,-12)
+    shelter(-22,-12.1);obstacle(-22,-12.1,5.5,1.9,3.0)
+    bench(-31,-12.2);bench(32,-12)
+    for x,y,w,d in [(-34,-14,4.3,1.2),(-30,-29,5.4,1.4),(-16,-31,5.2,1.2),(-31,-38,4.5,1.3),(30,-29,5,1.3),(37,-13,4,1.2),(14.8,13.8,1.2,2.3)]:planter(x,y,w,d)
+    for x,y in [(-30,-26.5),(-16,-28.5),(31,-26.5)]:bench(x,y);obstacle(x,y,2.0,.72,1.2)
     for x in [-30,-28.5,-27]:
         box((x,11.65,1.06),(1.25,.74,2.05),red)
         g.panel((x,11.27,1.3),1.02,1.03,warm[2])
@@ -253,51 +470,233 @@ def streets():
         box((x,y,.7),(.63,.62,1.3),metal);box((x,y-.32,1.12),(.46,.04,.20),black)
         sign('MAP',x+.68,y,1.49,.67,1.12,blue,.26)
 
+def taiseido():
+    """Small Center-gai bookshop: white tile, blue/red wrap fascia and open racks.
+
+    Primary exterior/location references are recorded in assets/references.
+    The low-rise silhouette and sign treatment are intentionally unlike the
+    generic office generator. Dimensions are estimated for the concept scale.
+    """
+    x,y,w,d,h=-54,20,10,16,18
+    front=y-d/2
+    obstacle(x,y,w,d,h)
+    footprint(x,y,w,d,2.0,.1,h,porcelain)
+    for z in [3.25,6.55,9.8,13.1,16.4,18]:
+        footprint(x,y,w+.08,d+.08,2.0,z,.12,silver)
+    # Tile joints, narrow upper windows and the low shop entrance.
+    for z in np.arange(.6,18,.55):box((x,front-.018,float(z)),(w-.15,.025,.018),stone)
+    for dx in [-3.5,-1.75,0,1.75,3.5]:
+        box((x+dx,front-.024,9),(.016,.025,17.8),stone)
+        for z in [8.2,11.5,14.8]:g.panel((x+dx,front-.05,z),1.18,1.6,blueglass)
+    for dx in [-3,0,3]:
+        g.panel((x+dx,front-.08,1.55),2.15,2.7,warm[1])
+        if dx==0:g.panel((x,front-.12,1.45),1.6,2.6,black)
+        else:
+            for row in range(4):
+                box((x+dx,front-.4,.45+row*.48),(1.8,.40,.07),metal)
+                for col in range(6):box((x+dx-.71+col*.28,front-.45,.62+row*.48),(.22,.07,.30),books[(row+col)%4])
+    # Letter colors and red inset border match the shop's own exterior photo.
+    for xx,yy,angle,span,body in [(x,front-.16,0,9.2,'大盛堂書店'),(x+w/2+.04,y-2,math.pi/2,9.0,'大盛堂書店')]:
+        box((xx,yy,4.85),(span+.1,.16,2.75),blue,angle)
+        g.panel((xx+math.sin(angle)*.10,yy-math.cos(angle)*.10,4.85),span-.14,2.51,brandred,angle)
+        g.panel((xx+math.sin(angle)*.12,yy-math.cos(angle)*.12,4.85),span-.28,2.35,porcelain,angle)
+        g.text(body,(xx+math.sin(angle)*.14,yy-math.cos(angle)*.14,4.9),1.70,blue,angle,jp)
+    sign('TAISEIDO  BOOKS',x,front-.2,3.25,9.4,.40,blue,.29)
+    roof_detail(x,y,w,d,h,1)
+
+
+def magnet():
+    """MAGNET: ceramic horizontal wing + taller blue-glass corner and big board."""
+    x,y,w,d,h=70,25,22,28,34
+    front=y-d/2
+    obstacle(x,y,w,d,h)
+    # The white wing ends where the glass tower starts. Overlapping solids here
+    # used to leave coplanar white/glass front faces shimmering down the middle.
+    box((x-6,y,13.8),(10,d,27.6),porcelain)
+    for z in [6.8,10.1,13.4,16.7,20,23.3]:
+        g.panel((x-6,front-.055,z),9.2,.54,blueglass)
+        g.panel((x-11.05,y,z),d-.7,.54,blueglass,-math.pi/2)
+    for z in np.arange(.8,27.5,.8):
+        box((x-6,front-.022,float(z)),(9.8,.026,.015),stone)
+        box((x-11.02,y,float(z)),(.026,d-.2,.015),stone)
+    for xx in np.arange(x-10.5,x-1,.8):box((float(xx),front-.026,15),(.014,.026,24),stone)
+    for yy in np.arange(front+.5,y+d/2,.8):box((x-11.025,float(yy),15),(.026,.014,24),stone)
+    # Taller glazed square tower at the station-facing corner; stepped crown.
+    box((x+5,y-3,h/2),(12,d-6,h),blueglass)
+    box((x+2,y+11,15.5),(6,6,31),blueglass)
+    for zz in np.arange(1.8,h,1.8):
+        box((x+5,front-.035,float(zz)),(12,.065,.055),silver)
+        box((x+11.035,y-3,float(zz)),(.065,d-6,.055),silver)
+    for xx in np.arange(x-.9,x+11,1.5):box((float(xx),front-.04,17),(.055,.065,34),silver)
+    for yy in np.arange(front+.8,y+8,1.5):box((x+11.04,float(yy),17),(.065,.055,34),silver)
+    # Deep rectangular advertising frame on the glass tower, and small lower screen.
+    box((x+5,front-.55,20),(9.6,.95,17.2),metal)
+    g.panel((x+5,front-1.04,20),8.7,16.25,cladding[0])
+    g.panel((x+5,front-1.065,19),7.4,5.7,blueglass)
+    sign('MAGNET',x+5,front-1.12,26.3,8.0,1.2,metal,.91)
+    g.text('by SHIBUYA109',(x+5,front-1.28,25.25),.47,white,font=font)
+    sign('SHIBUYA',x+5,front-1.1,19.5,7.1,3.3,blue,.9)
+    sign('MAGNET',x-6,front-.18,3.65,9.3,.8,metal,1.0)
+    # Roof viewing terrace, open steel safety fence and glazed corner lookout.
+    box((x-6,y,27.7),(9.6,d-.6,.20),roofing)
+    for yy in [front+.25,y+d/2-.25]:
+        g.rod((x-10.6,yy,28.8),(x-1.4,yy,28.8),.04,metal)
+        for xx in np.arange(x-10.6,x-1.3,.5):g.rod((float(xx),yy,27.7),(float(xx),yy,28.8),.02,metal,5)
+    for yy in np.arange(front+.25,y+d/2,.6):g.rod((x-10.6,float(yy),27.7),(x-10.6,float(yy),28.8),.02,metal,5)
+    for xx in [x-8,x-5]:g.panel((xx,front+.35,28.35),2.7,1.25,glass)
+    for xx in [x-8,x-5,x-2]:
+        g.panel((xx,front-.10,1.5),2.55,2.6,glass)
+        box((xx,front+.55,1.4),(2.4,.10,2.6),warm[1])
+    for xx in [x+1,x+9]:g.rod((xx,y+5,34),(xx,y+5,36),.04,metal)
+
+
+def mark_city():
+    """Mark City's long shopping podium, slimmer East hotel and taller West office."""
+    x,y=-78,-36
+    box((x,y,3.1),(58,22,6.2),porcelain);obstacle(x,y,58,22,6.2)
+    for sy in [-1,1]:
+        yy=y+sy*11
+        for xx in np.arange(-105,-49,2.4):
+            g.panel((float(xx),yy+sy*.05,3.15),2.3,4.8,hotelglass,0 if sy<0 else math.pi)
+            box((float(xx)-1.18,yy,3.2),(.13,.25,6.0),silver)
+        box((x,yy,6.1),(58,.35,.30),silver)
+    # Towers are modeled separately, preserving the two distinct proportions.
+    for tx,ty,w,d,h,hotel in [(-59,-33,18,20,57,True),(-94,-36,22,22,70,False)]:
+        box((tx,ty,(h+6.3)/2),(w,d,h-6.3),hotelglass);obstacle(tx,ty,w,d,h)
+        floors=25 if hotel else 23;step=(h-6.3)/floors
+        for i in range(floors+1):
+            zz=6.3+i*step
+            box((tx,ty,zz),(w+.14,d+.14,.13),silver)
+            if hotel:
+                for sy in [-1,1]:box((tx,ty+sy*(d/2+.035),zz+.52),(w-.10,.08,.82),porcelain)
+        for sx in [-1,1]:
+            for yy in np.arange(ty-d/2+.65,ty+d/2,1.3):box((tx+sx*(w/2+.06),float(yy),(h+6.3)/2),(.10,.075,h-6.3),silver)
+        for sy in [-1,1]:
+            for xx in np.arange(tx-w/2+.65,tx+w/2,1.3):box((float(xx),ty+sy*(d/2+.06),(h+6.3)/2),(.075,.10,h-6.3),silver)
+            if hotel:
+                # Solid center strip and narrow glass edge piers on the hotel.
+                box((tx,ty+sy*(d/2+.12),32),(w*.34,.22,51),porcelain)
+                for zz in np.arange(8,56,step):g.panel((tx,ty+sy*(d/2+.25),float(zz)),w*.29,step*.58,hotelglass,0 if sy<0 else math.pi)
+        box((tx,ty,h+1.35),(w*.76,d*.72,2.7),silver)
+        for zz in np.arange(h+.15,h+2.7,.38):box((tx,ty-d*.36-.02,float(zz)),(w*.76,.05,.04),metal)
+        if hotel:
+            box((tx,ty,h+4.0),(w*.35,d*.45,2.6),silver)
+            g.rod((tx,ty,h+4),(tx,ty,h+8.0),.055,metal)
+    sign('SHIBUYA MARK CITY',-76,-47.2,4.6,33,1.3,metal,1.25)
+    sign('SHIBUYA MARK CITY',-76,-24.8,4.6,33,1.3,metal,1.25,math.pi)
+    sign('EAST MALL',-49,-33,4.5,14,1.0,metal,.80,math.pi/2)
+
+
+def station_deck():
+    """Covered second-level station walkway, derived from the west-side network.
+
+    This is a compressed scenic connection, outside the scramble and traffic
+    envelope. Only its ground piers/stair flights receive movement colliders.
+    """
+    # One continuous L/U outline avoids overlapping deck/roof faces at elbows.
+    def outline(r):
+        return [(-48.4-r,-33),(-48.4-r,-48-r),(21+r,-48-r),(21+r,-44),
+                (21-r,-44),(21-r,-48+r),(-48.4+r,-48+r),(-48.4+r,-33)]
+    edge=outline(2.1)
+    prism(edge,5.54,.42,silver)
+    prism(edge,5.96,.055,deck_paving)
+    prism(outline(2.225),8.66,.16,silver)
+    for a,b in zip(edge,edge[1:]+edge[:1]):
+        # Open mouths at the shopping podium and station stairs.
+        if a[1]==b[1] and a[1] in [-33,-44]:continue
+        angle=math.atan2(b[1]-a[1],b[0]-a[0]);length=math.dist(a,b)
+        for zz in [6.14,7.13]:g.rod((*a,zz),(*b,zz),.045,metal)
+        g.panel(((a[0]+b[0])/2,(a[1]+b[1])/2,6.65),length,1.0,glass,angle)
+    def span(a,b):
+        ax,ay=a;bx,by=b;length=math.dist(a,b);angle=math.atan2(by-ay,bx-ax)
+        nx,ny=-math.sin(angle),math.cos(angle);cx,cy=(ax+bx)/2,(ay+by)/2
+        for i in range(max(1,int(length/5.7))+1):
+            t=i/max(1,int(length/5.7));xx=ax+(bx-ax)*t;yy=ay+(by-ay)*t
+            for side in [-1,1]:g.rod((xx+nx*side*1.88,yy+ny*side*1.88,5.98),(xx+nx*side*1.88,yy+ny*side*1.88,8.7),.052,silver)
+            box((xx,yy,8.61),(.22,4.05,.16),metal,angle)
+            box((xx,yy,8.48),(.4,1.2,.035),lamp,angle)
+        for t in [.08,.50,.92]:
+            xx=ax+(bx-ax)*t;yy=ay+(by-ay)*t
+            # Keep the extended road center free even beneath the bridge.
+            if abs(xx)<10:continue
+            g.rod((xx,yy,.1),(xx,yy,5.55),.30,porcelain,12)
+            obstacle(xx,yy,.65,.65,5.55)
+    span((-48.4,-33),(-48.4,-48))
+    span((-48.4,-48),(21,-48))
+    span((21,-48),(21,-44))
+    # Two rising stair flights with a landing and parallel stainless handrails.
+    for i in range(32):
+        yy=-32-(i+.5)*.375;top=(i+1)*.1875
+        box((21,yy,top/2),(3.7,.38,top),deck_paving)
+        box((21,yy+.15,top+.015),(3.6,.065,.025),deck_yellow)
+    for xx in [19.2,21,22.8]:
+        g.rod((xx,-32,1.0),(xx,-44,7.0),.045,trim)
+        for i in range(9):
+            yy=-32-i*1.5;zz=i*.75
+            g.rod((xx,yy,zz),(xx,yy,zz+1.0),.035,trim)
+    obstacle(21,-38,3.8,12,6.1)
+    sign('渋谷駅   SHIBUYA STATION  →',-13,-50.15,6.62,20,.60,green,.50,japanese=True)
+    sign('←  MARK CITY',-30,-50.15,6.62,10,.60,metal,.49)
+
+
 def city():
     ground()
-    building(20,23,19,22,29,'TSUTAYA',True)
-    building(37,19.5,12,14,18,'STARBUCKS')
-    building(-24,22,14,20,23,'BIG ECHO')
-    building(-38,22,10,18,20,'BOOKS & COFFEE')
-    building(-12.8,36,9,12,24,'SHIBUYA 109')
-    # The 109 landmark is a cylindrical tower, with horizontal rings and a neon crown.
-    g.rod((-13.2,34,5),(-13.2,34,32.3),4.2,stone,48)
-    for z in np.arange(7,33,2.5):g.rod((-13.2,34,float(z)),(-13.2,34,float(z)+.055),4.25,trim,48)
-    g.text('SHIBUYA',(-13.2,29.72,30.2),1.04,pink,font=font)
-    g.text('109',(-13.2,29.70,27.95),3.2,pink,font=font)
-    building(-1.0,31,7.6,9,26,'TOKYO RECORDS')
-    building(9.0,39,8.2,13,27,'H&M')
-    building(-28,43,15,12,29)
-    building(35,40,17,16,30)
-    building(-40,-33,10,17,13,'SHIBUYA  /  MUSIC')
-    building(41,-37,10,14,12,'TOKYO MARKET')
-    for x in [-40,-20,0,20,40]:building(x,53,13,8,random.randint(17,28))
+    tx,tf=tsutaya()
+    building(43,20,10,15,19.3,'STARBUCKS',style=2)
+    building(-27,22,17,20,25,'BIG ECHO',style=0)
+    building(-41,23,9,21,21,'BOOKS & COFFEE',style=1)
+    building(-15.5,23,5.4,12,18,'牛かつ',style=3)
+    tower_109()
+    # Both sides flank an unobstructed 18 m road all the way to the map boundary.
+    building(13,22.5,7.4,11,29,'TOKYO RECORDS',style=3)
+    building(-26,40,8.5,11,29,'H&M',style=0)
+    building(-38,44,12,10,31,style=2)
+    building(31,43,16,12,29,style=3)
+    building(-40,-30,12,22,15,'SHIBUYA  /  MUSIC',style=1)
+    building(42,-36,10,17,14,'TOKYO MARKET',style=0)
+    building(-30,-39,7,8,5.8,'交番  KOBAN',style=3)
+    for x,w,h,y in [(-43,8,24,57),(-30,11,35,57),(-16,10,23,53),(16,10,34,54),(31,13,38,58),(45,9,27,55)]:building(x,y,w,8,h,style=int(abs(x))%4)
+    # A distant cross street and staggered skyline close the view beyond the
+    # playable area; the taxi/bus corridor remains completely clear to its exit.
+    for x,w,h,y in [(-28,10,27,75),(-15,12,35,82),(0,13,22,88),(15,11,31,80),(28,12,25,75)]:building(x,y,w,9,h,style=int(abs(x)+1)%4)
     anime=artwork('Concept anime billboard',[(174,188),(367,121),(370,317),(185,366)],768,768)
     cat=artwork('Concept cat billboard',[(689,241),(796,232),(797,302),(690,308)],512,384)
     cityposter=artwork('Concept brighter tomorrow',[(847,163),(1030,201),(1032,351),(848,310)],768,768)
-    screen(-24,11.71,16.5,12.9,9.3,anime)
-    sign('カラオケ',-24,11.50,10.15,12.9,1.44,red,1.05,japanese=True)
-    sign('BIG ECHO',-24,11.50,8.55,12.9,1.53,red,1.28)
-    screen(18.7,11.63,19.9,16,10.1,cityposter)
-    sign('SHIBUYA PEOPLE CULTURE',19.0,11.49,26.2,16.5,.9,metal,.57)
-    screen(-1,26.28,17.4,6.9,4.4,cat)
-    sign('DHC',-1,26.1,20.36,7,1.35,blue,1.07)
-    sign('サロンパス',-1,26.1,23.07,7,2.75,green,1.16,japanese=True)
-    sign('Hisamitsu',-1,26.1,25.34,7,1.28,blue,.90)
-    sign('DAM',-1,26.12,12.85,7,3.95,metal,1.48)
-    sign('UNIQLO',-13,29.18,20.8,7.6,2.45,red,1.10)
-    sign('H&M',9,32.35,23.4,7.7,4.7,cream,2)
-    for x,y,z,body,mat in [(-31.25,11.38,10.5,'も\nっ\nと\n好\nき\nな\n渋\n谷\nを',blue),(-16.6,11.45,12,'カ\nラ\nオ\nケ',red),(9.91,11.41,11.3,'T\nS\nU\nT\nA\nY\nA',blue),(30.21,12.12,12,'渋\n谷\n書\n店',pink),(-5.2,26.05,17.3,'も\nん\nじ\nゃ',cream),(-37,12.61,9,'珈\n琲',red)]:
+    portrait=artwork('Concept DAM portrait',[(692,312),(765,311),(767,376),(691,374)],512,512)
+    curved_screen(-27,10.75,18.3,16.2,10.6,anime,1.10)
+    sign('カラオケ',-27,11.30,11.55,15.8,1.65,red,1.25,japanese=True)
+    sign('BIG ECHO',-27,11.30,9.64,15.8,1.95,red,1.68)
+    curved_screen(tx,tf-.23,22.4,18.8,10.2,cityposter,2.10)
+    # Separate architectural campaign panel wraps the building's right elevation.
+    sign('SHIBUYA\nPEOPLE\nCULTURE\nALWAYS\nMOVES\nFORWARD',37.20,23.8,21.6,12.1,14.4,cladding[0],1.10,math.pi/2)
+    g.rod((37.34,18.4,14.8),(37.34,28.7,23.4),.085,pink,6)
+    screen(13,16.70,18.8,6.9,4.7,cat)
+    sign('DHC',13,16.53,21.94,7,1.35,blue,1.07)
+    sign('サロンパス',13,16.53,24.52,7,2.75,green,1.16,japanese=True)
+    sign('Hisamitsu',13,16.53,27.0,7,1.6,blue,1.04)
+    screen(13,16.68,13.4,6.9,4.85,portrait)
+    sign('DAM',13,16.46,11.12,6.9,.70,metal,.68)
+    screen(-26,34.3,25,7.7,4.7,cream)
+    g.text('H&M',(-26,34.09,25),2.2,brandred,font=font)
+    for x,y,z,body,mat in [(-36.2,12.18,12,'も\nっ\nと\n好\nき\nな\n渋\n谷\nを',blue),(-18.4,11.45,13,'カ\nラ\nオ\nケ',red),(16.0,14.5,11.9,'T\nS\nU\nT\nA\nY\nA',blue),(38.2,12.12,12,'渋\n谷\n書\n店',pink),(8.85,16.55,18.1,'も\nん\nじ\nゃ',cream),(-41.2,12.31,9,'珈\n琲',red)]:
         sign(body,x,y,z,1.25,10.5,mat,.80,japanese=True)
-    for x,y,z,body,mt in [(-40.5,12.68,11,'音\n楽\n館',pink),(-34.5,12.68,15,'映\n画',blue),(-15.1,15,6.2,'牛\nか\nつ',red),(-6.1,28,8,'東\n京\n食\n堂',lamp),(3.0,26.13,11,'レ\nコ\nー\nド',blue),(6.0,32.2,16,'フ\nァ\nッ\nシ\nョ\nン',red),(32,12.25,8,'本\nと\n珈\n琲',green),(43.3,12.25,11,'渋\n谷\n散\n歩',blue)]:
+    for x,y,z,body,mt in [(-44.6,12.18,12,'音\n楽\n館',pink),(-37.2,12.18,16,'映\n画',blue),(-12.6,16.7,8,'牛\nか\nつ',red),(-17.3,16.7,8,'東\n京\n食\n堂',lamp),(17.0,16.63,13,'レ\nコ\nー\nド',blue),(-21.5,34.2,18,'フ\nァ\nッ\nシ\nョ\nン',red),(39,12.25,8,'本\nと\n珈\n琲',green),(47.3,12.25,11,'渋\n谷\n散\n歩',blue)]:
         sign(body,x,y,z,.86,6,mt,.60,japanese=True)
     # Small secondary signs and lanterns make the ground-level rhythm less uniform.
-    for x,y in [(-21,11.2),(-34,12.6),(33,12.1),(40,12.1)]:
+    for x,y in [(-23,11.2),(-40,12.2),(22,12.4),(43,12.1)]:
         sign('OPEN  /  COFFEE',x,y,4.68,3.8,.65,green,.32)
         for dx in [-1.1,0,1.1]:
             g.rod((x+dx,y-.5,3.65),(x+dx,y-.5,4.17),.18,lamp,12)
             box((x+dx,y-.5,4.18),(.25,.25,.08),metal)
+    # Starbucks has its own timber fascia, a coffee counter and upstairs bar seating.
+    for xx in [39.6,41.3,43,44.7,46.4]:
+        box((xx,13.03,4.03),(1.1,.5,.11),wood)
+        g.rod((xx,13.55,3.07),(xx,13.55,3.77),.12,metal,8)
+        g.rod((xx,13.55,3.77),(xx,13.55,3.89),.23,wood,12)
+    box((43,14.1,1.1),(6.4,.8,1.05),wood)
+    for xx in [41.5,43,44.5]:box((xx,14.1,1.82),(.62,.43,.43),metal)
     station();streets()
+    taiseido();magnet();mark_city();station_deck()
 
 def setup_lights():
     s=bpy.context.scene;s.render.engine='CYCLES';s.cycles.samples=48;s.cycles.use_denoising=True
@@ -314,10 +713,10 @@ def setup_lights():
 
 city();objects=g.flush()
 for o in objects:
-    if 'Glazing' in o.name or 'Crosswalk' in o.name:o.visible_shadow=False
+    if 'Glazing' in o.name or o.data.materials[0].get('surface_role')=='road-marking':o.visible_shadow=False
 setup_lights()
 g.export(ROOT/'public/models/crossing.glb',objects)
-metadata={'id':'crossing','name':'Shibuya Crossing','spawn':[0,0,13],'bounds':[-45,45,-45,45],'colliders':colliders,'artRevision':3}
+metadata={'id':'crossing','name':'Shibuya Crossing','spawn':[0,0,16],'bounds':[-114,114,-118,104],'colliders':colliders,'artRevision':6,'roadHalfWidth':9,'crossingCenter':11.25,'cornerChamfer':2.8,'terrainBounds':[-120,120,-125,110],'landmarks':['Taiseido Bookstore','MAGNET by SHIBUYA109','Shibuya Mark City East','Shibuya Mark City West'],'districtScale':'Concept-scale dimensions and compressed distances; see assets/references/shibuya-landmarks.md','pedestrianDeck':{'scenic':True,'height':6.0,'roadClearance':5.54}}
 # Moving traffic owns its current collision volumes in lib/game/traffic.ts.
 (ROOT/'public/models/crossing.json').write_text(json.dumps(metadata,indent=2),encoding='utf8')
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets/blender/crossing.blend'),compress=True)
@@ -327,5 +726,5 @@ try:
     for d in prefs.devices:d.use=d.type=='OPTIX'
     s.cycles.device='GPU'
 except Exception:pass
-bpy.ops.render.render(write_still=True)
+if '--skip-render' not in sys.argv:bpy.ops.render.render(write_still=True)
 print('CONCEPT_SCENE_COMPLETE',len(objects),'objects',sum(len(o.data.polygons) for o in objects),'faces',flush=True)

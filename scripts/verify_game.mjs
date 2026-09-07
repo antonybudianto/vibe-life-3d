@@ -3,6 +3,7 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
 import zlib from 'node:zlib';
+import * as THREE from 'three';
 
 const source = fs.readFileSync('lib/game/physics.ts', 'utf8');
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
@@ -53,16 +54,26 @@ for (const name of ['character','crossing','park','car','motorcycle','pedestrian
     const baked=json.materials.filter(m=>m.occlusionTexture);
     assert.ok(baked.length >= (name==='crossing' ? 4 : 6),`${name} includes genuine AO textures`);
     if(name==='crossing') {
+      for (const name of ['Crosswalk ivory paint','District road paint']) {
+        assert.equal(json.materials.find(m=>m.name===name)?.extras?.surface_role,'road-marking','Compressed road paint preserves decal semantics');
+      }
       const vertexBaked = json.materials.filter(m=>m.extras?.bake_mode?.includes('Cycles color attribute'));
       assert.ok(vertexBaked.length>=20,'Detailed street props use Cycles vertex bakes');
       for(const mesh of json.meshes) for(const p of mesh.primitives) if(json.materials[p.material]?.extras?.bake_mode) assert.ok(p.attributes.COLOR_0!==undefined,'Vertex bake is exported');
       const coverage=JSON.parse(fs.readFileSync('assets/bakes/crossing.json','utf8'));
       assert.ok(coverage.vertexBakes.every(b=>b.minimum>.001&&b.corners>0),'Every baked corner has a valid color');
       assert.ok(coverage.aoStd>.03&&coverage.lightmapMaximum>.01,'Street AO and irradiance are nonuniform Cycles bakes');
-      for(const material of ['Rain-dark asphalt','Pavement stone']) {
+      for(const material of ['Rain-dark asphalt','Pavement stone','District asphalt','District paving']) {
         const m=json.materials.find(m=>m.name===material);
         assert.ok(m.normalTexture&&m.pbrMetallicRoughness.baseColorTexture&&m.pbrMetallicRoughness.metallicRoughnessTexture,'Street aggregate has PBR textures');
       }
+      const core=json.materials.find(m=>m.name==='Rain-dark asphalt');
+      const outer=json.materials.find(m=>m.name==='District asphalt');
+      // Compare exported image sources: exporters may use separate texture
+      // records for the same image when UV sets/samplers differ.
+      const textureSource=t=>{const v=json.textures[t.index];return v.extensions?.EXT_texture_webp?.source??v.source;};
+      assert.equal(textureSource(core.pbrMetallicRoughness.baseColorTexture),textureSource(outer.pbrMetallicRoughness.baseColorTexture),'All asphalt shares one weathering image');
+      assert.equal(textureSource(core.occlusionTexture),textureSource(outer.occlusionTexture),'Street lighting is continuous across the old map boundary');
     }
     for(const mesh of json.meshes) for(const primitive of mesh.primitives) {
       if(json.materials[primitive.material]?.occlusionTexture) {
@@ -103,6 +114,43 @@ vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/game/pedestrians.ts',
 const {PedestrianSimulation}=pedestrianContext.exports;
 const map=JSON.parse(fs.readFileSync('public/models/crossing.json','utf8'));
 const landmark=JSON.parse(fs.readFileSync('public/models/hachiko.json','utf8'));
+// Exercise the actual World movement update in all four user-facing modes.
+// Skip only WebGL construction; imported movement and camera math remain real.
+const worldContext={exports:{},Math,Set,Map,require:(name)=>name==='three'?THREE:name==='./physics'?context.exports:name==='./camera'?cameraContext.exports:{}};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/game/world.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,worldContext);
+const {World}=worldContext.exports;
+for(const mode of ['walk','run','motorcycle','car']) {
+  for(const route of [
+    {name:'left',x:-40,z:4.5,heading:-Math.PI/2,yaw:Math.PI/2,axis:'x',end:-100},
+    {name:'right',x:40,z:-4.5,heading:Math.PI/2,yaw:-Math.PI/2,axis:'x',end:100},
+    {name:'front',x:-4.5,z:40,heading:0,yaw:Math.PI,axis:'z',end:96},
+    {name:'rear approach',x:4.5,z:-40,heading:Math.PI,yaw:0,axis:'z',end:-58},
+    {name:'rear side street',x:53,z:-40,heading:Math.PI,yaw:0,axis:'z',end:-65},
+  ]) {
+    const world=Object.create(World.prototype);
+    Object.assign(world,{data:{...map,colliders:[...map.colliders,...landmark.colliders]},character:{},paused:false,
+      status:{loading:false,error:null},keys:new Set(['KeyW']),joystick:{x:0,y:0},
+      player:new THREE.Vector3(route.x,0,route.z),travel:mode==='run'?'walk':mode,running:mode==='run',
+      velocity:0,verticalVelocity:0,heading:route.heading,yaw:route.yaw});
+    const direction=Math.sign(route.end-world.player[route.axis]);
+    let reached=false;
+    for(let frame=0;frame<60*40;frame++) {
+      world.step(1/60);
+      if((world.player[route.axis]-route.end)*direction>=0){reached=true;break;}
+    }
+    assert.ok(reached,`${mode} can enter and traverse the ${route.name} road: ${world.player[route.axis]}`);
+  }
+}
+const outerTraffic=new TrafficSimulation([{model:'taxi',x:52,z:4.5,yaw:Math.PI/2}]);
+assert.equal(outerTraffic.colliders.length,1,'Visible traffic retains collision outside the former boundary');
+console.log('PASS: actual walk/run/ride/drive updates traverse all extended approaches.');
+// A vehicle must be able to traverse both lanes of both streets end to end.
+// This catches the former billboard tower standing in the rear road corridor.
+for(const axis of ['x','z']) for(const lane of [-4.5,4.5]) {
+  let position=axis==='x'?{x:-43,z:lane}:{x:lane,z:-43};
+  for(let i=0;i<344;i++) position=move(position.x,position.z,axis==='x'?.25:0,axis==='z'?.25:0,1.7,[...map.colliders,...landmark.colliders],map.bounds);
+  assert.ok(Math.abs(position[axis]-43)<.001,`${axis} street lane ${lane} stays clear through the entire map`);
+}
 const crowd=new PedestrianSimulation(life.people,[...map.colliders,...landmark.colliders]);
 for(const w of crowd.walkers) {
   assert.ok(crowd.walkers.filter(p=>Math.hypot(w.x-p.x,w.z-p.z)<2.5).length<=5,'Initial crowd is spread across the sidewalks');
@@ -110,6 +158,7 @@ for(const w of crowd.walkers) {
 }
 const sim=new TrafficSimulation(life.vehicles),away={x:40,z:40,radius:.32},phasesSeen=new Set();
 let wrapped=false,last=sim.cars.map(v=>({x:v.x,z:v.z})),minimumMoving=74,crossings=0,largestGroup=0,largestStoppedGroup=0;
+let stoppedCluster=null;
 const motionCounts=Array(74).fill(0);
 for(let i=0;i<60*240;i++) {
   const people=crowd.walkers;
@@ -118,7 +167,10 @@ for(let i=0;i<60*240;i++) {
   if(i%60===0)for(const w of people) {
     const neighbors=people.filter(p=>Math.hypot(w.x-p.x,w.z-p.z)<2.5);
     largestGroup=Math.max(largestGroup,neighbors.length);
-    if(i>120)largestStoppedGroup=Math.max(largestStoppedGroup,neighbors.filter(p=>p.speed<.12).length);
+    if(i>120) {
+      const stopped=neighbors.filter(p=>p.speed<.12);
+      if(stopped.length>largestStoppedGroup){largestStoppedGroup=stopped.length;stoppedCluster={seconds:i/60,walkers:stopped.map(p=>({x:p.x,z:p.z,path:p.path,waiting:p.waiting,region:p.region,stalled:p.stalled}))};}
+    }
   }
   if(i>120) {
     minimumMoving=Math.min(minimumMoving,people.filter(p=>p.speed>.12).length);
@@ -138,6 +190,7 @@ for(let i=0;i<60*240;i++) {
   last=sim.cars.map(v=>({x:v.x,z:v.z}));
 }
 assert.equal(phasesSeen.size,4,'Both roads and pedestrians receive a turn');assert.ok(wrapped,'Cars keep circulating');
+fs.mkdirSync('work',{recursive:true});fs.writeFileSync('work/crowd-check.json',JSON.stringify({minimumMoving,largestStoppedGroup,stoppedCluster},null,2));
 assert.ok(minimumMoving>=52,`Sidewalk life continues during every signal phase (${minimumMoving} moving)`);
 // Passing groups can converge naturally; stationary piles are the regression.
 assert.ok(largestStoppedGroup<=5,`No pile of stopped pedestrians (${largestStoppedGroup} in a 2.5m radius)`);

@@ -135,6 +135,14 @@ export class World {
         for (const m of materials) if (m instanceof THREE.MeshStandardMaterial) {
           m.envMapIntensity = .55;
           if (m.name.includes('Glazing')) { m.depthWrite = false; o.castShadow = false; }
+          const roadPaint = m.userData.surface_role === 'road-marking';
+          const roadRepair = m.name === 'Asphalt repairs';
+          if (roadPaint || roadRepair) {
+            // Thin road overlays need depth bias at maximum zoom. Repairs draw
+            // before paint; depth testing keeps both behind vehicles and people.
+            m.polygonOffset = true; m.polygonOffsetFactor = -2; m.polygonOffsetUnits = -4;
+            m.depthWrite = false; o.renderOrder = roadPaint ? 2 : 1; o.castShadow = false;
+          }
           m.aoMapIntensity = .85;
           if (m.aoMap) m.aoMap.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
           m.userData.baseEmission = m.emissiveIntensity;
