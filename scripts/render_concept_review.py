@@ -11,11 +11,16 @@ meta=json.loads((ROOT/'public/models/crossing-life.json').read_text())
 def append(name):
     with bpy.data.libraries.load(str(ROOT/'assets/blender'/f'{name}.blend'),link=False) as (a,b):b.objects=[n for n in a.objects if n not in ['Studio ground','Camera','Evening sun','Sky bounce']]
     return [o for o in b.objects if o and o.type in ['MESH','EMPTY','FONT']]
+landmark=json.loads((ROOT/'public/models/hachiko.json').read_text());x,y,z=landmark['position']
+for o in append('hachiko'):
+    s.collection.objects.link(o);o.location+=Vector((x,-z,y))
+for xx in [-4.6,4.6]:
+    bpy.ops.object.light_add(type='POINT',location=(x+xx,-z-1.8,3.2));o=bpy.context.object;o.data.energy=150;o.data.color=(1,.48,.2);o.data.shadow_soft_size=.4;o['baked_shop']=True;o['base_power']=150
 crowd=append('pedestrian')
 for i,p in enumerate(meta['people']):
-    a,b=p['a'],p['b'];dx=b[0]-a[0];dz=b[1]-a[1];length=math.hypot(dx,dz);phase=p['offset']*2 if length else 0;t=phase if phase<=1 else 2-phase
-    yaw=math.atan2(dx,dz)+(math.pi if phase>1 else 0) if length else p['offset']*math.tau
-    gait=math.sin(p['offset']*math.pi*8) if length else 0
+    a,b=p['a'],p['b'];dx=b[0]-a[0];dz=b[1]-a[1];length=math.hypot(dx,dz);t=0
+    yaw=math.atan2(dx,dz) if length else p['offset']*math.tau
+    gait=0
     root=Matrix.Translation((a[0]+dx*t,-a[1]-dz*t,.1+abs(gait)*.025))@Matrix.Rotation(yaw,4,'Z')@Matrix.Scale(p['scale'],4)
     for source in crowd:
         o=source.copy();o.data=source.data;s.collection.objects.link(o)

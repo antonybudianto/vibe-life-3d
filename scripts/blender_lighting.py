@@ -31,6 +31,8 @@ def apply_preset(preset='evening'):
         if 'base_emission' not in m:m['base_emission']=node.inputs['Emission Strength'].default_value
         node.inputs['Emission Strength'].default_value=m['base_emission']*p['emission']
     s.view_settings.view_transform='AgX';s.view_settings.exposure=math.log2(p['exposure'])
+    from blender_sky import camera_sky
+    camera_sky(p)
 
 if __name__=='__main__':
     args=sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else []

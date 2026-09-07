@@ -266,46 +266,6 @@
       "height": 7.14,
       "cameraRadius": 2.3375,
       "cameraMinY": 3.7399999999999993
-    },
-    {
-      "x": -4.5,
-      "z": -20,
-      "halfX": 1.225,
-      "halfZ": 3.65,
-      "height": 3.2,
-      "kind": "traffic"
-    },
-    {
-      "x": -4.5,
-      "z": -13.6,
-      "halfX": 0.96,
-      "halfZ": 2.35,
-      "height": 1.9,
-      "kind": "traffic"
-    },
-    {
-      "x": 4.4,
-      "z": 17,
-      "halfX": 0.9600000000000003,
-      "halfZ": 2.35,
-      "height": 1.9,
-      "kind": "traffic"
-    },
-    {
-      "x": -18,
-      "z": 4.4,
-      "halfX": 2.35,
-      "halfZ": 0.9600000000000001,
-      "height": 1.9,
-      "kind": "traffic"
-    },
-    {
-      "x": 22,
-      "z": -4.4,
-      "halfX": 2.35,
-      "halfZ": 0.9600000000000001,
-      "height": 1.9,
-      "kind": "traffic"
     }
   ],
   "artRevision": 3

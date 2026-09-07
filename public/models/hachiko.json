@@ -1,0 +1,56 @@
+{
+  "model": "hachiko",
+  "position": [
+    -20,
+    0,
+    20
+  ],
+  "colliders": [
+    {
+      "x": -20,
+      "z": 20,
+      "halfX": 2.2,
+      "halfZ": 2.2,
+      "height": 3.8
+    },
+    {
+      "x": -23.2,
+      "z": 19,
+      "halfX": 1.08,
+      "halfZ": 0.44,
+      "height": 1.2
+    },
+    {
+      "x": -16.8,
+      "z": 19,
+      "halfX": 1.08,
+      "halfZ": 0.44,
+      "height": 1.2
+    },
+    {
+      "x": -24.2,
+      "z": 16.6,
+      "halfX": 0.8,
+      "halfZ": 0.8,
+      "height": 5.5,
+      "cameraRadius": 1.7,
+      "cameraMinY": 3.5
+    },
+    {
+      "x": -15.8,
+      "z": 16.6,
+      "halfX": 0.8,
+      "halfZ": 0.8,
+      "height": 5.5,
+      "cameraRadius": 1.7,
+      "cameraMinY": 3.5
+    },
+    {
+      "x": -20,
+      "z": 23.5,
+      "halfX": 1.45,
+      "halfZ": 0.13,
+      "height": 1.2
+    }
+  ]
+}

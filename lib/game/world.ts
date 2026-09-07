@@ -10,12 +10,14 @@ import { moveWithCollision, resolveTime, type Collider } from './physics';
 import phases from './lighting.json';
 import { elevatedPitch, zoomDistance } from './camera';
 import { Ambience } from './ambience';
+import { CitySky } from './sky';
 
 export type TravelMode = 'walk' | 'motorcycle' | 'car';
 export type TimeMode = 'day' | 'evening' | 'night' | 'live';
 export type MapId = 'crossing' | 'park';
 export type Status = { loading: boolean; progress: number; map: MapId; x: number; z: number; speed: number; fps: number; clock: string; phase: string; error: string | null };
 type MapData = { id: MapId; name: string; spawn: [number, number, number]; bounds: [number, number, number, number]; colliders: Collider[] };
+type LandmarkData = { model: string; position: [number, number, number]; colliders: Collider[] };
 const INITIAL: Status = { loading: true, progress: 0, map: 'crossing', x: 0, z: 10, speed: 0, fps: 0, clock: '17:30', phase: 'evening', error: null };
 
 export class World {
@@ -30,6 +32,8 @@ export class World {
   vehicles: Partial<Record<TravelMode, THREE.Group>> = {};
   environment: THREE.Group | null = null;
   private ambience: Ambience | null = null;
+  private sky = new CitySky();
+  private movementColliders: Collider[] = [];
   data: MapData | null = null;
   player = new THREE.Vector3(0, 0, 10);
   heading = Math.PI;
@@ -92,6 +96,7 @@ export class World {
     room.dispose(); pmrem.dispose();
     this.scene.background = new THREE.Color(0x8896b8);
     this.scene.fog = new THREE.Fog(0x8896b8, 85, 200);
+    this.scene.add(this.sky.mesh);
     this.sun.position.set(-22, 28, 14);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
@@ -165,6 +170,8 @@ export class World {
 
   private async initialize() {
     try {
+      await this.sky.load();
+      if (!this.alive) return;
       const asset = await this.loader.loadAsync('/models/character.glb', (e) => {
         this.status.progress = e.total ? Math.round(e.loaded / e.total * 25) : 10; this.emit();
       });
@@ -191,7 +198,17 @@ export class World {
       let life: Ambience | null = null;
       try {
         await this.loadBakedLighting(asset.scene);
-        if (id === 'crossing') life = await Ambience.load(this.loader);
+        if (id === 'crossing') {
+          const landmarkData = await fetch('/models/hachiko.json').then((r) => { if (!r.ok) throw new Error('Landmark unavailable'); return r.json() as Promise<LandmarkData>; });
+          const landmark = await this.loader.loadAsync('/models/hachiko.glb');
+          landmark.scene.position.fromArray(landmarkData.position); asset.scene.add(landmark.scene);
+          for (const x of [-4.6, 4.6]) {
+            const lantern = new THREE.PointLight(0xffba73, 12, 7, 2);
+            lantern.position.set(x, 3.2, 1.8); lantern.userData.plazaPower = 12; landmark.scene.add(lantern);
+          }
+          data.colliders.push(...landmarkData.colliders);
+          life = await Ambience.load(this.loader);
+        }
       }
       catch (error) { this.disposeObject(asset.scene); throw error; }
       if (!this.alive || serial !== this.loadSerial) { this.disposeObject(asset.scene); life?.dispose(); return; }
@@ -201,6 +218,7 @@ export class World {
       this.ambience = life;
       if (life) this.scene.add(this.prep(life.group));
       this.environment = next; this.data = data; this.scene.add(next);
+      this.movementColliders = [...data.colliders, ...(life?.traffic.colliders ?? [])];
       this.player.fromArray(data.spawn); this.velocity = 0; this.verticalVelocity = 0; this.heading = Math.PI;
       this.yaw = id === 'crossing' ? .22 : .02;
       this.status.map = id; this.status.loading = false; this.status.progress = 100;
@@ -223,7 +241,7 @@ export class World {
     this.lastPhase = ''; this.applyTime();
     // A larger vehicle cannot spawn inside a wall when changing from walking.
     if (this.data) {
-      const p = moveWithCollision(this.player.x, this.player.z, 0, 0, this.radius(), this.data.colliders, this.data.bounds);
+      const p = moveWithCollision(this.player.x, this.player.z, 0, 0, this.radius(), this.movementColliders, this.data.bounds);
       this.player.x = p.x; this.player.z = p.z;
     }
     for (const [name, object] of Object.entries(this.vehicles)) object!.visible = name === mode;
@@ -297,6 +315,7 @@ export class World {
     const a = phases[p.phase], b = phases[p.next]; const t = p.blend;
     const sky = new THREE.Color(a.sky).lerp(new THREE.Color(b.sky), t);
     this.scene.background = sky;
+    this.sky.setTime(p.phase, p.next, t);
     (this.scene.fog as THREE.Fog).color.copy(sky);
     this.hemi.color.copy(sky).lerp(new THREE.Color(0xc5d3ef), .25);
     this.hemi.groundColor.set(0x3b303d);
@@ -309,6 +328,7 @@ export class World {
     const emission = THREE.MathUtils.lerp(a.emission, b.emission, t);
     const seen = new Set<THREE.Material>();
     this.scene.traverse((o) => {
+      if (o instanceof THREE.PointLight && o.userData.plazaPower) o.intensity = o.userData.plazaPower * emission;
       if (o instanceof THREE.Mesh) for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
         if (m instanceof THREE.MeshStandardMaterial && !seen.has(m)) {
           seen.add(m); m.emissiveIntensity = (m.userData.baseEmission ?? m.emissiveIntensity) * emission;
@@ -321,6 +341,8 @@ export class World {
 
   private step(dt: number) {
     if (!this.data || !this.character || this.paused || this.status.loading || this.status.error) return;
+    this.ambience?.update(dt, { x: this.player.x, z: this.player.z, radius: this.radius() });
+    this.movementColliders = [...this.data.colliders, ...(this.ambience?.traffic.colliders ?? [])];
     const left = this.keys.has('KeyA') || this.keys.has('ArrowLeft');
     const right = this.keys.has('KeyD') || this.keys.has('ArrowRight');
     const forward = this.keys.has('KeyW') || this.keys.has('ArrowUp');
@@ -351,7 +373,7 @@ export class World {
       dx = Math.sin(this.heading) * this.velocity * dt;
       dz = Math.cos(this.heading) * this.velocity * dt;
     }
-    const p = moveWithCollision(this.player.x, this.player.z, dx, dz, this.radius(), this.data.colliders, this.data.bounds);
+    const p = moveWithCollision(this.player.x, this.player.z, dx, dz, this.radius(), this.movementColliders, this.data.bounds);
     if (this.travel !== 'walk' && Math.hypot(p.x - this.player.x, p.z - this.player.z) < Math.hypot(dx, dz) * .3) this.velocity *= .7;
     this.player.x = p.x; this.player.z = p.z;
   }
@@ -407,7 +429,7 @@ export class World {
     this.accumulator += dt;
     while (this.accumulator >= 1 / 60) { this.step(1 / 60); this.accumulator -= 1 / 60; }
     this.pose(); this.updateCamera(dt);
-    if (!this.paused && !this.status.loading) this.ambience?.update(this.elapsed);
+    this.sky.update(this.camera, this.elapsed);
     // Follow the player with a bounded shadow camera instead of shadowing the entire map.
     this.sun.position.set(this.player.x - 22, 28, this.player.z + 14);
     this.sun.target.position.copy(this.player);
@@ -425,6 +447,7 @@ export class World {
       this.renderer.domElement.dataset.camera = `${this.yaw.toFixed(2)},${this.pitch.toFixed(2)},${this.distance.toFixed(2)}`;
       this.renderer.domElement.dataset.drawCalls = String(this.renderer.info.render.calls);
       this.renderer.domElement.dataset.streetLife = this.ambience ? '74 pedestrians, 5 vehicles' : 'none';
+      this.renderer.domElement.dataset.crossingPhase = this.ambience?.traffic.phase ?? 'none';
     }
   };
 
@@ -441,6 +464,7 @@ export class World {
   dispose() {
     this.alive = false; this.loadSerial++; cancelAnimationFrame(this.requestId);
     if (this.ambience) { this.scene.remove(this.ambience.group); this.ambience.dispose(); this.ambience = null; }
+    this.scene.remove(this.sky.mesh); this.sky.dispose();
     this.cleanup.forEach((f) => f()); this.disposeObject(this.scene); this.scene.clear();
     this.sun.shadow.dispose(); this.envTarget.dispose(); this.bloom.dispose(); this.composer.dispose();
     this.draco.dispose(); this.renderer.dispose(); this.renderer.domElement.remove();

@@ -37,12 +37,17 @@ assert.equal(elevatedPitch(.24,8.8),.24,'Close camera retains manual pitch');
 assert.ok(elevatedPitch(1.02,MAX_ZOOM)<Math.PI/2,'Orbit cannot flip over');
 
 const report = [];
-for (const name of ['character','crossing','park','car','motorcycle','pedestrian','taxi','citybus']) {
+for (const name of ['character','crossing','park','car','motorcycle','pedestrian','taxi','citybus','hachiko']) {
   const buf=fs.readFileSync(`public/models/${name}.glb`);
   assert.equal(buf.toString('utf8',0,4),'glTF');assert.equal(buf.readUInt32LE(8),buf.length);
   const json=JSON.parse(buf.toString('utf8',20,20+buf.readUInt32LE(12)));
   assert.ok(json.meshes.length>0);
   for (const node of json.nodes) if(node.translation) assert.ok(node.translation.every(Number.isFinite));
+  if(name==='hachiko') {
+    assert.ok(json.nodes.some(n=>n.name==='Hachiko sculpt'),'Recognizable dog sculpture is present');
+    for(const mesh of json.meshes) for(const p of mesh.primitives) assert.ok(p.attributes.COLOR_0!==undefined,'Hachiko plaza carries Cycles shading');
+    assert.ok(buf.length<900000,'Landmark stays under 900 KB');
+  }
   if(name==='character') for(const joint of ['Character','Arm_L','Arm_R','Leg_L','Leg_R']) assert.ok(json.nodes.some(n=>n.name===joint),`${joint} preserved`);
   if(['character','crossing','park'].includes(name)) {
     const baked=json.materials.filter(m=>m.occlusionTexture);
@@ -89,6 +94,38 @@ for(const p of life.people) {
   assert.ok([...p.a,...p.b].every(v=>Number.isFinite(v)&&Math.abs(v)<45));
   assert.ok(p.scale>.8&&p.scale<1.2&&p.offset>=0&&p.offset<1);
 }
+const trafficContext={exports:{},Math};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/game/traffic.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,trafficContext);
+const {TrafficSimulation,pedestrianPose}=trafficContext.exports;
+const sim=new TrafficSimulation(life.vehicles),away={x:40,z:40,radius:.32},phasesSeen=new Set();
+let wrapped=false,last=sim.cars.map(v=>({x:v.x,z:v.z}));
+for(let i=0;i<60*240;i++) {
+  const people=life.people.map(p=>({...pedestrianPose(p,sim.pedestrianWave,sim.pedestrianTime),radius:.35*p.scale}));
+  sim.step(1/60,people,away);phasesSeen.add(sim.phase);
+  for(const [j,v] of sim.cars.entries()) {
+    assert.ok(Number.isFinite(v.x)&&Number.isFinite(v.z)&&v.speed>=0,'Traffic state is finite');
+    if(Math.hypot(v.x-last[j].x,v.z-last[j].z)>100) wrapped=true;
+    if(sim.phase==='pedestrians') assert.ok(Math.abs(v.x)>12+Math.abs(v.dx)*v.halfLength||Math.abs(v.z)>12+Math.abs(v.dz)*v.halfLength,'Junction is clear during the pedestrian wave');
+    for(const p of people) {
+      const dx=Math.max(0,Math.abs(p.x-v.x)-(v.dx?v.halfLength:v.halfWidth));
+      const dz=Math.max(0,Math.abs(p.z-v.z)-(v.dz?v.halfLength:v.halfWidth));
+      assert.ok(Math.hypot(dx,dz)>=p.radius-.08,'Traffic does not intersect pedestrians');
+    }
+  }
+  last=sim.cars.map(v=>({x:v.x,z:v.z}));
+}
+assert.equal(phasesSeen.size,4,'Both roads and pedestrians receive a turn');assert.ok(wrapped,'Cars keep circulating');
+const stopSim=new TrafficSimulation([{model:'taxi',x:-4.5,z:-25,yaw:0}]);
+for(let i=0;i<600;i++)stopSim.step(1/60,[],{x:-4.5,z:-10,radius:.32});
+assert.ok(stopSim.cars[0].z<-13.3&&stopSim.cars[0].speed<.01,'Taxi stops before the player');
+const before=JSON.stringify(stopSim.cars);stopSim.step(0,[],away);assert.equal(JSON.stringify(stopSim.cars),before,'Paused traffic stays still');
+for(const p of life.people) assert.equal(pedestrianPose(p,1,27).moving,false,'Every pedestrian clears before traffic resumes');
+const map=JSON.parse(fs.readFileSync('public/models/crossing.json','utf8'));
+assert.ok(map.colliders.every(c=>c.kind!=='traffic'),'No invisible parked traffic colliders remain');
+const landmark=JSON.parse(fs.readFileSync('public/models/hachiko.json','utf8'));
+assert.ok(landmark.colliders.length>=6);assert.ok(fs.statSync('public/textures/clouds.webp').size<100000,'Cloud panorama remains lightweight');
+const skyPalette=JSON.parse(fs.readFileSync('lib/game/lighting.json','utf8'));
+for(const p of Object.values(skyPalette))assert.ok(/^#[0-9a-f]{6}$/i.test(p.skyZenith)&&/^#[0-9a-f]{6}$/i.test(p.cloudTint));
 fs.mkdirSync('work',{recursive:true});fs.writeFileSync('work/asset-report.json',JSON.stringify(report,null,2));
 console.log('PASS: collisions, wall sliding, vehicle clearance, map bounds, Tokyo time transitions, 60m third-person zoom, glTF structure, baked textures/UVs, animation pivots, safe map spawns.');
 console.table(report);

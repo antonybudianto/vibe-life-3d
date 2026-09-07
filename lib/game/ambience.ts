@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import type { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { pedestrianPose, TrafficSimulation, type TrafficSpec, type RoadUser } from './traffic';
 
 type Person = { a: [number, number]; b: [number, number]; offset: number; speed: number; scale: number; coat: string };
-type Traffic = { model: 'taxi' | 'citybus'; x: number; z: number; yaw: number };
-type CityLife = { people: Person[]; vehicles: Traffic[] };
+type CityLife = { people: Person[]; vehicles: TrafficSpec[] };
 
 /** One shared geometry per body part; no per-pedestrian model downloads. */
 export class Ambience {
@@ -14,8 +14,13 @@ export class Ambience {
   private limb = new THREE.Matrix4();
   private origin = new THREE.Matrix4();
   private trafficSources: THREE.Group[] = [];
+  private vehicleModels: THREE.Group[] = [];
+  traffic: TrafficSimulation;
+  private elapsed = 0;
+  private people: RoadUser[] = [];
 
   private constructor(private data: CityLife, private pedestrian: THREE.Group) {
+    this.traffic = new TrafficSimulation(data.vehicles);
     pedestrian.updateMatrixWorld(true);
     pedestrian.traverse((source) => {
       if (!(source instanceof THREE.Mesh)) return;
@@ -29,7 +34,7 @@ export class Ambience {
       this.parts.push({ mesh, pivot: new THREE.Vector3().fromArray(source.userData.pivot ?? [0, 0, 0]), swing: source.userData.swing ?? 0, local: source.matrixWorld.clone() });
       this.group.add(mesh);
     });
-    this.group.name = 'Shibuya street life'; this.update(0);
+    this.group.name = 'Shibuya street life'; this.posePeople();
   }
 
   static async load(loader: GLTFLoader) {
@@ -48,19 +53,30 @@ export class Ambience {
     for (const v of meta.value.vehicles) {
       const model = (v.model === 'taxi' ? taxi : bus).value.scene.clone();
       model.position.set(v.x, .02, v.z); model.rotation.y = v.yaw;
-      life.group.add(model);
+      life.group.add(model); life.vehicleModels.push(model);
     }
     return life;
   }
 
-  update(time: number) {
+  update(dt: number, player: RoadUser) {
+    this.elapsed += dt;
+    this.traffic.step(dt, this.people, player);
+    this.posePeople();
+    this.traffic.cars.forEach((v, i) => {
+      const model = this.vehicleModels[i];
+      model.position.set(v.x, .02, v.z);
+      model.visible = Math.abs(v.x) < 48 && Math.abs(v.z) < 48;
+    });
+  }
+
+  private posePeople() {
+    this.people.length = 0;
     this.data.people.forEach((p, i) => {
-      const dx = p.b[0] - p.a[0], dz = p.b[1] - p.a[1], length = Math.hypot(dx, dz);
-      const phase = length ? (time * p.speed / length + p.offset * 2) % 2 : 0;
-      const progress = phase <= 1 ? phase : 2 - phase;
-      const gait = length ? Math.sin(time * p.speed * 7.5 + p.offset * Math.PI * 8) : 0;
-      this.dummy.position.set(p.a[0] + dx * progress, .1 + Math.abs(gait) * .025, p.a[1] + dz * progress);
-      this.dummy.rotation.set(0, length ? Math.atan2(dx, dz) + (phase > 1 ? Math.PI : 0) : p.offset * Math.PI * 2, 0);
+      const pose = pedestrianPose(p, this.traffic.pedestrianWave, this.traffic.pedestrianTime);
+      const gait = pose.moving ? Math.sin(this.elapsed * pose.speed * 7.5 + p.offset * Math.PI * 8) : 0;
+      this.people.push({ x: pose.x, z: pose.z, radius: .35 * p.scale });
+      this.dummy.position.set(pose.x, .1 + Math.abs(gait) * .025, pose.z);
+      this.dummy.rotation.set(0, pose.yaw, 0);
       this.dummy.scale.setScalar(p.scale); this.dummy.updateMatrix();
       for (const part of this.parts) {
         this.matrix.copy(this.dummy.matrix);

@@ -113,6 +113,6 @@ for i in range(38):
     if i<20:a=[sx*random.uniform(10.8,15.8),sy*random.uniform(10.6,11.15)]
     else:a=[sx*random.uniform(10.7,11.25),sy*random.uniform(14,39)]
     people.append({'a':a,'b':a,'offset':random.random(),'speed':0,'scale':random.uniform(.86,1.06),'coat':coats[i%8]})
-data={'people':people,'vehicles':[{'model':'citybus','x':-4.5,'z':-20,'yaw':0},{'model':'taxi','x':-4.5,'z':-13.6,'yaw':0},{'model':'taxi','x':4.4,'z':17,'yaw':math.pi},{'model':'taxi','x':-18,'z':4.4,'yaw':math.pi/2},{'model':'taxi','x':22,'z':-4.4,'yaw':-math.pi/2}]}
+data={'people':people,'vehicles':[{'model':'citybus','x':-4.5,'z':-24,'yaw':0},{'model':'taxi','x':-4.5,'z':-17,'yaw':0},{'model':'taxi','x':4.4,'z':17,'yaw':math.pi},{'model':'taxi','x':-18,'z':4.4,'yaw':math.pi/2},{'model':'taxi','x':22,'z':-4.4,'yaw':-math.pi/2}]}
 (ROOT/'public/models/crossing-life.json').write_text(json.dumps(data,indent=2))
 print('CITY_LIFE_COMPLETE',len(people),'pedestrians',flush=True)

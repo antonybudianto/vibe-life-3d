@@ -318,12 +318,7 @@ for o in objects:
 setup_lights()
 g.export(ROOT/'public/models/crossing.glb',objects)
 metadata={'id':'crossing','name':'Shibuya Crossing','spawn':[0,0,13],'bounds':[-45,45,-45,45],'colliders':colliders,'artRevision':3}
-life_path=ROOT/'public/models/crossing-life.json'
-if life_path.exists():
-    for v in json.loads(life_path.read_text())['vehicles']:
-        w,d,h=(2.45,7.3,3.2) if v['model']=='citybus' else (1.92,4.7,1.9)
-        co,si=abs(math.cos(v['yaw'])),abs(math.sin(v['yaw']))
-        colliders.append({'x':v['x'],'z':v['z'],'halfX':(w*co+d*si)/2,'halfZ':(w*si+d*co)/2,'height':h,'kind':'traffic'})
+# Moving traffic owns its current collision volumes in lib/game/traffic.ts.
 (ROOT/'public/models/crossing.json').write_text(json.dumps(metadata,indent=2),encoding='utf8')
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets/blender/crossing.blend'),compress=True)
 s=bpy.context.scene;s.render.image_settings.file_format='PNG';s.render.filepath=str(ROOT/'public/renders/crossing.png')

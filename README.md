@@ -37,19 +37,23 @@ The following camera now dollies from **4.2 to 60 meters**, using proportional w
 
 The crossing now has a rounded glazed Tsutaya façade, varied concrete cladding, a cylindrical 109 crown, reference-derived billboards, Japanese signs, modeled café furniture and shelves, rooftop ventilation and railings, individual leaf canopies, bus shelter, vending machines and the station stair entrance. These are real Blender meshes visible from every camera angle.
 
-The scene includes 74 pedestrians with animated limb instances, four stationary taxis and a stationary city bus. Crowd clothing varies by instance. These are scenery characters; Haru remains the sole playable character. Traffic waits at the crossing and has collision volumes. This is not yet a traffic simulation or an NPC interaction system.
+The scene includes 74 pedestrians with animated limb instances, four moving taxis and a city bus. Traffic follows left-hand lanes, accelerates, queues, stops for the player, and takes turns with pedestrian crossing waves. Collision volumes move with each vehicle. Vehicles recycle beyond the map edge; this is a compact street simulation, not citywide navigation. Haru remains the sole playable character.
+
+Hachikō Square sits southwest of the crossing at (-20, 20), marked in gold on the minimap. Its Blender-authored bronze Akita stands on a granite pedestal inside a planted octagonal border, with benches, trees, dedication plaques and lanterns. The separate Draco asset loads only with the crossing and uses Cycles vertex shading. Blue skies and drifting cumulus clouds use a single 28 KB transparent panorama rendered from Blender cloud meshes. The same cloud bake and sky palette work in Blender; day, evening and night blend continuously in Live mode.
 
 Rebuild the current crossing with Blender 5.2 and the supplied reference image available at the path in `build_crossing_concept.py`:
 
 ```sh
 blender --background --factory-startup --python-exit-code 1 --python scripts/build_city_life.py
+blender --background --factory-startup --python-exit-code 1 --python scripts/build_cloud_sky.py
+blender --background --factory-startup --python-exit-code 1 --python scripts/build_hachiko.py
 blender --background --factory-startup --python-exit-code 1 --python scripts/build_crossing_concept.py
 blender --background --factory-startup --python-exit-code 1 --python scripts/bake_crossing_concept.py
 blender --background --factory-startup --python-exit-code 1 --python scripts/render_concept_review.py
 blender --background --factory-startup --python-exit-code 1 --python scripts/compact_blender_sources.py
 ```
 
-`assets/blender/crossing.blend` is the editable environment. The locally generated `crossing-review.blend` assembles the same crowd, traffic and Haru with the starting gameplay camera and Cycles lighting; this duplicate review assembly is excluded from source uploads and can be regenerated with the last command above. The review images use a fixed crowd pose at time zero. The browser crowd continuously walks. Reference billboard images and generated surface textures are packed into the delivered Blender scenes and GLBs.
+`assets/blender/crossing.blend` is the editable environment, with `hachiko.blend` and `cloud-sky.blend` as separate editable assets. The locally generated `crossing-review.blend` assembles the landmark, crowd, traffic and Haru with the starting gameplay camera and Cycles lighting; this duplicate review assembly is excluded from source uploads and can be regenerated with `render_concept_review.py`. The review images use a fixed street-life pose at time zero. Reference billboard images and generated surface textures are packed into the delivered Blender scenes and GLBs.
 
 Detailed architecture and foliage use Cycles AO baked into vertex colors, which avoids atlas holes on small leaves and rails. Four street materials use 2048px planar AO and shop irradiance maps. A 512px repeating albedo, normal and roughness set supplies subtle pavement/asphalt grain. Sunlight stays dynamic. The map GLB is approximately 4.9 MB; the pedestrian model is 61 KB and is downloaded only once for all 74 instances. Crowd and traffic load only for the crossing and their shared GPU resources are disposed on map changes.
 
