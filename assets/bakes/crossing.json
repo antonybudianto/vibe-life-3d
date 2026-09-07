@@ -1,10 +1,144 @@
 {
+  "asset": "crossing",
+  "artRevision": 3,
+  "vertexBakes": [
+    {
+      "mesh": "Slate concrete",
+      "corners": 7896,
+      "minimum": 0.11050000786781311,
+      "maximum": 0.17000001668930054
+    },
+    {
+      "mesh": "Warm concrete",
+      "corners": 28992,
+      "minimum": 0.17549997568130493,
+      "maximum": 0.27000001072883606
+    },
+    {
+      "mesh": "Champagne aluminum",
+      "corners": 79368,
+      "minimum": 0.15599995851516724,
+      "maximum": 0.2399999350309372
+    },
+    {
+      "mesh": "Walnut shop joinery",
+      "corners": 41736,
+      "minimum": 0.09750001132488251,
+      "maximum": 0.15000003576278687
+    },
+    {
+      "mesh": "Charcoal architectural metal",
+      "corners": 111668,
+      "minimum": 0.03575001284480095,
+      "maximum": 0.05499999225139618
+    },
+    {
+      "mesh": "Book spines 0",
+      "corners": 10728,
+      "minimum": 0.2470000684261322,
+      "maximum": 0.3800000846385956
+    },
+    {
+      "mesh": "Book spines 1",
+      "corners": 8424,
+      "minimum": 0.1430000513792038,
+      "maximum": 0.21999996900558472
+    },
+    {
+      "mesh": "Book spines 2",
+      "corners": 7416,
+      "minimum": 0.42249995470046997,
+      "maximum": 0.6499998569488525
+    },
+    {
+      "mesh": "Book spines 3",
+      "corners": 9720,
+      "minimum": 0.25349998474121094,
+      "maximum": 0.38999998569488525
+    },
+    {
+      "mesh": "Store plaster",
+      "corners": 11360,
+      "minimum": 0.2989999055862427,
+      "maximum": 0.46000000834465027
+    },
+    {
+      "mesh": "Interior amber 3",
+      "corners": 14424,
+      "minimum": 0.0715000256896019,
+      "maximum": 0.10012435913085938
+    },
+    {
+      "mesh": "Facade cladding 1",
+      "corners": 960,
+      "minimum": 0.20149996876716614,
+      "maximum": 0.3099999725818634
+    },
+    {
+      "mesh": "Facade cladding 0",
+      "corners": 2872,
+      "minimum": 0.24050000309944153,
+      "maximum": 0.3699999451637268
+    },
+    {
+      "mesh": "Facade cladding 2",
+      "corners": 300,
+      "minimum": 0.260000079870224,
+      "maximum": 0.3999999761581421
+    },
+    {
+      "mesh": "Facade cladding 3",
+      "corners": 600,
+      "minimum": 0.14949995279312134,
+      "maximum": 0.23000000417232513
+    },
+    {
+      "mesh": "Textured tree bark",
+      "corners": 6120,
+      "minimum": 0.06824998557567596,
+      "maximum": 0.1045214980840683
+    },
+    {
+      "mesh": "Ginkgo leaves 4",
+      "corners": 43578,
+      "minimum": 0.17549997568130493,
+      "maximum": 0.2692617177963257
+    },
+    {
+      "mesh": "Ginkgo leaves 1",
+      "corners": 43362,
+      "minimum": 0.1170000284910202,
+      "maximum": 0.17950785160064697
+    },
+    {
+      "mesh": "Ginkgo leaves 2",
+      "corners": 42606,
+      "minimum": 0.15599995851516724,
+      "maximum": 0.23945306241512299
+    },
+    {
+      "mesh": "Ginkgo leaves 3",
+      "corners": 42984,
+      "minimum": 0.09424997866153717,
+      "maximum": 0.14480175077915192
+    },
+    {
+      "mesh": "Ginkgo leaves 0",
+      "corners": 43470,
+      "minimum": 0.0715000256896019,
+      "maximum": 0.10979946702718735
+    },
+    {
+      "mesh": "Soft black rubber",
+      "corners": 96,
+      "minimum": 0.01495000533759594,
+      "maximum": 0.023000000044703484
+    }
+  ],
   "ao": "crossing-ao.png",
   "resolution": 2048,
-  "aoStd": 0.1924772709608078,
+  "aoStd": 0.4269622266292572,
   "lightmap": "crossing-light.webp",
   "lightmapScale": 4,
-  "lightmapMaximum": 7.225218772888184,
-  "asset": "crossing",
-  "seconds": 65.7
+  "lightmapMaximum": 11.37818717956543
 }
