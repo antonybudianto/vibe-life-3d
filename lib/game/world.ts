@@ -9,6 +9,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { moveWithCollision, resolveTime, type Collider } from './physics';
 import phases from './lighting.json';
 import { elevatedPitch, zoomDistance } from './camera';
+import { Ambience } from './ambience';
 
 export type TravelMode = 'walk' | 'motorcycle' | 'car';
 export type TimeMode = 'day' | 'evening' | 'night' | 'live';
@@ -28,6 +29,7 @@ export class World {
   character: THREE.Group | null = null;
   vehicles: Partial<Record<TravelMode, THREE.Group>> = {};
   environment: THREE.Group | null = null;
+  private ambience: Ambience | null = null;
   data: MapData | null = null;
   player = new THREE.Vector3(0, 0, 10);
   heading = Math.PI;
@@ -40,7 +42,7 @@ export class World {
   time: TimeMode = 'evening';
   running = false;
   paused = false;
-  quality: 'high' | 'balanced' = 'balanced';
+  quality: 'high' | 'balanced' = matchMedia('(pointer: fine)').matches ? 'high' : 'balanced';
   keys = new Set<string>();
   joystick = { x: 0, y: 0 };
   pointers = new Map<number, { x: number; y: number }>();
@@ -102,7 +104,9 @@ export class World {
       const light = new THREE.PointLight(0xffae60, 30, 15, 2);
       light.position.set(x, 3, z); this.nightLights.push(light); this.scene.add(light);
     }
-    this.composer = new EffectComposer(this.renderer);
+    // The bloom pipeline renders offscreen, so it needs its own antialiasing.
+    const postTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: Math.min(4, this.renderer.capabilities.maxSamples) });
+    this.composer = new EffectComposer(this.renderer, postTarget);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     this.bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), .20, .4, 1.3);
     this.composer.addPass(this.bloom);
@@ -111,7 +115,7 @@ export class World {
     const resize = new ResizeObserver(() => this.resize()); resize.observe(host);
     this.cleanup.push(() => resize.disconnect());
     this.resize(); this.updateCamera(1); this.animate();
-    this.initialize();
+    void this.initialize();
   }
 
   private emit() { if (this.alive) this.update({ ...this.status }); }
@@ -120,11 +124,12 @@ export class World {
     group.updateMatrixWorld(true);
     group.traverse((o) => {
       if (o instanceof THREE.Mesh) {
-        o.castShadow = !o.name.includes('Crosswalk'); o.receiveShadow = true;
+        o.castShadow = !o.name.includes('Crosswalk') && !o.name.includes('Glazing'); o.receiveShadow = true;
         if (world) o.matrixAutoUpdate = false;
         const materials = Array.isArray(o.material) ? o.material : [o.material];
         for (const m of materials) if (m instanceof THREE.MeshStandardMaterial) {
           m.envMapIntensity = .55;
+          if (m.name.includes('Glazing')) { m.depthWrite = false; o.castShadow = false; }
           m.aoMapIntensity = .85;
           if (m.aoMap) m.aoMap.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
           m.userData.baseEmission = m.emissiveIntensity;
@@ -183,11 +188,18 @@ export class World {
         }),
         fetch(`/models/${id}.json`).then((r) => { if (!r.ok) throw new Error('Map description unavailable'); return r.json() as Promise<MapData>; }),
       ]);
-      try { await this.loadBakedLighting(asset.scene); }
+      let life: Ambience | null = null;
+      try {
+        await this.loadBakedLighting(asset.scene);
+        if (id === 'crossing') life = await Ambience.load(this.loader);
+      }
       catch (error) { this.disposeObject(asset.scene); throw error; }
-      if (!this.alive || serial !== this.loadSerial) { this.disposeObject(asset.scene); return; }
+      if (!this.alive || serial !== this.loadSerial) { this.disposeObject(asset.scene); life?.dispose(); return; }
       const next = this.prep(asset.scene, true);
       if (this.environment) { this.scene.remove(this.environment); this.disposeObject(this.environment); }
+      if (this.ambience) { this.scene.remove(this.ambience.group); this.ambience.dispose(); }
+      this.ambience = life;
+      if (life) this.scene.add(this.prep(life.group));
       this.environment = next; this.data = data; this.scene.add(next);
       this.player.fromArray(data.spawn); this.velocity = 0; this.verticalVelocity = 0; this.heading = Math.PI;
       this.yaw = id === 'crossing' ? .22 : .02;
@@ -395,6 +407,7 @@ export class World {
     this.accumulator += dt;
     while (this.accumulator >= 1 / 60) { this.step(1 / 60); this.accumulator -= 1 / 60; }
     this.pose(); this.updateCamera(dt);
+    if (!this.paused && !this.status.loading) this.ambience?.update(this.elapsed);
     // Follow the player with a bounded shadow camera instead of shadowing the entire map.
     this.sun.position.set(this.player.x - 22, 28, this.player.z + 14);
     this.sun.target.position.copy(this.player);
@@ -411,6 +424,7 @@ export class World {
       this.renderer.domElement.dataset.map = this.status.map;
       this.renderer.domElement.dataset.camera = `${this.yaw.toFixed(2)},${this.pitch.toFixed(2)},${this.distance.toFixed(2)}`;
       this.renderer.domElement.dataset.drawCalls = String(this.renderer.info.render.calls);
+      this.renderer.domElement.dataset.streetLife = this.ambience ? '74 pedestrians, 5 vehicles' : 'none';
     }
   };
 
@@ -426,6 +440,7 @@ export class World {
   }
   dispose() {
     this.alive = false; this.loadSerial++; cancelAnimationFrame(this.requestId);
+    if (this.ambience) { this.scene.remove(this.ambience.group); this.ambience.dispose(); this.ambience = null; }
     this.cleanup.forEach((f) => f()); this.disposeObject(this.scene); this.scene.clear();
     this.sun.shadow.dispose(); this.envTarget.dispose(); this.bloom.dispose(); this.composer.dispose();
     this.draco.dispose(); this.renderer.dispose(); this.renderer.domElement.remove();

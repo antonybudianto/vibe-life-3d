@@ -13,15 +13,16 @@ def apply_preset(preset='evening'):
     root=Path(__file__).resolve().parents[1]
     p=json.loads((root/'lib/game/lighting.json').read_text())[preset]
     s=bpy.context.scene;s['lighting_preset']=preset
-    # The .37 conversion calibrates different ambient light units artistically.
+    # Cycles world radiance and Three's hemisphere + environment use different units.
+    # Calibrated together against the exported crossing under the shared AgX view.
     if s.world:
         s.world.use_nodes=True;bg=s.world.node_tree.nodes.get('Background')
-        bg.inputs[0].default_value=(*linear_rgb(p['sky']),1);bg.inputs[1].default_value=p['ambient']*.37
+        bg.inputs[0].default_value=(*linear_rgb(p['sky']),1);bg.inputs[1].default_value=p['ambient']*1.7
     for o in s.objects:
         if o.type=='LIGHT' and o.get('baked_shop'):
             o.data.energy=o.get('base_power',o.data.energy)*p['emission']
         if o.type=='LIGHT' and o.data.type=='SUN':
-            o.data.color=linear_rgb(p['sun']);o.data.energy=p['power'];o.data.angle=.12
+            o.data.color=linear_rgb(p['sun']);o.data.energy=p['power']*.55;o.data.angle=.12
             o.location=(-22,-14,28);o.rotation_euler=(-o.location).to_track_quat('-Z','Y').to_euler()
     for m in bpy.data.materials:
         if not m.use_nodes:continue

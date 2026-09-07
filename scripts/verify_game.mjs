@@ -37,7 +37,7 @@ assert.equal(elevatedPitch(.24,8.8),.24,'Close camera retains manual pitch');
 assert.ok(elevatedPitch(1.02,MAX_ZOOM)<Math.PI/2,'Orbit cannot flip over');
 
 const report = [];
-for (const name of ['character','crossing','park','car','motorcycle']) {
+for (const name of ['character','crossing','park','car','motorcycle','pedestrian','taxi','citybus']) {
   const buf=fs.readFileSync(`public/models/${name}.glb`);
   assert.equal(buf.toString('utf8',0,4),'glTF');assert.equal(buf.readUInt32LE(8),buf.length);
   const json=JSON.parse(buf.toString('utf8',20,20+buf.readUInt32LE(12)));
@@ -46,7 +46,19 @@ for (const name of ['character','crossing','park','car','motorcycle']) {
   if(name==='character') for(const joint of ['Character','Arm_L','Arm_R','Leg_L','Leg_R']) assert.ok(json.nodes.some(n=>n.name===joint),`${joint} preserved`);
   if(['character','crossing','park'].includes(name)) {
     const baked=json.materials.filter(m=>m.occlusionTexture);
-    assert.ok(baked.length>5,`${name} includes genuine AO textures`);
+    assert.ok(baked.length >= (name==='crossing' ? 4 : 6),`${name} includes genuine AO textures`);
+    if(name==='crossing') {
+      const vertexBaked = json.materials.filter(m=>m.extras?.bake_mode?.includes('Cycles color attribute'));
+      assert.ok(vertexBaked.length>=20,'Detailed street props use Cycles vertex bakes');
+      for(const mesh of json.meshes) for(const p of mesh.primitives) if(json.materials[p.material]?.extras?.bake_mode) assert.ok(p.attributes.COLOR_0!==undefined,'Vertex bake is exported');
+      const coverage=JSON.parse(fs.readFileSync('assets/bakes/crossing.json','utf8'));
+      assert.ok(coverage.vertexBakes.every(b=>b.minimum>.001&&b.corners>0),'Every baked corner has a valid color');
+      assert.ok(coverage.aoStd>.03&&coverage.lightmapMaximum>.01,'Street AO and irradiance are nonuniform Cycles bakes');
+      for(const material of ['Rain-dark asphalt','Pavement stone']) {
+        const m=json.materials.find(m=>m.name===material);
+        assert.ok(m.normalTexture&&m.pbrMetallicRoughness.baseColorTexture&&m.pbrMetallicRoughness.metallicRoughnessTexture,'Street aggregate has PBR textures');
+      }
+    }
     for(const mesh of json.meshes) for(const primitive of mesh.primitives) {
       if(json.materials[primitive.material]?.occlusionTexture) {
         assert.equal(json.materials[primitive.material].occlusionTexture.texCoord,1);
@@ -58,6 +70,11 @@ for (const name of ['character','crossing','park','car','motorcycle']) {
       assert.ok(fs.existsSync('public'+m.extras.bakedLightmap),'Irradiance texture exists');
     }
   }
+  if(name==='pedestrian') {
+    const moving=json.nodes.filter(n=>n.extras?.swing);
+    assert.ok(moving.length>=8,'Blender-authored limb pivots are exported');
+    assert.ok(moving.every(n=>n.extras.pivot.length===3&&n.extras.pivot.every(Number.isFinite)));
+  }
   if(['crossing','park'].includes(name)) {
     const m=JSON.parse(fs.readFileSync(`public/models/${name}.json`,'utf8'));
     assert.ok(m.colliders.length>0);
@@ -65,6 +82,12 @@ for (const name of ['character','crossing','park','car','motorcycle']) {
     assert.equal(resolved.x,m.spawn[0]);assert.equal(resolved.z,m.spawn[2]);
   }
   report.push({ name, bytes:buf.length, gzipBytes:zlib.gzipSync(buf).length, meshes:json.meshes.length, triangles:json.meshes.reduce((n,m)=>n+m.primitives.reduce((s,p)=>s+json.accessors[p.indices].count/3,0),0), compressed:!!json.extensionsUsed?.includes('KHR_draco_mesh_compression') });
+}
+const life=JSON.parse(fs.readFileSync('public/models/crossing-life.json','utf8'));
+assert.equal(life.people.length,74);assert.equal(life.vehicles.length,5);
+for(const p of life.people) {
+  assert.ok([...p.a,...p.b].every(v=>Number.isFinite(v)&&Math.abs(v)<45));
+  assert.ok(p.scale>.8&&p.scale<1.2&&p.offset>=0&&p.offset<1);
 }
 fs.mkdirSync('work',{recursive:true});fs.writeFileSync('work/asset-report.json',JSON.stringify(report,null,2));
 console.log('PASS: collisions, wall sliding, vehicle clearance, map bounds, Tokyo time transitions, 60m third-person zoom, glTF structure, baked textures/UVs, animation pivots, safe map spawns.');
