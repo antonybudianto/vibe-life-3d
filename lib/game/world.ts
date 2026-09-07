@@ -207,7 +207,7 @@ export class World {
             lantern.position.set(x, 3.2, 1.8); lantern.userData.plazaPower = 12; landmark.scene.add(lantern);
           }
           data.colliders.push(...landmarkData.colliders);
-          life = await Ambience.load(this.loader);
+          life = await Ambience.load(this.loader, data.colliders);
         }
       }
       catch (error) { this.disposeObject(asset.scene); throw error; }

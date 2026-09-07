@@ -1,5 +1,5 @@
 """Use the same Blender assets, crowd placement and camera convention as the game."""
-import bpy,sys,json,math
+import bpy,sys,json,math,hashlib
 from pathlib import Path
 from mathutils import Vector,Matrix
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
@@ -17,11 +17,14 @@ for o in append('hachiko'):
 for xx in [-4.6,4.6]:
     bpy.ops.object.light_add(type='POINT',location=(x+xx,-z-1.8,3.2));o=bpy.context.object;o.data.energy=150;o.data.color=(1,.48,.2);o.data.shadow_soft_size=.4;o['baked_shop']=True;o['base_power']=150
 crowd=append('pedestrian')
+snapshot=json.loads((ROOT/'work/crowd-start.json').read_text())
+fingerprint=hashlib.sha256()
+for path in ['lib/game/pedestrians.ts','public/models/crossing-life.json','public/models/crossing.json','public/models/hachiko.json']:fingerprint.update((ROOT/path).read_bytes())
+if snapshot['hash']!=fingerprint.hexdigest():raise RuntimeError('Refresh starting poses with node scripts/crowd_snapshot.mjs before rendering')
+poses=snapshot['poses']
 for i,p in enumerate(meta['people']):
-    a,b=p['a'],p['b'];dx=b[0]-a[0];dz=b[1]-a[1];length=math.hypot(dx,dz);t=0
-    yaw=math.atan2(dx,dz) if length else p['offset']*math.tau
-    gait=0
-    root=Matrix.Translation((a[0]+dx*t,-a[1]-dz*t,.1+abs(gait)*.025))@Matrix.Rotation(yaw,4,'Z')@Matrix.Scale(p['scale'],4)
+    pose=poses[i];yaw=pose['yaw'];gait=pose['gait']
+    root=Matrix.Translation((pose['x'],-pose['z'],.1+abs(gait)*.025))@Matrix.Rotation(yaw,4,'Z')@Matrix.Scale(p['scale'],4)
     for source in crowd:
         o=source.copy();o.data=source.data;s.collection.objects.link(o)
         limb=Matrix.Identity(4)

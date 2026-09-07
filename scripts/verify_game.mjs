@@ -91,17 +91,40 @@ for (const name of ['character','crossing','park','car','motorcycle','pedestrian
 const life=JSON.parse(fs.readFileSync('public/models/crossing-life.json','utf8'));
 assert.equal(life.people.length,74);assert.equal(life.vehicles.length,5);
 for(const p of life.people) {
-  assert.ok([...p.a,...p.b].every(v=>Number.isFinite(v)&&Math.abs(v)<45));
+  assert.ok(Number.isInteger(p.region)&&p.region>=0&&p.region<4);
+  assert.ok(p.speed>=1.08&&p.speed<=1.58,'Every pedestrian has an individual walking pace');
   assert.ok(p.scale>.8&&p.scale<1.2&&p.offset>=0&&p.offset<1);
 }
 const trafficContext={exports:{},Math};
 vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/game/traffic.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,trafficContext);
-const {TrafficSimulation,pedestrianPose}=trafficContext.exports;
+const {TrafficSimulation}=trafficContext.exports;
+const pedestrianContext={exports:{},Math,Map,Set};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/game/pedestrians.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,pedestrianContext);
+const {PedestrianSimulation}=pedestrianContext.exports;
+const map=JSON.parse(fs.readFileSync('public/models/crossing.json','utf8'));
+const landmark=JSON.parse(fs.readFileSync('public/models/hachiko.json','utf8'));
+const crowd=new PedestrianSimulation(life.people,[...map.colliders,...landmark.colliders]);
+for(const w of crowd.walkers) {
+  assert.ok(crowd.walkers.filter(p=>Math.hypot(w.x-p.x,w.z-p.z)<2.5).length<=5,'Initial crowd is spread across the sidewalks');
+  for(const p of crowd.walkers)if(w!==p)assert.ok(Math.hypot(w.x-p.x,w.z-p.z)>1.1,'Initial personal space');
+}
 const sim=new TrafficSimulation(life.vehicles),away={x:40,z:40,radius:.32},phasesSeen=new Set();
-let wrapped=false,last=sim.cars.map(v=>({x:v.x,z:v.z}));
+let wrapped=false,last=sim.cars.map(v=>({x:v.x,z:v.z})),minimumMoving=74,crossings=0,largestGroup=0,largestStoppedGroup=0;
+const motionCounts=Array(74).fill(0);
 for(let i=0;i<60*240;i++) {
-  const people=life.people.map(p=>({...pedestrianPose(p,sim.pedestrianWave,sim.pedestrianTime),radius:.35*p.scale}));
+  const people=crowd.walkers;
   sim.step(1/60,people,away);phasesSeen.add(sim.phase);
+  crowd.update(1/60,sim,away);
+  if(i%60===0)for(const w of people) {
+    const neighbors=people.filter(p=>Math.hypot(w.x-p.x,w.z-p.z)<2.5);
+    largestGroup=Math.max(largestGroup,neighbors.length);
+    if(i>120)largestStoppedGroup=Math.max(largestStoppedGroup,neighbors.filter(p=>p.speed<.12).length);
+  }
+  if(i>120) {
+    minimumMoving=Math.min(minimumMoving,people.filter(p=>p.speed>.12).length);
+    for(let j=0;j<74;j++)if(people[j].speed>.12)motionCounts[j]++;
+  }
+  if(people.some(p=>p.crossing))crossings++;
   for(const [j,v] of sim.cars.entries()) {
     assert.ok(Number.isFinite(v.x)&&Number.isFinite(v.z)&&v.speed>=0,'Traffic state is finite');
     if(Math.hypot(v.x-last[j].x,v.z-last[j].z)>100) wrapped=true;
@@ -115,14 +138,24 @@ for(let i=0;i<60*240;i++) {
   last=sim.cars.map(v=>({x:v.x,z:v.z}));
 }
 assert.equal(phasesSeen.size,4,'Both roads and pedestrians receive a turn');assert.ok(wrapped,'Cars keep circulating');
+assert.ok(minimumMoving>=52,`Sidewalk life continues during every signal phase (${minimumMoving} moving)`);
+// Passing groups can converge naturally; stationary piles are the regression.
+assert.ok(largestStoppedGroup<=5,`No pile of stopped pedestrians (${largestStoppedGroup} in a 2.5m radius)`);
+assert.ok(crossings>0,'Pedestrians still use the crossing');
+fs.mkdirSync('work',{recursive:true});fs.writeFileSync('work/crowd-behavior.json',JSON.stringify({minimumMoving,walkers:crowd.walkers.map((w,i)=>({...w,active:motionCounts[i]/(60*240-121),canCross:life.people[i].crosses}))},null,2));
+for(const [i,w] of crowd.walkers.entries()) {
+  assert.ok(w.travelled>65,`Pedestrian ${i} continues exploring: ${w.travelled.toFixed(1)} m`);
+  if(!life.people[i].crosses)assert.ok(motionCounts[i]/(60*240-121)>.65,`Sidewalk walker ${i} does not spend most of the time stopped`);
+}
+console.log(`Crowd: at least ${minimumMoving}/74 moving throughout 4 minutes; largest local group ${largestGroup}, stopped ${largestStoppedGroup}; shortest journey ${Math.min(...crowd.walkers.map(w=>w.travelled)).toFixed(1)} m.`);
 const stopSim=new TrafficSimulation([{model:'taxi',x:-4.5,z:-25,yaw:0}]);
 for(let i=0;i<600;i++)stopSim.step(1/60,[],{x:-4.5,z:-10,radius:.32});
 assert.ok(stopSim.cars[0].z<-13.3&&stopSim.cars[0].speed<.01,'Taxi stops before the player');
 const before=JSON.stringify(stopSim.cars);stopSim.step(0,[],away);assert.equal(JSON.stringify(stopSim.cars),before,'Paused traffic stays still');
-for(const p of life.people) assert.equal(pedestrianPose(p,1,27).moving,false,'Every pedestrian clears before traffic resumes');
-const map=JSON.parse(fs.readFileSync('public/models/crossing.json','utf8'));
+const held=new TrafficSimulation([]);held.phase='clear';held.phaseTime=3;
+held.step(1/60,[{x:0,z:9.75,radius:.3,crossing:true}],away);assert.equal(held.phase,'clear','Traffic waits for the last person to finish crossing');
+const crowdBefore=JSON.stringify(crowd.walkers);crowd.update(0,sim,away);assert.equal(JSON.stringify(crowd.walkers),crowdBefore,'Paused crowd stays still');
 assert.ok(map.colliders.every(c=>c.kind!=='traffic'),'No invisible parked traffic colliders remain');
-const landmark=JSON.parse(fs.readFileSync('public/models/hachiko.json','utf8'));
 assert.ok(landmark.colliders.length>=6);assert.ok(fs.statSync('public/textures/clouds.webp').size<100000,'Cloud panorama remains lightweight');
 const skyPalette=JSON.parse(fs.readFileSync('lib/game/lighting.json','utf8'));
 for(const p of Object.values(skyPalette))assert.ok(/^#[0-9a-f]{6}$/i.test(p.skyZenith)&&/^#[0-9a-f]{6}$/i.test(p.cloudTint));

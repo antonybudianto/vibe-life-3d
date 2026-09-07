@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import type { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { pedestrianPose, TrafficSimulation, type TrafficSpec, type RoadUser } from './traffic';
+import { TrafficSimulation, type TrafficSpec, type RoadUser } from './traffic';
+import { PedestrianSimulation, type Person } from './pedestrians';
+import type { Collider } from './physics';
 
-type Person = { a: [number, number]; b: [number, number]; offset: number; speed: number; scale: number; coat: string };
 type CityLife = { people: Person[]; vehicles: TrafficSpec[] };
 
 /** One shared geometry per body part; no per-pedestrian model downloads. */
@@ -16,11 +17,11 @@ export class Ambience {
   private trafficSources: THREE.Group[] = [];
   private vehicleModels: THREE.Group[] = [];
   traffic: TrafficSimulation;
-  private elapsed = 0;
-  private people: RoadUser[] = [];
+  private crowd: PedestrianSimulation;
 
-  private constructor(private data: CityLife, private pedestrian: THREE.Group) {
+  private constructor(private data: CityLife, private pedestrian: THREE.Group, colliders: Collider[]) {
     this.traffic = new TrafficSimulation(data.vehicles);
+    this.crowd = new PedestrianSimulation(data.people, colliders);
     pedestrian.updateMatrixWorld(true);
     pedestrian.traverse((source) => {
       if (!(source instanceof THREE.Mesh)) return;
@@ -37,7 +38,7 @@ export class Ambience {
     this.group.name = 'Shibuya street life'; this.posePeople();
   }
 
-  static async load(loader: GLTFLoader) {
+  static async load(loader: GLTFLoader, colliders: Collider[]) {
     // Settle every request so a failed load also disposes successful siblings.
     const results = await Promise.allSettled([
       fetch('/models/crossing-life.json').then((r) => { if (!r.ok) throw new Error('Street life unavailable'); return r.json() as Promise<CityLife>; }),
@@ -48,7 +49,7 @@ export class Ambience {
       throw new Error('Could not load street life');
     }
     const [meta, people, taxi, bus] = results as [PromiseFulfilledResult<CityLife>, PromiseFulfilledResult<Awaited<ReturnType<GLTFLoader['loadAsync']>>>, PromiseFulfilledResult<Awaited<ReturnType<GLTFLoader['loadAsync']>>>, PromiseFulfilledResult<Awaited<ReturnType<GLTFLoader['loadAsync']>>>];
-    const life = new Ambience(meta.value, people.value.scene);
+    const life = new Ambience(meta.value, people.value.scene, colliders);
     life.trafficSources = [taxi.value.scene, bus.value.scene];
     for (const v of meta.value.vehicles) {
       const model = (v.model === 'taxi' ? taxi : bus).value.scene.clone();
@@ -59,8 +60,8 @@ export class Ambience {
   }
 
   update(dt: number, player: RoadUser) {
-    this.elapsed += dt;
-    this.traffic.step(dt, this.people, player);
+    this.traffic.step(dt, this.crowd.walkers, player);
+    this.crowd.update(dt, this.traffic, player);
     this.posePeople();
     this.traffic.cars.forEach((v, i) => {
       const model = this.vehicleModels[i];
@@ -70,11 +71,9 @@ export class Ambience {
   }
 
   private posePeople() {
-    this.people.length = 0;
     this.data.people.forEach((p, i) => {
-      const pose = pedestrianPose(p, this.traffic.pedestrianWave, this.traffic.pedestrianTime);
-      const gait = pose.moving ? Math.sin(this.elapsed * pose.speed * 7.5 + p.offset * Math.PI * 8) : 0;
-      this.people.push({ x: pose.x, z: pose.z, radius: .35 * p.scale });
+      const pose = this.crowd.walkers[i];
+      const gait = Math.sin(pose.gait) * Math.min(1, pose.speed / .9);
       this.dummy.position.set(pose.x, .1 + Math.abs(gait) * .025, pose.z);
       this.dummy.rotation.set(0, pose.yaw, 0);
       this.dummy.scale.setScalar(p.scale); this.dummy.updateMatrix();

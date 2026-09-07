@@ -1,7 +1,7 @@
 import type { Collider } from './physics';
 
 export type TrafficSpec = { model: 'taxi' | 'citybus'; x: number; z: number; yaw: number };
-export type RoadUser = { x: number; z: number; radius: number };
+export type RoadUser = { x: number; z: number; radius: number; crossing?: boolean };
 export type TrafficCar = TrafficSpec & { speed: number; dx: number; dz: number; halfLength: number; halfWidth: number };
 export type CrossingPhase = 'north-south' | 'east-west' | 'pedestrians' | 'clear';
 
@@ -28,7 +28,7 @@ export class TrafficSimulation {
     // Bound each update, including after a background-tab pause.
     dt = Math.min(dt, 1 / 30);
     this.phaseTime += dt;
-    const occupied = this.cars.some((v) => Math.abs(v.x) < 12 + v.halfLength * Math.abs(v.dx) && Math.abs(v.z) < 12 + v.halfLength * Math.abs(v.dz));
+    const occupied = people.some(p=>p.crossing) || this.cars.some((v) => Math.abs(v.x) < 12 + v.halfLength * Math.abs(v.dx) && Math.abs(v.z) < 12 + v.halfLength * Math.abs(v.dz));
     if (this.phase === 'clear') {
       if (this.phaseTime >= 2 && !occupied) {
         this.phase = this.sequence[this.next]; this.next = (this.next + 1) % 3; this.phaseTime = 0;
@@ -69,16 +69,4 @@ export class TrafficSimulation {
       if (along > 54) { v.x -= v.dx * 108; v.z -= v.dz * 108; v.speed = 0; }
     });
   }
-}
-
-export type PedestrianRoute = { a: [number, number]; b: [number, number]; offset: number; speed: number };
-export function pedestrianPose(p: PedestrianRoute, wave: number, time: number) {
-  const dx = p.b[0] - p.a[0], dz = p.b[1] - p.a[1], length = Math.hypot(dx, dz);
-  // Stagger curb departures; every pedestrian clears before the 27-second green ends.
-  const duration = 22 + (1.05 - p.speed) * 6;
-  const progress = wave === 0 ? 0 : Math.max(0, Math.min(1, (time - p.offset * 2) / duration));
-  const reverse = wave > 0 && wave % 2 === 0;
-  const t = reverse ? 1 - progress : progress;
-  const moving = length > 0 && progress > 0 && progress < 1;
-  return { x: p.a[0] + dx * t, z: p.a[1] + dz * t, moving, yaw: length ? Math.atan2(dx, dz) + (reverse ? Math.PI : 0) : p.offset * Math.PI * 2, speed: length / duration };
 }

@@ -99,20 +99,8 @@ def vehicle(name,bus=False):
     save(name)
 vehicle('taxi');vehicle('citybus',True)
 
-random.seed(109)
-people=[]
-coats=['#a5aaa1','#29404b','#796151','#bfa875','#464f39','#bbb7af','#41464e','#9c655b']
-routes=[([-11,-8.5],[11,-8.5]),([-11,8.5],[11,8.5]),([-8.5,-11],[-8.5,11]),([8.5,-11],[8.5,11]),([-9.2,9.2],[9.2,-9.2])]
-for i in range(36):
-    a,b=routes[i%5];offset=((i//5)%3-1)*.48
-    a=[a[0]+offset,a[1]+offset];b=[b[0]+offset,b[1]+offset]
-    people.append({'a':a,'b':b,'offset':random.random(),'speed':random.uniform(.75,1.05),'scale':random.uniform(.86,1.07),'coat':coats[i%8]})
-for i in range(38):
-    sx=-1 if i%2 else 1;sy=-1 if i%4<2 else 1
-    # Waiting pedestrians inhabit the curb and bus-stop apron, clear of shops.
-    if i<20:a=[sx*random.uniform(10.8,15.8),sy*random.uniform(10.6,11.15)]
-    else:a=[sx*random.uniform(10.7,11.25),sy*random.uniform(14,39)]
-    people.append({'a':a,'b':a,'offset':random.random(),'speed':0,'scale':random.uniform(.86,1.06),'coat':coats[i%8]})
+from crowd_metadata import people_metadata
+people=people_metadata()
 data={'people':people,'vehicles':[{'model':'citybus','x':-4.5,'z':-24,'yaw':0},{'model':'taxi','x':-4.5,'z':-17,'yaw':0},{'model':'taxi','x':4.4,'z':17,'yaw':math.pi},{'model':'taxi','x':-18,'z':4.4,'yaw':math.pi/2},{'model':'taxi','x':22,'z':-4.4,'yaw':-math.pi/2}]}
 (ROOT/'public/models/crossing-life.json').write_text(json.dumps(data,indent=2))
 print('CITY_LIFE_COMPLETE',len(people),'pedestrians',flush=True)

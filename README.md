@@ -37,7 +37,7 @@ The following camera now dollies from **4.2 to 60 meters**, using proportional w
 
 The crossing now has a rounded glazed Tsutaya façade, varied concrete cladding, a cylindrical 109 crown, reference-derived billboards, Japanese signs, modeled café furniture and shelves, rooftop ventilation and railings, individual leaf canopies, bus shelter, vending machines and the station stair entrance. These are real Blender meshes visible from every camera angle.
 
-The scene includes 74 pedestrians with animated limb instances, four moving taxis and a city bus. Traffic follows left-hand lanes, accelerates, queues, stops for the player, and takes turns with pedestrian crossing waves. Collision volumes move with each vehicle. Vehicles recycle beyond the map edge; this is a compact street simulation, not citywide navigation. Haru remains the sole playable character.
+The scene includes 74 pedestrians with animated limb instances, four moving taxis and a city bus. Pedestrians start across all four districts and independently walk between sidewalk destinations at varied speeds. A shared navigation graph avoids buildings, planters, benches and Hachikō; walkers steer around each other and the player, turn smoothly, and animate footsteps from actual distance travelled. Sixteen walkers occasionally cross between districts; only those waiting at a curb obey the crossing timer, and traffic waits for the last walker to finish. Sidewalk journeys continue through every traffic phase. `scripts/crowd_metadata.py` updates their personalities without rebuilding Blender meshes. Traffic follows left-hand lanes, accelerates, queues, and stops for the player. Collision volumes move with each vehicle. Vehicles recycle beyond the map edge; this is a compact street simulation, not citywide navigation. Haru remains the sole playable character.
 
 Hachikō Square sits southwest of the crossing at (-20, 20), marked in gold on the minimap. Its Blender-authored bronze Akita stands on a granite pedestal inside a planted octagonal border, with benches, trees, dedication plaques and lanterns. The separate Draco asset loads only with the crossing and uses Cycles vertex shading. Blue skies and drifting cumulus clouds use a single 28 KB transparent panorama rendered from Blender cloud meshes. The same cloud bake and sky palette work in Blender; day, evening and night blend continuously in Live mode.
 
@@ -49,6 +49,7 @@ blender --background --factory-startup --python-exit-code 1 --python scripts/bui
 blender --background --factory-startup --python-exit-code 1 --python scripts/build_hachiko.py
 blender --background --factory-startup --python-exit-code 1 --python scripts/build_crossing_concept.py
 blender --background --factory-startup --python-exit-code 1 --python scripts/bake_crossing_concept.py
+node scripts/crowd_snapshot.mjs
 blender --background --factory-startup --python-exit-code 1 --python scripts/render_concept_review.py
 blender --background --factory-startup --python-exit-code 1 --python scripts/compact_blender_sources.py
 ```
