@@ -1,30 +1,34 @@
 /* eslint-disable jsx-a11y/prefer-tag-over-role -- An inline SVG map retains vector geometry and an accessible image role. */
 import type { MapId } from './world';
+import canalLayout from './dotonbori-layout.json';
 
 /** Use world coordinates so the explorer stays visible on the extended roads. */
 export function MiniMap({ map, x, z }: { map: MapId; x: number; z: number }) {
   const crossing = map === 'crossing';
-  if (map === 'dotonbori') return <svg viewBox="-39 -73 78 146" role="img" aria-label="Dotonbori canal, three walkable bridges and riverside promenades">
-    <rect x="-39" y="-73" width="78" height="146" fill="#1b2b37"/>
-    <rect x="-8.4" y="-70" width="16.8" height="140" fill="#267b9b"/>
+  const canalEnd = canalLayout.promenadeEnd, canalViewEnd = canalEnd + 6;
+  const canalBridges = [-48, 0, 48, ...canalLayout.extensionBridges.flatMap((v) => [-v, v])];
+  if (map === 'dotonbori') return <svg viewBox={`-84 -${canalViewEnd} 168 ${canalViewEnd * 2}`} role="img" aria-label="Dotonbori canal, seven walkable bridges and extended riverside promenades">
+    <rect x="-84" y={-canalViewEnd} width="168" height={canalViewEnd * 2} fill="#1b2b37"/>
+    <rect x="-8.4" y={-canalEnd} width="16.8" height={canalEnd * 2} fill="#267b9b"/>
     {[-1,1].map((side) => <g key={side}>
-      <rect x={side === -1 ? -18.8 : 8.4} y="-70" width="10.4" height="140" fill="#8c9796" opacity=".65"/>
-      {Array.from({length:14},(_,i) => <rect key={i} x={side === -1 ? -30 : 20} y={-69+i*10} width="10" height="8" fill={i%3 === 0 ? '#c37b85' : '#5b6875'}/>)}
+      <rect x={side === -1 ? -18.8 : 8.4} y={-canalEnd} width="10.4" height={canalEnd * 2} fill="#8c9796" opacity=".65"/>
+      {Array.from({length:30},(_,i) => <rect key={i} x={side === -1 ? -30 : 20} y={-149+i*10} width="10" height="8" fill={i%3 === 0 ? '#c37b85' : '#5b6875'}/>)}
+      {[-1,1].map((end) => <path key={end} d={`M${side*8.4} ${end*canalEnd}H${side*18.8}`} stroke="#decdb2" strokeWidth="1.5"/>)}
     </g>)}
-    {[-48,0,48].map((z) => <g key={z} fill="#decdb2">
+    {canalBridges.map((z) => <g key={z} fill="#decdb2">
       <rect x="-13.5" y={z-3.8} width="27" height="7.6"/>
       {[-1,1].map((side) => <g key={side}>
         <rect x={side===-1?-13.5:8.5} y={z-(z===0?10.6:8.8)} width="5" height={z===0?21.2:17.6}/>
         {[-1,1].map((end) => <path key={end} d={`M${side*11-1} ${z+end*7}h2m-2 ${end*1.2}h2m-2 ${end*1.2}h2`} fill="none" stroke="#82745f" strokeWidth=".6"/>)}
       </g>)}
     </g>)}
-    <text x="0" y="-7" textAnchor="middle" fontSize="4.7" fill="#fbe7bf">Ebisubashi</text>
+    <text x="0" y="-13" textAnchor="middle" fontSize="7" fill="#fbe7bf">Ebisubashi</text>
     <circle cx="-19" cy="-13.5" r="2" fill="#6bbdff"><title>Glico runner</title></circle>
     <circle cx="-19" cy="23.8" r="2" fill="#ec675a"><title>Kani Doraku</title></circle>
     <circle cx="-18" cy="9" r="2" fill="#ffe088"><title>Asahi corner building</title></circle>
     <circle cx="19" cy="40" r="2" fill="#f8c74f"><title>Don Quijote wheel — north bank, east of Ebisubashi</title></circle>
-    <circle cx={x} cy={z} r="4" fill="#e8a4bf" opacity=".3"/>
-    <circle cx={x} cy={z} r="1.8" fill="#ffd6e6"/>
+    <circle cx={x} cy={z} r="7" fill="#e8a4bf" opacity=".3"/>
+    <circle cx={x} cy={z} r="3.2" fill="#ffd6e6"/>
   </svg>;
   const px = crossing ? x : 80 + x * 2, py = crossing ? z : 75 + z * 2;
   return <svg viewBox={crossing ? '-120 -125 240 235' : '0 0 160 150'} role="img" aria-label="Local navigation map">

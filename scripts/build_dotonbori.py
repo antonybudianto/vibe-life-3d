@@ -9,6 +9,7 @@ import numpy as np
 from pathlib import Path
 from mathutils import Vector, Matrix
 ROOT=Path(__file__).resolve().parents[1]
+layout=json.loads((ROOT/'lib/game/dotonbori-layout.json').read_text())
 sys.path.insert(0,str(ROOT/'scripts'))
 import scene_geometry as g
 from blender_lighting import apply_preset
@@ -106,6 +107,14 @@ def umbrella(x,y):
         for xx in [-.22,.22]:g.rod((x+xx,y+yy,0),(x+xx,y+yy,.47),.03,dark)
     collider(x,y,.66,1.1,.85)
 
+def paving_joints(side,start,stop):
+    """Keep the same tile grid and global phase across every promenade segment."""
+    for y in range(math.floor(start/2)*2+1,math.ceil(stop),2):
+        for x in [9.4,11.4,13.4,15.4,17.4]:
+            g.box((side*x,y,.006),(1.97,.014,.012),joint)
+    for x in [9,11,13,15,17,19]:
+        g.box((side*x,(start+stop)/2,.006),(.012,stop-start,.012),joint)
+
 # Retaining walls and full-width promenade. Water is lower than the walking deck.
 g.box((0,0,-2.05),(70,150,.7),joint)
 for side in [-1,1]:
@@ -114,8 +123,7 @@ for side in [-1,1]:
     g.box((side*8.35,0,.035),(.7,140,.07),cap)
     for y in range(-69,70,2):
         g.box((side*8.0,y,-1.02),(.012,.015,1.98),joint)
-        for x in [9.4,11.4,13.4,15.4,17.4]:g.box((side*x,y,.006),(1.97,.014,.012),joint)
-    for x in [9,11,13,15,17,19]:g.box((side*x,0,.006),(.012,140,.012),joint)
+    paving_joints(side,-70,70)
     for y in range(-65,66,7):
         if min(abs(y-b) for b in [-48,0,48])<5:continue
         lamp(side*8.9,y)
@@ -193,16 +201,8 @@ for lo,hi in [(-70,-51.4),(-44.6,-3.8),(3.8,44.6),(51.4,70)]:
     collider(0,(lo+hi)/2,8.22,(hi-lo)/2,0,cameraIgnore=True)
 
 # Blender water grid: wave geometry catches dynamic sunlight in the game.
-verts=[];faces=[]
-for j in range(561):
-    y=-70+j*.25
-    for i in range(69):
-        x=-8.5+i*.25;z=-1.43+.019*math.sin(x*4.3+y*7.7)+.012*math.sin(y*14-x*3.1)
-        verts.append((x,y,z))
-for j in range(560):
-    for i in range(68):
-        k=j*69+i;faces.append((k,k+1,k+70,k+69))
-g.mesh(verts,faces,water,'Dotonbori canal water',True)
+from dotonbori_water_geometry import build as build_water
+build_water(g,water,layout)
 
 # Facade coordinates: u follows the canal, v projects out from each storefront.
 frontages={}
@@ -359,39 +359,8 @@ campaign(side,y,0,23,4.2,6.8,'Don Quijote mascot',[(1311,205),(1364,205),(1364,2
 panel(side,y,0,6.5,13.7,2.4,black,'ドン・キホーテ',yellow,1.6)
 
 # The two open-deck vessels are added after the static scenery is batched.
-# Continue the visual corridor beyond the playable bounds and close the horizon
-# with a compact skyline so orbit views never reveal a world ending in empty sky.
-for sign in [-1,1]:
-    g.box((0,sign*122,-1.45),(17,104,.1),water,name='Dotonbori canal water')
-    for side in [-1,1]:
-        g.box((side*22,sign*122,-.3),(28,104,.6),paving,name='Dotonbori distant paving')
-        g.box((side*8.3,sign*122,-1.1),(.62,104,2.2),stone)
-        for i in range(8):
-            yy=sign*(76+i*11);h=[23,29,25,32,22,27,24,30][(i+(side+1))%8]
-            g.box((side*24,yy,h/2),(10,10.5,h),facades[(i+2)%6])
-            for z in range(4,int(h),3):
-                g.box((side*18.9,yy,z-1.25),(.32,10.5,.26),stone)
-                for u in [-3.6,-1.2,1.2,3.6]:
-                    g.panel((side*18.82,yy+u,z),1.8,1.9,windows[(z+round(u)+i)%4],-side*math.pi/2)
-                    g.box((side*18.76,yy+u,z),(.12,.08,1.9),dark)
-            vertical(side,yy,side*3.8,h*.52,labels[i%12],signs[i%8],h*.7,1.65)
-            panel(side,yy,-side,4.2,6.1,1.2,white,labels[(i+2)%12],neonred,.8)
-            panel(side,yy,-side,10.1,4.6,2.1,signs[(i+3)%8],labels[(i+6)%12],None,.9)
-            g.box((side*25,yy+1,h+1.35),(4.6,4.1,2.7),facades[(i+4)%6])
-            rail((side*19.2,yy-5),(side*19.2,yy+5),h+.1)
-            g.box((side*21.2,yy-2,h+.55),(1.5,2.2,1.1),silver)
-            for u in [-4,-2,0,2,4]:g.sphere((side*17.9,yy+u,3.1),(.15,.19,.26),warm,8,5)
-            g.box((side*8.0,yy,-.6),(.08,.4,.6),warm)
-        # Small bridges continue the perspective beyond the playable district.
-        rail((side*8.4,sign*71),(side*8.4,sign*168),0)
-    for yy in [sign*88,sign*122]:
-        g.box((0,yy,1.75),(18,3.2,.65),stone)
-        for end in [-1,1]:rail((-9,yy+end*1.55),(9,yy+end*1.55),2.08)
-    for x in [-43,-33,-22,-9,6,21,38]:
-        h=random.uniform(19,41);depth=random.uniform(174,184)
-        g.box((x,sign*depth,h/2),(random.uniform(7,11),12,h),facades[abs(x)%6])
-        for z in range(4,int(h),3):
-            for u in [-2,0,2]:g.panel((x+u,sign*(depth-6.1),z),.75,1.25,windows[(z+int(u))%4],0 if sign==1 else math.pi)
+from dotonbori_background import build as build_background
+background=build_background(globals())
 objects=g.flush()
 from dotonbori_cruises import build_cruises
 objects+=build_cruises(globals())
@@ -401,7 +370,7 @@ objects+=build_cruises(globals())
 
 # Practical light spill is baked separately from the sun.
 for side in [-1,1]:
-    for i,y in enumerate(range(-60,61,10)):
+    for i,y in enumerate(range(-150,151,10)):
         bpy.ops.object.light_add(type='AREA',location=(side*17.6,y,3.1));o=bpy.context.object
         o.name='Dotonbori shop spill';o.data.energy=150;o.data.color=(1,.38,.10);o.data.shape='DISK';o.data.size=4
         o.rotation_euler=(Vector((side*12,y,0))-o.location).to_track_quat('-Z','Y').to_euler();o['baked_shop']=True;o['base_power']=150
@@ -418,7 +387,7 @@ s=bpy.context.scene;s.camera=cam;s.render.resolution_x=1500;s.render.resolution_
 s['design_reference']='Four user supplied Dotonbori directional concept boards; compact stylized reconstruction'
 s['bridge_navigation']='Four longitudinal stair flights per bridge; 0.1275m main risers, 5m landings, parabolic crown 2.79m'
 s['pedestrian_count']=36
-data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-68,68],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=5,architecture=architecture)
+data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-layout['promenadeEnd'],layout['promenadeEnd']],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=7,architecture=architecture,background=background)
 (ROOT/'public/models/dotonbori.json').write_text(json.dumps(data,indent=2))
 if '--navigation-only' in sys.argv:
     print('DOTONBORI_NAVIGATION_UPDATED',len(colliders),flush=True)

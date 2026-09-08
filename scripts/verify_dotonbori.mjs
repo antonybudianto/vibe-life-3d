@@ -126,7 +126,8 @@ for(const phase of ['day','evening','night','day']) {
 }
 const b=fs.readFileSync('public/models/dotonbori.glb');assert.equal(b.toString('utf8',0,4),'glTF');
 const gltf=JSON.parse(b.toString('utf8',20,20+b.readUInt32LE(12)));
-assert.ok(b.length<9e6,'Detailed foliage and signs stay within the 9 MB map budget');
+// Seven navigable bridges and the larger shared AO atlas add about 1 MB.
+assert.ok(b.length<10.5e6,'The expanded seven-bridge district stays within 10.5 MB');
 assert.equal(gltf.nodes.filter(n=>n.extras?.cruise).length,2);
 assert.ok(gltf.nodes.some(n=>n.name==='Ebisubashi deck'));
 assert.ok(gltf.nodes.some(n=>n.name==='Dotonbori canal water'));
@@ -171,6 +172,8 @@ assert.equal(gltf.materials.filter(m=>m.extras?.bakedLightmap).length,3,'Every w
 assert.ok(gltf.materials.filter(m=>m.extras?.bake_mode).length>25,'Completed detail bakes must be in the delivered GLB');
 const bake=JSON.parse(fs.readFileSync('assets/bakes/dotonbori.json','utf8'));
 assert.equal(bake.engine,'CYCLES');assert.ok(bake.vertexBakes.length>30);assert.ok(bake.aoStd>.03);assert.ok(bake.lightmapMaximum>.1);
+assert.equal(bake.resolution,4096,'Expanded walkways retain the original texel density');
+assert.equal(bake.walkableExtent,152,'The bake covers both new ends of the playable district');
 assert.ok(bake.vertexBakes.every(v=>v.minimum>.001&&v.corners>0));
 assert.equal(bake.waterNormalEngine,'CYCLES');assert.ok(bake.waterNormalStd>.03);
 assert.ok(fs.existsSync('public'+bake.waterNormal));

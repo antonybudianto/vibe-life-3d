@@ -26,7 +26,9 @@ const compiled = () => {
 };
 atmosphere.applyTo(material);
 const shader = compiled();
-assert.equal(atmosphere.level, 'clear');
+assert.equal(atmosphere.level, 'medium');
+assert.equal(shader.uniforms.hazeStrength.value, 1, 'Medium is active on startup');
+atmosphere.setLevel('clear');
 assert.equal(shader.uniforms.hazeStrength.value, 0, 'Clear removes fog at every distance');
 assert.equal(atmosphere.fog.near, 85);
 assert.equal(atmosphere.fog.far, 200, 'Medium preserves the existing distance falloff');

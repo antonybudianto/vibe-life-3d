@@ -16,7 +16,7 @@ export default function Game() {
   const [status, setStatus] = useState<Status>(baseStatus);
   const [travel, setTravel] = useState<TravelMode>('walk');
   const [time, setTime] = useState<TimeMode>('evening');
-  const [haze, setHaze] = useState<HazeLevel>('clear');
+  const [haze, setHaze] = useState<HazeLevel>('medium');
   const [running, setRunning] = useState(false), [paused, setPaused] = useState(false);
   const [panel, setPanel] = useState<'help' | 'settings' | 'character' | null>(null);
   const [quality, setQuality] = useState('balanced');
@@ -95,7 +95,7 @@ export default function Game() {
           <ToggleGroupItem value="small">Small</ToggleGroupItem>
           <ToggleGroupItem value="medium">Medium</ToggleGroupItem>
         </ToggleGroup>
-        <p className="setting-note">Clear is the default. Clouds drift at every level.</p>
+        <p className="setting-note">Medium is the default. Clouds drift at every level.</p>
         <label htmlFor="graphics-quality">Graphics</label>
         <Select value={quality} onValueChange={(v) => { if (v) { setQuality(v); game.current?.setQuality(v as 'high'|'balanced'); } }}>
           <SelectTrigger id="graphics-quality" className="quality-select"><SelectValue>{quality === 'balanced' ? 'Balanced · smoother on mobile' : 'High · detail & light bloom'}</SelectValue></SelectTrigger>

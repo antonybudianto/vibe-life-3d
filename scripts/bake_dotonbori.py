@@ -5,6 +5,8 @@ ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 from bake_assets import cycles, select, occlusion, irradiance
 import scene_geometry as g
 start=time.time()
+layout=json.loads((ROOT/'lib/game/dotonbori-layout.json').read_text())
+atlas_extent=layout['promenadeEnd']+2
 bpy.ops.wm.open_mainfile(filepath=str(ROOT/'assets/blender/dotonbori.blend'))
 s=bpy.context.scene;cycles(s);s.cycles.samples=24
 # Store unit-strength practical illumination; runtime scales it once per phase.
@@ -49,18 +51,19 @@ for o in ground:
     for p in o.data.polygons:
         for li in p.loop_indices:
             v=o.matrix_world@o.data.vertices[o.data.loops[li].vertex_index].co
-            uv.data[li].uv=((v.x+20)/40,(v.y+72)/144) if p.normal.z>.9 else (-1,-1)
+            uv.data[li].uv=((v.x+21)/42,(v.y+atlas_extent)/(atlas_extent*2)) if p.normal.z>.9 else (-1,-1)
     o.data.uv_layers[0].active_render=True
 mats=list({o.data.materials[0] for o in ground})
-report.update(occlusion(ground,mats,'dotonbori',2048))
-report.update(irradiance(ground,mats,'dotonbori',2048))
+report.update(occlusion(ground,mats,'dotonbori',4096))
+report.update(irradiance(ground,mats,'dotonbori',4096))
+report['walkableExtent']=layout['promenadeEnd']
 for o in ground:o.data.uv_layers.active_index=0
 for m in bpy.data.materials:
     if m.use_nodes and m.node_tree.nodes.get('Cycles bake target'):m.node_tree.nodes.remove(m.node_tree.nodes['Cycles bake target'])
 from dotonbori_water import bake_water_normal
 report.update(bake_water_normal(ROOT))
 g.compact_baked_colors(objects)
-s['baking_pipeline']='Cycles vertex AO, 2048px UV1 ambient occlusion and independent shop irradiance; sunlight remains dynamic'
+s['baking_pipeline']='Cycles vertex AO, 4096px UV1 ambient occlusion and independent shop irradiance across seven bridges; sunlight remains dynamic'
 roots=[o for o in s.objects if o.type=='EMPTY']
 g.export_atomic(ROOT/'public/models/dotonbori.glb',objects+roots)
 from blender_lighting import apply_preset

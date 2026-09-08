@@ -6,8 +6,8 @@ const STRENGTH: Record<HazeLevel, number> = { clear: 0, small: .35, medium: 1 };
 /** Shared by the city and its reflection, including instanced pedestrians. */
 export class Atmosphere {
   readonly fog = new THREE.Fog(0x8896b8, 85, 200);
-  level: HazeLevel = 'clear';
-  private strength = { value: 0 };
+  level: HazeLevel = 'medium';
+  private strength = { value: STRENGTH.medium };
   private time = { value: 0 };
   private materials = new WeakSet<THREE.Material>();
 

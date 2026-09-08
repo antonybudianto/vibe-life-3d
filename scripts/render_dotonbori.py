@@ -49,6 +49,12 @@ for name,position,target,lens in [
     ('landmarks',(15,9,23),(-19,9,17),11),
     ('south',(13,-55,32),(-18,6,12),20),
     ('geography',(2,46,16),(0,-22,11),24),
+    ('east-continuation',(10.2,-34,6.4),(10.36,-94,5.8),28),
+    ('west-continuation',(-10,36,6.4),(-8,100,5.8),28),
+    ('extension-first',(16,77,6),(4,91,1.3),24),
+    ('extension-second',(-15,151,5.2),(-3,138,1.2),22),
+    ('paving-west',(12,60,11),(12,81,0),30),
+    ('paving-east',(12,-60,11),(12,-81,0),30),
 ]:
     s.camera.location=position;s.camera.data.lens=lens
     s.camera.rotation_euler=(Vector(target)-s.camera.location).to_track_quat('-Z','Y').to_euler()
