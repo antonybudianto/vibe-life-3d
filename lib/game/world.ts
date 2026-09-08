@@ -6,7 +6,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { moveWithCollision, resolveTime, groundHeight, followGround, canStepTo, type Collider, type WalkSurface } from './physics';
+import { moveWithCollision, moveMotorcycleWithCollision, placeMotorcycle, resolveTime, groundHeight, followGround, canStepTo, type Collider, type WalkSurface } from './physics';
 import phases from './lighting.json';
 import dotonboriPhases from './dotonbori-lighting.json';
 import { elevatedPitch, zoomDistance } from './camera';
@@ -271,16 +271,21 @@ export class World {
       try {
         const asset = await this.loader.loadAsync(`/models/${mode}.glb`);
         if (!this.alive) { this.disposeObject(asset.scene); return; }
-        this.vehicles[mode] = this.prep(asset.scene); this.scene.add(asset.scene);
+        this.vehicles[mode] = this.prep(asset.scene); asset.scene.visible = false; this.scene.add(asset.scene);
       } catch (e) { this.fail(e); return; }
       this.status.loading = false; this.status.progress = 100; this.emit();
     }
+    const bike = mode === 'motorcycle' && this.data
+      ? placeMotorcycle(this.player.x, this.player.z, this.heading, this.movementColliders, this.data.bounds, this.data.surfaces)
+      : null;
+    if (mode === 'motorcycle' && this.data && !bike) { this.emit(); return; }
     this.travel = mode; this.velocity = 0; this.verticalVelocity = 0;
     this.lastPhase = ''; this.applyTime();
     // A larger vehicle cannot spawn inside a wall when changing from walking.
     if (this.data) {
-      const p = moveWithCollision(this.player.x, this.player.z, 0, 0, this.radius(), this.movementColliders, this.data.bounds);
+      const p = bike ?? moveWithCollision(this.player.x, this.player.z, 0, 0, this.radius(), this.movementColliders, this.data.bounds);
       this.player.x = p.x; this.player.z = p.z;
+      if (bike) this.heading = bike.heading;
     }
     this.player.y = groundHeight(this.player.x, this.player.z, this.data?.surfaces);
     for (const [name, object] of Object.entries(this.vehicles)) object!.visible = name === mode;
@@ -295,6 +300,7 @@ export class World {
   recenter() { this.yaw = this.heading - Math.PI; this.pitch = .30; }
   jump() { if (!this.paused && !this.status.loading && this.travel === 'walk' && this.player.y <= groundHeight(this.player.x, this.player.z, this.data?.surfaces) + .025) this.verticalVelocity = 5.3; }
   setQuality(value: 'high' | 'balanced') { this.quality = value; this.bloom.enabled = value === 'high'; this.resize(); }
+  // Visitors keep a broad avoidance distance; bike/scenery contact uses its capsule.
   private radius() { return this.travel === 'car' ? 1.7 : this.travel === 'motorcycle' ? .95 : .32; }
   private clearInput() { this.keys.clear(); this.joystick.x = 0; this.joystick.y = 0; this.pointers.clear(); }
 
@@ -394,6 +400,7 @@ export class World {
     let iz = Number(backward) - Number(forward) + this.joystick.y;
     const len = Math.hypot(ix, iz); if (len > 1) { ix /= len; iz /= len; }
     let dx = 0, dz = 0;
+    const previousHeading = this.heading;
     if (this.travel === 'walk') {
       const sprint = this.running || this.keys.has('ShiftLeft') || this.keys.has('ShiftRight');
       const speed = sprint ? 4.8 : 2.1;
@@ -409,13 +416,29 @@ export class World {
       this.velocity += -iz * 7 * dt;
       if (Math.abs(iz) < .08) this.velocity *= Math.exp(-2.1 * dt);
       this.velocity = THREE.MathUtils.clamp(this.velocity, -max * .35, max);
-      this.heading -= ix * dt * 1.7 * THREE.MathUtils.clamp(this.velocity / 3, -1, 1);
+      // A rider can maneuver at walking speed and turn away after a collision.
+      // Reverse steering retains its direction; cars keep their rolling turn.
+      const steering = this.travel === 'motorcycle'
+        ? (this.velocity < -.05 ? -1 : 1) * Math.max(.65, Math.min(1, Math.abs(this.velocity) / 3))
+        : THREE.MathUtils.clamp(this.velocity / 3, -1, 1);
+      this.heading -= ix * dt * 1.7 * steering;
       dx = Math.sin(this.heading) * this.velocity * dt;
       dz = Math.cos(this.heading) * this.velocity * dt;
     }
-    const p = moveWithCollision(this.player.x, this.player.z, dx, dz, this.radius(), this.movementColliders, this.data.bounds);
+    let p;
+    if (this.travel === 'motorcycle') {
+      let bike = moveMotorcycleWithCollision(this.player.x, this.player.z, dx, dz, this.heading, this.movementColliders, this.data.bounds);
+      // Reject a turn that cannot fit between walls instead of ejecting the bike.
+      if (!bike.clear || Math.hypot(bike.x - this.player.x - dx, bike.z - this.player.z - dz) > .10) {
+        this.heading = previousHeading;
+        dx = Math.sin(this.heading) * this.velocity * dt; dz = Math.cos(this.heading) * this.velocity * dt;
+        bike = moveMotorcycleWithCollision(this.player.x, this.player.z, dx, dz, this.heading, this.movementColliders, this.data.bounds);
+      }
+      p = bike.clear ? bike : { x: this.player.x, z: this.player.z };
+    } else p = moveWithCollision(this.player.x, this.player.z, dx, dz, this.radius(), this.movementColliders, this.data.bounds);
     if (!canStepTo(this.player.y, oldFloor, groundHeight(p.x, p.z, this.data.surfaces))) {
       p.x = this.player.x; p.z = this.player.z;
+      if (this.travel === 'motorcycle') this.heading = previousHeading;
     }
     if (this.travel !== 'walk' && Math.hypot(p.x - this.player.x, p.z - this.player.z) < Math.hypot(dx, dz) * .3) this.velocity *= .7;
     this.player.x = p.x; this.player.z = p.z;
