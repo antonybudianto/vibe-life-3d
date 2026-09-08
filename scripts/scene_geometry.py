@@ -1,5 +1,6 @@
 """Fast Blender mesh batching for the Shibuya art pass. Coordinates are Z-up."""
 import bpy,math,random
+import os
 from array import array
 from mathutils import Vector,Matrix
 
@@ -107,3 +108,10 @@ def export(path,objects):
     bpy.ops.object.select_all(action='DESELECT')
     for o in objects:o.select_set(True)
     bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',use_selection=True,export_apply=True,export_extras=True,export_cameras=False,export_lights=False,export_image_format='WEBP',export_image_quality=88,export_draco_mesh_compression_enable=True,export_draco_mesh_compression_level=6,export_draco_position_quantization=16,export_draco_normal_quantization=12,export_draco_texcoord_quantization=14,export_draco_color_quantization=10)
+
+
+def export_atomic(path,objects):
+    """Avoid truncating an asset currently held open by the local web server."""
+    staging=path.with_name(path.stem+'.staging.glb')
+    export(staging,objects)
+    os.replace(staging,path)

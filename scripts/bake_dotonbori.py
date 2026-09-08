@@ -62,7 +62,7 @@ report.update(bake_water_normal(ROOT))
 g.compact_baked_colors(objects)
 s['baking_pipeline']='Cycles vertex AO, 2048px UV1 ambient occlusion and independent shop irradiance; sunlight remains dynamic'
 roots=[o for o in s.objects if o.type=='EMPTY']
-g.export(ROOT/'public/models/dotonbori.glb',objects+roots)
+g.export_atomic(ROOT/'public/models/dotonbori.glb',objects+roots)
 from blender_lighting import apply_preset
 apply_preset('evening')
 bpy.data.orphans_purge(do_recursive=True)
