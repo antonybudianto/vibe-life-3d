@@ -13,6 +13,13 @@ def perimeter_ramps(n,y,edge,top):
     ramp is outside the plaza railing, alongside—not replacing—the stairs.
     """
     g=n['g'];silver=n['silver'];stone=n['stone'];width=1.65
+    def deck_sample(fn,x):
+        # The deck is 24 planar strips. Match their interpolation exactly;
+        # independently sampling the circle at 48 points crosses the fascia.
+        i=max(0,min(23,math.floor((x+8.5)*24/17)))
+        a=-8.5+i*17/24;b=a+17/24
+        return fn(a)+(fn(b)-fn(a))*(x-a)/(b-a)
+    def deck_height(x):return deck_sample(lambda xx:2.55+.24*max(0,1-(xx/8.5)**2),x)
     def level(x):
         t=abs(x)/8.5
         # Level transitions at the plaza entrance and lower bank landings.
@@ -20,22 +27,24 @@ def perimeter_ramps(n,y,edge,top):
     for end in [-1,1]:
         for i in range(48):
             a=-8.5+i*17/48;b=-8.5+(i+1)*17/48
-            ea,eb=edge(a),edge(b)
+            ea,eb=deck_sample(edge,a),deck_sample(edge,b)
             za=level(a);zb=level(b)
             ia,ib=y+end*ea,y+end*eb;oa,ob=ia+end*width,ib+end*width
             v=[(a,ia,za),(b,ib,zb),(b,ob,zb),(a,oa,za)]
             # One upward-facing surface: reversed duplicate faces also compete
             # in the depth buffer and sample the underside's excluded bake UVs.
             g.mesh(v,[(0,1,2,3) if end==1 else (3,2,1,0)],n['cap'],'Ebisubashi deck')
-            g.mesh([(x,yy,zz-.20) for x,yy,zz in v],[(0,1,2,3),(3,2,1,0)],stone,'Bridge solid soffits')
+            g.mesh([(x,yy,zz-.20) for x,yy,zz in v],[(3,2,1,0) if end==1 else (0,1,2,3)],stone,'Bridge solid soffits')
             n['surfaces'].append(dict(minX=a,maxX=b,minZ=min(-ia,-oa),maxZ=max(-ia,-oa),endMinZ=min(-ib,-ob),endMaxZ=max(-ib,-ob),height=za,endHeight=zb))
             # Inner wall separates the lower path from the higher plaza. The
             # two middle slices form the entrance and must remain open.
             if not (a>=-17/24-.001 and b<=17/24+.001):
-                ha=2.55+.24*max(0,1-(a/8.5)**2);hb=2.55+.24*max(0,1-(b/8.5)**2)
-                g.mesh([(a,ia,za-.2),(b,ib,zb-.2),(b,ib,hb),(a,ia,ha)],[(0,1,2,3),(3,2,1,0)],stone)
+                ha,hb=deck_height(a),deck_height(b)
+                # One continuous retaining face covers the deck fascia and
+                # lower ramp wall. Materials already render both sides.
+                g.mesh([(a,ia,min(za-.2,ha-.94)),(b,ib,min(zb-.2,hb-.94)),(b,ib,hb),(a,ia,ha)],[(3,2,1,0) if end==1 else (0,1,2,3)],stone,'Ebisubashi ramp retaining walls')
                 g.rod((a,ia+end*.07,za+.86),(b,ib+end*.07,zb+.86),.032,silver,8)
-            g.mesh([(a,oa,za),(b,ob,zb),(b,ob,zb-.6),(a,oa,za-.6)],[(0,1,2,3),(3,2,1,0)],silver)
+            g.mesh([(a,oa,za),(b,ob,zb),(b,ob,zb-.6),(a,oa,za-.6)],[(0,1,2,3) if end==1 else (3,2,1,0)],silver,'Ebisubashi ramp fascia')
             from dotonbori_bridge import baluster
             for h in [.10,1.1]:g.rod((a,oa,za+h),(b,ob,zb+h),.040,silver,8)
             tangent=(b-a,ob-oa)

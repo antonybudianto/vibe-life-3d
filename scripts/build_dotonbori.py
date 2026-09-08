@@ -151,9 +151,12 @@ def bridge(y,main=True):
         surfaces.append(dict(minX=a,maxX=b,minZ=-y-ea,maxZ=-y+ea,endMinZ=-y-eb,endMaxZ=-y+eb,height=ha,endHeight=hb))
         for sgn in [-1,1]:
             yy=y+sgn*ea;yb=y+sgn*eb
-            g.mesh([(a,yy,ha),(b,yb,hb),(b,yb,hb-.94),(a,yy,ha-.94)],[(0,1,2,3),(3,2,1,0)],silver if main else stone)
-            g.rod((a,yy,ha-.92),(a,yy,ha-.02),.012,joint,4)
             entrance=main and j in [11,12]
+            # The ramp's retaining wall owns this elevation outside the entry.
+            # A second fascia here overlaps it and flickers after GLB export.
+            if not main or entrance:
+                g.mesh([(a,yy,ha),(b,yb,hb),(b,yb,hb-.94),(a,yy,ha-.94)],[(0,1,2,3) if sgn==1 else (3,2,1,0)],silver if main else stone)
+            if not main:g.rod((a,yy,ha-.92),(a,yy,ha-.02),.012,joint,4)
             if main and not entrance:
                 from dotonbori_bridge import parapet
                 parapet(globals(),(a,yy,ha),(b,yb,hb))
