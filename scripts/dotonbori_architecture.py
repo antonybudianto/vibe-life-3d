@@ -13,22 +13,22 @@ def build(n):
     white=n['white'];red=n['neonred'];cream=n['cream'];warm=n['warm']
     blue=n['blue'];yellow=n['yellow'];windows=n['windows'];jp=n['jp']
     stone=n['stone'];rail=n['rail'];collider=n['collider']
-    tile=mat('pearl ceramic',(.43,.46,.48),.6)
+    tile=mat('pearl ceramic',(.68,.70,.68),.6)
     grout=mat('ceramic joints',(.20,.24,.27),.9)
-    concrete=mat('cool concrete',(.32,.35,.39),.84)
+    concrete=mat('cool concrete',(.52,.55,.58),.84)
     bronze=mat('bronze window frames',(.12,.072,.034),.37,.55)
     brick=mat('warm terracotta',(.24,.12,.08),.86)
-    slate=mat('slate cladding',(.085,.115,.16),.68)
+    slate=mat('slate cladding',(.25,.29,.34),.68)
     cladding=[tile,concrete,brick,slate,n['facades'][3],n['facades'][0]]
     # Center, frontage, height, architecture family, reserved landmark.
     parcels={
         -1:[(-65,9.6,22,0,''),(-55.5,8.8,28,2,''),(-46.7,7.5,25,1,''),
-            (-38.3,8.7,31,3,''),(-23.8,19.6,25,4,'kani'),
+            (-38.3,8.7,21,0,''),(-23.8,19.6,25,4,'tsutaya'),
             (-9,9.7,33,0,'asahi'),(11.5,22.7,35,1,'glico'),(28.5,10.7,31,0,'promise'),
             (42,15.7,32,3,''),(56,11.7,28,2,''),(66.5,8.7,22,0,'')],
         1:[(-65,9.6,27,1,''),(-55,9.7,22,0,''),(-40,18.7,32,3,'wheel'),
-           (-24.5,8.7,29,0,''),(-16,7.7,27,2,'fugu'),
-           (-7,9.7,34,3,'ohsho'),(7,17.7,31,2,''),(21,9.7,24,2,''),
+           (-24.5,8.7,19,0,''),(-16,7.7,23,1,''),
+           (-7,9.7,37,3,'glass-tower'),(7,17.7,22,2,'glass-retail'),(21,9.7,24,2,''),
            (29.5,6.7,31,1,''),(38,9.7,31,3,''),(48.5,10.7,26,0,''),
            (59,9.7,30,2,''),(67,5.7,22,1,'')]
     }
@@ -36,9 +36,16 @@ def build(n):
     report=[]
     for side,rows in parcels.items():
         for idx,(y,w,h,style,hero) in enumerate(rows):
-            front=19+[.15,.65,-.12,.35][(idx+(side+1))%4]
+            front=(18.5 if abs(y)<15 else 17.2)+[.15,.65,-.12,.35][(idx+(side+1))%4]
+            if abs(y)>55:front=19.2
             if hero=='asahi':front=17.95
             n['frontages'][side,y]=front
+            if hero in ['tsutaya','glass-tower','glass-retail','wheel']:
+                from dotonbori_realism import frontage
+                frontage(n,side,y,w,h,front,hero)
+                collider(side*(front+5),y,5.7,w/2,h)
+                report.append(dict(side=side,center=y,width=w,height=h,front=front,family=hero,landmark=hero))
+                continue
             if hero=='asahi':
                 from dotonbori_asahi import build_asahi
                 build_asahi(n,side,y,w,h,front)
@@ -59,7 +66,7 @@ def build(n):
             collider(side*(front+5),y,5.9,w/2,h)
             for u in [-w/2+.14,w/2-.14]:box(u,-.1,h/2,1.5,.28,h,wall)
             # Every family has its own floor rhythm and bay count.
-            floor=[3.05,3.5,2.85,3.3,3.15][style]
+            floor=[2.8,3.65,3.0,3.3,3.15][style]
             bay_count=max(2,round(w/[2.2,3.1,2.7,2.35,3.0][style]))
             usable=w-.70;bay=usable/bay_count
             for level in range(1,int((h-1)/floor)):
@@ -74,7 +81,7 @@ def build(n):
                     lit=not covered and (level<4 or (j+level*3+idx)%5<2)
                     interior=windows[(j+idx+level)%3] if lit else glass
                     g.panel(pos(side,y,u,-.57,z),ww,hh,interior,angle)
-                    for edge in [-1,1]:box(u+edge*bay/2,-.12,z,1.15,.14,hh+.25,bronze if style==2 else wall)
+                    for edge in [-1,1]:box(u+edge*bay/2,-.12,z,.40 if style==0 else .8,.14,hh+.25,bronze if style==2 else wall)
                     box(u,.07,z-hh/2,.40,ww+.15,.13,stone)
                     # Transoms, slim mullions, a recessed sill, and interior furniture.
                     box(u,.02,z+.26,.12,ww,.06,bronze if style==2 else dark)
@@ -135,9 +142,8 @@ def build(n):
                     for k in range(5):panel(side,y,-edge,6.5+k*3.4,1.32,2.6,[white,red,blue][k%3],['焼\n肉','寿\n司','珈\n琲'][k%3],red if k%3==0 else white,.72)
                     panel(side,y,0,h-3.2,w*.80,2.1,red,'お好み焼 道頓堀',white,.80)
                 else:
-                    vertical(side,y,-edge,16.0,'大阪王将',red,16,2.05)
-                    vertical(side,y,edge,10.5,'串かつだるま',white,9,1.5)
-                    panel(side,y,0,h-3,w*.72,3.8,blue,'道頓堀',white,1.3)
+                    vertical(side,y,-edge,min(16,h*.56),labels[idx%8],white,min(13,h*.5),1.35)
+                    panel(side,y,edge,8.5,1.2,3.2,white,'ビル',n['black'],.8)
                 # Double-sided blade sign on brackets, readable along the canal.
                 u=-side*(w/2-.28);v=1.08;z=6.5+idx%3*1.4
                 box(u,v,z,1.4,.22,2.65,dark)

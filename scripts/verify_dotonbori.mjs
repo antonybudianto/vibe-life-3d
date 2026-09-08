@@ -11,6 +11,10 @@ function moduleFrom(path, require = () => ({})) {
   return ctx.exports;
 }
 const physics=moduleFrom('lib/game/physics.ts');
+// Curved bridge slices and longitudinal ramps must agree with rendered geometry.
+const tapered={minX:0,maxX:2,minZ:-2,maxZ:2,endMinZ:-4,endMaxZ:4,height:2,endHeight:3};
+assert.equal(physics.groundHeight(1,2.8,[tapered]),2.5);
+assert.equal(physics.groundHeight(1,3.2,[tapered]),0,'No invisible floor beyond a curved deck edge');
 const {findCanalSurface,CanalWater}=moduleFrom('lib/game/canal-water.ts',n=>n==='three'?THREE:{Reflector});
 // Reproduce the actual GLTFLoader name transformation that previously disabled water.
 const bytes=Buffer.from(new Float32Array([-1,0,-1,1,0,-1,0,0,1]).buffer);
@@ -109,8 +113,21 @@ for (const z of [-62,-30,23,63]) {
 }
 const edge=world(0,0,Math.PI);edge.keys.add('KeyW');
 for(let i=0;i<300;i++)edge.step(1/60);
-assert.ok(edge.player.z<3.5,'Bridge side railing blocks canal access');assert.ok(Math.abs(edge.player.y-2.79)<1e-6);
+assert.ok(edge.player.z>7.9&&edge.player.z<8.3,'Central opening reaches the perimeter ramp and its outer railing blocks canal access');assert.ok(Math.abs(edge.player.y-2.79)<1e-6);
 assert.ok(Math.abs(edge.player.x)<.01,'Touching a long railing does not teleport the avatar sideways');
+// Stairs and the outer ramp are independent, usable routes in both directions.
+const mainTreads=data.surfaces.filter(s=>s.minX>10&&s.maxX<14&&s.minZ>3.799&&s.maxZ<10.61);
+assert.equal(mainTreads.length,20,'Main bank approach has twenty actual stair treads');
+assert.ok(mainTreads.every(s=>s.endHeight===undefined&&s.endHeightZ===undefined),'Bank stairs have level treads');
+for(const side of [-1,1])for(const end of [-1,1]) {
+  const w=world(0,0),points=[[0,end*7.725]];
+  for(let i=1;i<=17;i++) { const x=i*.5;points.push([side*x,end*(3.8+3.1*(1-(x/8.5)**2)+.825)]); }
+  points.push([side*9.4,end*4.625],[side*9.4,end*8]);
+  for(const [x,z] of points)walkTo(w,x,z);
+  assert.equal(w.player.y,0,'Perimeter ramp exits beside the stairs onto the riverwalk');
+  for(const [x,z] of points.slice().reverse())walkTo(w,x,z);
+  walkTo(w,0,0);assert.equal(w.player.y,2.79,'Separate ramp returns to the plaza through its central opening');
+}
 const paused=world(0,0);paused.keys.add('KeyW');paused.paused=true;paused.step(1);assert.equal(paused.player.z,0);
 // Exercise actual time application repeatedly, including returning to daytime.
 const lit=world(0,0), material=new THREE.MeshStandardMaterial({emissive:0xff6020,emissiveIntensity:2});
@@ -138,6 +155,10 @@ assert.equal(donki.side,1,'Don Quijote occupies the north bank');
 assert.equal(glico.side,-1,'Glico occupies the opposite south bank');
 assert.ok(donki.center<0&&glico.center>0,'Don Quijote is east of Ebisubashi; Glico is west (game +Z is east)');
 const asahi=data.architecture.find(p=>p.landmark==='asahi');
+assert.ok(data.architecture.some(p=>p.landmark==='tsutaya'&&p.side===-1&&p.center<0),'TSUTAYA anchors the south-bank retail block');
+assert.ok(data.architecture.some(p=>p.landmark==='glass-retail'&&p.side===1),'Contrasting glazed retail shell is across the canal');
+assert.ok(!data.architecture.some(p=>p.landmark==='fugu'||p.landmark==='kani'),'Retired or street-facing attractions are not canal-front parcels');
+assert.ok(gltf.nodes.some(n=>n.name==='Ebisu Tower 32 gondolas'),'The full wheel cabin assembly is exported');
 assert.equal(asahi.side,glico.side,'Asahi shares Glico’s bank in the supplied photograph');
 assert.ok(asahi.center<0,'Asahi occupies the corner east of the main bridge');
 assert.ok(!gltf.nodes.some(n=>n.name.startsWith('Cruise Glazing')),'The photo reference requires open passenger decks');

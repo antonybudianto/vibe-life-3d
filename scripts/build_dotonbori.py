@@ -125,69 +125,84 @@ for side in [-1,1]:
         g.box((side*8.0,y,-1.02),(.012,.015,1.98),joint)
     paving_joints(side,-70,70)
     for y in range(-65,66,7):
-        if min(abs(y-b) for b in [-48,0,48])<5:continue
+        if abs(y)<7 or min(abs(y-b) for b in [-48,0,48])<5:continue
         lamp(side*8.9,y)
         g.box((side*7.96,y,-.65),(.05,.36,.65),warm)
-    for lo,hi in [(-70,-52),(-44,-4.2),(4.2,44),(52,70)]:
+    for lo,hi in [(-70,-52),(-44,-5.5),(5.5,44),(52,70)]:
         rail((side*8.38,lo),(side*8.38,hi),.08)
         collider(side*8.37,(lo+hi)/2,.08,(hi-lo)/2,1.28)
-    for y in [-59,-32,-18,18,33,60]:tree(side*16.7,y)
-    for y in [-25,24,57]:umbrella(side*17,y)
+    # The central riverwalk is a working urban frontage, not a planted boulevard.
+    for y in ([-59,60] if side==-1 else [60]):tree(side*16.7,y)
 
-# Stone bridges with longitudinal stairs, matching the concept's riverbank access.
+# Rounded Ebisubashi plaza and ramps; secondary crossings retain stair access.
 def bridge(y,main=True):
     half=3.8 if main else 3.4;top=2.55 if main else 1.8;crown=.24 if main else .14
     name='Ebisubashi deck' if main else 'Canal footbridges'
     def elevation(x):return top+crown*max(0,1-(x/8.5)**2)
+    def edge(x):return half+3.1*max(0,1-(x/8.5)**2) if main else half
     # Slight arch, deep segmented stone fascia and continuous bridge railing.
     for j in range(24):
         a=-8.5+j*17/24;b=-8.5+(j+1)*17/24;ha=elevation(a);hb=elevation(b)
-        g.mesh([(a,y-half,ha),(b,y-half,hb),(b,y+half,hb),(a,y+half,ha)],[(0,1,2,3)],cap,name)
+        ea,eb=edge(a),edge(b)
+        g.mesh([(a,y-ea,ha),(b,y-eb,hb),(b,y+eb,hb),(a,y+ea,ha)],[(0,1,2,3)],cap,name)
         # The reflection camera sees the real underside. A top-only bridge lets
         # billboards show through its back faces in the water.
-        g.mesh([(a,y+half,ha-.94),(b,y+half,hb-.94),(b,y-half,hb-.94),(a,y-half,ha-.94)],[(0,1,2,3)],stone,'Bridge solid soffits')
-        surfaces.append(dict(minX=a,maxX=b,minZ=-y-half,maxZ=-y+half,height=ha,endHeight=hb))
+        g.mesh([(a,y+ea,ha-.94),(b,y+eb,hb-.94),(b,y-eb,hb-.94),(a,y-ea,ha-.94)],[(0,1,2,3)],stone,'Bridge solid soffits')
+        surfaces.append(dict(minX=a,maxX=b,minZ=-y-ea,maxZ=-y+ea,endMinZ=-y-eb,endMaxZ=-y+eb,height=ha,endHeight=hb))
         for sgn in [-1,1]:
-            yy=y+sgn*half
-            g.mesh([(a,yy,ha),(b,yy,hb),(b,yy,hb-.94),(a,yy,ha-.94)],[(0,1,2,3),(3,2,1,0)],stone)
+            yy=y+sgn*ea;yb=y+sgn*eb
+            g.mesh([(a,yy,ha),(b,yb,hb),(b,yb,hb-.94),(a,yy,ha-.94)],[(0,1,2,3),(3,2,1,0)],silver if main else stone)
             g.rod((a,yy,ha-.92),(a,yy,ha-.02),.012,joint,4)
-            for h in [.12,.65,1.10]:g.rod((a,yy,ha+h),(b,yy,hb+h),.04,silver,8)
-            for t in [0,.5]:
-                x=a+(b-a)*t;z=ha+(hb-ha)*t
-                g.rod((x,yy,z+.1),(x,yy,z+1.15),.026,dark,6)
-        g.box(((a+b)/2,y,(ha+hb)/2+.012),(.014,half*2,.018),joint)
-    for x in [-5.9,5.9]:
+            entrance=main and j in [11,12]
+            if not entrance:
+                for h in [.12,.65,1.10]:g.rod((a,yy,ha+h),(b,yb,hb+h),.04,silver,8)
+                for t in ([0,.2,.4,.6,.8] if main else [0,.5]):
+                    x=a+(b-a)*t;z=ha+(hb-ha)*t
+                    g.rod((x,yy+(yb-yy)*t,z+.1),(x,yy+(yb-yy)*t,z+1.15),.026,silver if main else dark,6)
+            if main and not entrance:
+                # Small AABBs follow the curved rail without cutting off the plaza.
+                for k in range(4):
+                    ta=k/4;tb=(k+1)/4
+                    xa=a+(b-a)*ta;xb=a+(b-a)*tb;ya=yy+(yb-yy)*ta;yc=yy+(yb-yy)*tb
+                    collider((xa+xb)/2,(ya+yc)/2,(xb-xa)/2+.012,abs(yc-ya)/2+.035,top+crown+1.2,cameraMinY=top-.95)
+        g.box(((a+b)/2,y,(ha+hb)/2+.012),(.014,(ea+eb),.018),joint)
+        if main:
+            for k in range(-9,10):
+                if abs(k*.7)<min(ea,eb):g.box(((a+b)/2,y+k*.7,(ha+hb)/2+.012),(b-a,.012,.018),joint)
+    for x in ([-8.0,8.0] if main else [-5.9,5.9]):
         soffit=elevation(x)-.94
         g.box((x,y,(-1.8+soffit)/2),(.75,half*2-.3,soffit+1.8),stone,name='Bridge support piers')
         g.box((x,y,soffit-.12),(1.25,half*2,.28),cap,name='Bridge pier capitals')
-    for end in [-1,1]:
+    for end in ([] if main else [-1,1]):
         for x in [-8,-4,0,4,8]:
             z=elevation(x)
             g.box((x,y+end*half,z+.53),(.34,.30,1.10),stone)
             g.box((x,y+end*half,z+1.13),(.47,.43,.14),cap)
     for sgn in [-1,1]:
         yy=y+sgn*half
-        collider(0,yy,8.5,.055,top+crown+1.2,cameraMinY=top-.95)
-        g.text('え び す 橋' if main else '道 頓 堀',(0,yy+sgn*.022,top+crown-.5),.64 if main else .45,black,0 if sgn==-1 else math.pi,font=jp)
+        if not main:collider(0,yy,8.5,.055,top+crown+1.2,cameraMinY=top-.95)
+        if not main:g.text('道 頓 堀',(0,y+sgn*(edge(0)+.022),top+crown-.5),.45,black,0 if sgn==-1 else math.pi,font=jp)
     # Both banks have a broad upper landing and two real flights along the canal.
     count=20 if main else 15;run=6.8 if main else 5.4;rise=top/count;tread=run/count
     for side in [-1,1]:
         x=side*11.0;lo=8.5;hi=13.5
-        g.mesh([(side*lo,y-half,top),(side*hi,y-half,top),(side*hi,y+half,top),(side*lo,y+half,top)],[(0,1,2,3),(3,2,1,0)],cap,name)
+        g.mesh([(side*lo,y-half,top),(side*hi,y-half,top),(side*hi,y+half,top),(side*lo,y+half,top)],[(0,1,2,3) if side==1 else (3,2,1,0)],cap,name)
         g.box((x,y,top-.26),(4.95,half*2,.50),stone,name='Bridge landing soffits')
         surfaces.append(dict(minX=min(side*lo,side*hi),maxX=max(side*lo,side*hi),minZ=-y-half,maxZ=-y+half,height=top))
         g.box((side*13.42,y,top-.48),(.18,half*2,.96),stone)
         rail((side*13.48,y-half),(side*13.48,y+half),top)
         collider(side*13.48,y,.06,half,top+1.2)
+        stairx=side*12 if main else x;stairwidth=2.95 if main else 4.95
         for end in [-1,1]:
             for i in range(count):
                 yy=y+end*(half+(count-i-.5)*tread);height=(i+1)*rise
                 # Separate vertex-baked risers and planar-UV tread surfaces.
-                g.box((x,yy,height/2),(4.95,tread,height),stone,name='Bridge stair risers')
-                g.mesh([(x-2.48,yy-tread/2,height+.008),(x+2.48,yy-tread/2,height+.008),(x+2.48,yy+tread/2,height+.008),(x-2.48,yy+tread/2,height+.008)],[(0,1,2,3)],cap,name)
-                surfaces.append(dict(minX=x-2.5,maxX=x+2.5,minZ=-yy-tread/2,maxZ=-yy+tread/2,height=height+.008))
-                g.box((x,yy+end*(tread/2-.025),height+.022),(4.9,.042,.025),silver)
-            for xx in [side*8.52,side*13.48]:
+                g.box((stairx,yy,height/2),(stairwidth,tread,height),stone,name='Bridge stair risers')
+                sw=stairwidth/2
+                g.mesh([(stairx-sw,yy-tread/2,height+.008),(stairx+sw,yy-tread/2,height+.008),(stairx+sw,yy+tread/2,height+.008),(stairx-sw,yy+tread/2,height+.008)],[(0,1,2,3)],cap,name)
+                surfaces.append(dict(minX=stairx-sw-.025,maxX=stairx+sw+.025,minZ=-yy-tread/2,maxZ=-yy+tread/2,height=height+.008))
+                g.box((stairx,yy+end*(tread/2-.025),height+.022),(stairwidth-.05,.042,.025),silver)
+            for xx in [side*(10.52 if main else 8.52),side*13.48]:
                 a=(xx,y+end*half,top+1.1);b=(xx,y+end*(half+run),1.1)
                 g.rod(a,b,.05,silver,10)
                 for i in range(count+1):
@@ -196,8 +211,11 @@ def bridge(y,main=True):
                 collider(xx,y+end*(half+run/2),.06,run/2,top+1.2)
             lamp(side*13.0,y+end*(half-.25),top)
         g.box((side*8.2,y,(top-1.6)/2),(.65,half*2,top+1.6),stone)
+    if main:
+        from dotonbori_realism import perimeter_ramps
+        perimeter_ramps(globals(),y,edge,top+crown)
 for y in [-48,0,48]:bridge(y,y==0)
-for lo,hi in [(-70,-51.4),(-44.6,-3.8),(3.8,44.6),(51.4,70)]:
+for lo,hi in [(-70,-51.4),(-44.6,-8.6),(8.6,44.6),(51.4,70)]:
     collider(0,(lo+hi)/2,8.22,(hi-lo)/2,0,cameraIgnore=True)
 
 # Blender water grid: wave geometry catches dynamic sunlight in the game.
@@ -292,14 +310,17 @@ def crab(side,y,h):
         g.rod(p(sgn*.44,1.45,.67),p(sgn*.5,1.58,1.22),.065,enamel)
         g.sphere(p(sgn*.5,1.59,1.23),(.095,.105,.13),black,12,8)
     panel(side,y,0,h-5.2,14.8,1.75,white,'かに道楽',black,1.45)
-crab(-1,-23.8,15.6)
-vertical(-1,-23.8,8.35,15.3,'本場の味',white,17,1.65)
+# The restaurant frontage belongs on Dotonbori Street, behind the south bank.
+# Mirror only this sign assembly to the street-facing rear of the canal block.
+frontages[1,-23.8]=-29.8
+crab(1,-23.8,7.5)
+vertical(1,-23.8,8.35,8.0,'本場の味',white,11,1.3)
 # Traditional Kani Doraku surround: pale vertical slats, tiled eaves and lanterns.
-for u in np.linspace(-7.5,7.5,50):g.box(pos(-1,-23.8,float(u),.65,15.6),(.2,.11,9.2),cream)
+for u in np.linspace(-7.5,7.5,50):g.box(pos(1,-23.8,float(u),.65,7.5),(.2,.11,9.2),cream)
 for row in range(4):
     for u in np.linspace(-7.8,7.8,50):
-        g.rod(pos(-1,-23.8,float(u),.6+row*.23,20.45-row*.10),pos(-1,-23.8,float(u),.83+row*.23,20.35-row*.10),.10,dark,8)
-for u in np.linspace(-7.3,7.3,26):g.sphere(pos(-1,-23.8,float(u),1.1,20.0),(.18,.20,.25),warm,10,7)
+        g.rod(pos(1,-23.8,float(u),.6+row*.23,12.35-row*.10),pos(1,-23.8,float(u),.83+row*.23,12.25-row*.10),.10,dark,8)
+for u in np.linspace(-7.3,7.3,26):g.sphere(pos(1,-23.8,float(u),1.1,11.9),(.18,.20,.25),warm,10,7)
 
 # Takoyaki octopus with curling, sucker-lined tentacles.
 def octopus(side,y,h):
@@ -318,45 +339,13 @@ def octopus(side,y,h):
         g.sphere(p(u,1.72,.7),(.09,.19,.25),white,12,8)
         g.sphere(p(u,1.81,.69),(.035,.09,.13),black,10,6)
     g.sphere(p(0,1.88,.18),(.12,.17,.17),black,12,8)
-octopus(1,21,7.9)
+frontages[1,-43]=-29.8
+octopus(1,-43,6.8)
 
-# Suspended fugu lantern with fins, facial details and painted Japanese lettering.
-side=1;y=-16
-g.sphere(pos(side,y,0,2.1,18.7),(1.55,2.05,1.65),cream,32,20)
-g.sphere(pos(side,y,0,2.1,19.9),(1.3,1.8,.59),blue,28,14)
-for u in [-1.65,1.65]:
-    g.sphere(pos(side,y,u,2.3,18.6),(.15,.55,.44),yellow,12,8)
-    g.sphere(pos(side,y,u*.57,3.3,19.45),(.06,.12,.14),black,10,6)
-g.text('づぼらや',pos(side,y,0,3.65,18.55),.75,neonred,-math.pi/2,font=jp)
-for u in [-1.25,-.65,0,.65,1.25]:g.sphere(pos(side,y,u,3.27,19.7),(.055,.085,.085),black,8,5)
-g.rod(pos(side,y,0,.1,24),pos(side,y,0,2.1,24),.05,dark)
-g.rod(pos(side,y,0,2.1,20.5),pos(side,y,0,2.1,24),.035,dark)
-
-# Don Quijote is on the north bank east of Ebisubashi, across from Glico.
-# This compact map uses +X for north and -Blender-Y (+game-Z) for east.
-# Official access map: https://www.donki.com/kanransha/index_en.php
-side=1;y=-40
-for depth in [.85,1.5]:
-    for radius in [4.75,5.30]:
-        points=[pos(side,y,radius*math.cos(i*math.tau/96),depth,23+15.1*math.sin(i*math.tau/96)) for i in range(97)]
-        for aa,bb in zip(points,points[1:]):g.rod(aa,bb,.08,yellow,8)
-for i in range(32):
-    a=i*math.tau/32;b=(i+1)*math.tau/32
-    g.rod(pos(side,y,5.3*math.cos(a),.85,23+15.1*math.sin(a)),pos(side,y,4.75*math.cos(b),1.5,23+15.1*math.sin(b)),.055,yellow,6)
-    g.rod(pos(side,y,5.3*math.cos(a),.85,23+15.1*math.sin(a)),pos(side,y,5.3*math.cos(a),1.5,23+15.1*math.sin(a)),.07,yellow,6)
-for u in [-2.6,2.6]:g.rod(pos(side,y,u,1.05,8),pos(side,y,u,1.05,37),.10,yellow,8)
-for z in range(9,36,3):
-    g.rod(pos(side,y,-2.6,1.05,z),pos(side,y,2.6,1.05,z+3),.055,yellow,6)
-    g.rod(pos(side,y,2.6,1.05,z),pos(side,y,-2.6,1.05,z+3),.055,yellow,6)
-for i in range(16):
-    a=i*math.tau/16;u=5.3*math.cos(a);z=23+15.1*math.sin(a)
-    g.sphere(pos(side,y,u,1.65,z),(.45,.72,.92),red,16,10)
-    g.panel(pos(side,y,u,2.13,z+.05),1.0,1.1,glass,-side*math.pi/2)
-    for off in [-.55,.55]:g.rod(pos(side,y,u+off,2.15,z-.62),pos(side,y,u+off,2.15,z+.63),.025,yellow,6)
-    g.sphere(pos(side,y,u,2.17,z+.74),(.045,.045,.045),warm,8,5)
-# The mascot print sits on an independently modeled central sign cabinet.
-campaign(side,y,0,23,4.2,6.8,'Don Quijote mascot',[(1311,205),(1364,205),(1364,290),(1311,290)])
-panel(side,y,0,6.5,13.7,2.4,black,'ドン・キホーテ',yellow,1.6)
+# Present-day riverfront: no retired Zuboraya lantern on the north bank.
+from dotonbori_realism import wheel, river_details
+wheel(globals())
+river_details(globals())
 
 # The two open-deck vessels are added after the static scenery is batched.
 from dotonbori_background import build as build_background
@@ -384,10 +373,10 @@ apply_preset('evening')
 bpy.ops.object.camera_add(location=(3,-42,7.6));cam=bpy.context.object;cam.name='Dotonbori review camera'
 cam.rotation_euler=(Vector((-1,5,10))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.lens=26
 s=bpy.context.scene;s.camera=cam;s.render.resolution_x=1500;s.render.resolution_y=1000;s.render.resolution_percentage=100
-s['design_reference']='Four user supplied Dotonbori directional concept boards; compact stylized reconstruction'
-s['bridge_navigation']='Four longitudinal stair flights per bridge; 0.1275m main risers, 5m landings, parabolic crown 2.79m'
+s['design_reference']='Photo-informed Ebisubashi plaza, retail corner buildings and Ebisu Tower; compact stylized reconstruction'
+s['bridge_navigation']='Rounded Ebisubashi plaza, four straight bank stairs, separate curved perimeter ramps with central entrances and lower landings'
 s['pedestrian_count']=36
-data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-layout['promenadeEnd'],layout['promenadeEnd']],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=7,architecture=architecture,background=background)
+data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-layout['promenadeEnd'],layout['promenadeEnd']],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=9,architecture=architecture,background=background)
 (ROOT/'public/models/dotonbori.json').write_text(json.dumps(data,indent=2))
 if '--navigation-only' in sys.argv:
     print('DOTONBORI_NAVIGATION_UPDATED',len(colliders),flush=True)

@@ -51,7 +51,9 @@ for o in ground:
     for p in o.data.polygons:
         for li in p.loop_indices:
             v=o.matrix_world@o.data.vertices[o.data.loops[li].vertex_index].co
-            uv.data[li].uv=((v.x+21)/42,(v.y+atlas_extent)/(atlas_extent*2)) if p.normal.z>.9 else (-1,-1)
+            # Walkable perimeter ramps can be steeper than the former .9
+            # normal cutoff; excluding them leaves black AO strips at runtime.
+            uv.data[li].uv=((v.x+21)/42,(v.y+atlas_extent)/(atlas_extent*2)) if p.normal.z>.65 else (-1,-1)
     o.data.uv_layers[0].active_render=True
 mats=list({o.data.materials[0] for o in ground})
 report.update(occlusion(ground,mats,'dotonbori',4096))

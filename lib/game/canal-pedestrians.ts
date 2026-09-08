@@ -22,7 +22,7 @@ export class CanalNavigation {
   private surfaceCells = new Map<string, WalkSurface[]>();
   constructor(private map: CanalMap) {
     this.surfaces = map.surfaces ?? [];
-    for (const s of this.surfaces) for (let x=Math.floor(s.minX/2);x<=Math.floor(s.maxX/2);x++) for (let z=Math.floor(s.minZ);z<=Math.floor(s.maxZ);z++) {
+    for (const s of this.surfaces) for (let x=Math.floor(s.minX/2);x<=Math.floor(s.maxX/2);x++) for (let z=Math.floor(Math.min(s.minZ,s.endMinZ??s.minZ));z<=Math.floor(Math.max(s.maxZ,s.endMaxZ??s.maxZ));z++) {
       const key=`${x},${z}`, cell=this.surfaceCells.get(key) ?? []; cell.push(s); this.surfaceCells.set(key,cell);
     }
     const cells = new Map<string, number>();
@@ -46,13 +46,13 @@ export class CanalNavigation {
       if (n.y === 0 && Math.abs(n.x) > 10 && Math.abs(n.x) < 15.6) this.banks[n.x < 0 ? 0 : 1].push(id);
     }
     for (const z of BRIDGES) for (const x of [-5, -2.5, 2.5, 5]) for (const end of [-1, 1]) {
-      const node = this.nearest({ x, z: z + end * (z === 0 ? 3.05 : 2.65) });
+      const node = this.nearest({ x, z: z + end * (z === 0 ? 3.8+3.1*(1-(x/8.5)**2)-.85 : 2.65) });
       if (seen.has(node)) this.spots.push({ node, yaw: end < 0 ? Math.PI : 0 });
     }
     if (!this.banks[0].length || !this.banks[1].length || this.spots.length !== 24) throw new Error('Canal pedestrian routes are disconnected');
   }
   height(p: Point) {
-    if (Math.abs(p.x) > 13.6 || BRIDGES.every(z => Math.abs(p.z - z) > 11)) return 0;
+    if (Math.abs(p.x) > 14.5 || BRIDGES.every(z => Math.abs(p.z - z) > 11)) return 0;
     return groundHeight(p.x, p.z, this.surfaceCells.get(`${Math.floor(p.x/2)},${Math.floor(p.z)}`));
   }
   walkable(p: Point, radius = .39, candidates = this.map.colliders) {

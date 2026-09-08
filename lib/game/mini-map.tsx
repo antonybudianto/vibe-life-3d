@@ -17,14 +17,17 @@ export function MiniMap({ map, x, z }: { map: MapId; x: number; z: number }) {
     </g>)}
     {canalBridges.map((z) => <g key={z} fill="#decdb2">
       <rect x="-13.5" y={z-3.8} width="27" height="7.6"/>
+      {z===0 && <path d="M-8.5-3.8Q0-10 8.5-3.8V3.8Q0 10-8.5 3.8Z"/>}
+      {z===0 && <path d="M-8.5-4.625Q0-10.825 8.5-4.625M-8.5 4.625Q0 10.825 8.5 4.625" fill="none" stroke="#decdb2" strokeWidth="1.2"/>}
       {[-1,1].map((side) => <g key={side}>
-        <rect x={side===-1?-13.5:8.5} y={z-(z===0?10.6:8.8)} width="5" height={z===0?21.2:17.6}/>
-        {[-1,1].map((end) => <path key={end} d={`M${side*11-1} ${z+end*7}h2m-2 ${end*1.2}h2m-2 ${end*1.2}h2`} fill="none" stroke="#82745f" strokeWidth=".6"/>)}
+        <rect x={side===-1?-13.5:z===0?10.5:8.5} y={z-(z===0?10.6:8.8)} width={z===0?3:5} height={z===0?21.2:17.6}/>
+        {[-1,1].map((end) => <path key={end} d={`M${side*(z===0?12:11)-1} ${z+end*7}h2m-2 ${end*1.2}h2m-2 ${end*1.2}h2`} fill="none" stroke="#82745f" strokeWidth=".6"/>)}
       </g>)}
     </g>)}
     <text x="0" y="-13" textAnchor="middle" fontSize="7" fill="#fbe7bf">Ebisubashi</text>
     <circle cx="-19" cy="-13.5" r="2" fill="#6bbdff"><title>Glico runner</title></circle>
-    <circle cx="-19" cy="23.8" r="2" fill="#ec675a"><title>Kani Doraku</title></circle>
+    <circle cx="-17.5" cy="23.8" r="2" fill="#6bbdff"><title>TSUTAYA / Starbucks</title></circle>
+    <circle cx="-30" cy="23.8" r="2" fill="#ec675a"><title>Kani Doraku — restaurant street</title></circle>
     <circle cx="-18" cy="9" r="2" fill="#ffe088"><title>Asahi corner building</title></circle>
     <circle cx="19" cy="40" r="2" fill="#f8c74f"><title>Don Quijote wheel — north bank, east of Ebisubashi</title></circle>
     <circle cx={x} cy={z} r="7" fill="#e8a4bf" opacity=".3"/>

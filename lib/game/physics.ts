@@ -1,12 +1,15 @@
 export type Collider = { x: number; z: number; halfX: number; halfZ: number; height?: number; cameraRadius?: number; cameraMinY?: number; cameraIgnore?: boolean };
-export type WalkSurface = { minX: number; maxX: number; minZ: number; maxZ: number; height: number; endHeight?: number };
+export type WalkSurface = { minX: number; maxX: number; minZ: number; maxZ: number; endMinZ?: number; endMaxZ?: number; height: number; endHeight?: number };
 
 /** Sloped decks use the same endpoints as the Blender bridge mesh. */
 export function groundHeight(x: number, z: number, surfaces: WalkSurface[] = []) {
   let height = 0;
   for (const s of surfaces) {
-    if (x < s.minX || x > s.maxX || z < s.minZ || z > s.maxZ) continue;
+    if (x < s.minX || x > s.maxX) continue;
     const t = (x - s.minX) / Math.max(.001, s.maxX - s.minX);
+    const minZ = s.minZ + ((s.endMinZ ?? s.minZ) - s.minZ) * t;
+    const maxZ = s.maxZ + ((s.endMaxZ ?? s.maxZ) - s.maxZ) * t;
+    if (z < minZ || z > maxZ) continue;
     height = Math.max(height, s.height + ((s.endHeight ?? s.height) - s.height) * t);
   }
   return height;

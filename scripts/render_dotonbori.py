@@ -43,6 +43,8 @@ for phase in ['evening','day']:
     render_view(phase)
 apply_preset('evening')
 for name,position,target,lens in [
+    ('bridge-realism',(2,22,20),(0,0,2),29),
+    ('donki-realism',(-8,-24,21),(17,-40,28),21),
     ('riverside',(10,-22,3.2),(0,3,7),24),
     ('north',(-2,41,7),(0,-3,10),26),
     ('water',(0,-11,1.5),(0,17,-.1),30),
@@ -65,6 +67,7 @@ render_view('overview')
 # Photo-matching reviews use daylight to expose the metalwork and open seating.
 apply_preset('day')
 for name,position,target,lens in [
+    ('bridge-stairs',(17,20,8),(7,1,2.0),28),
     ('asahi',(12,17,16),(-21,-9,17),24),
     ('cruise',(8,-12,6),(-3,-24,-.1),34),
 ]:
