@@ -14,6 +14,14 @@ for phase in ['evening','day']:
     s.render.filepath=str(ROOT/'public/renders'/f'dotonbori-{phase}.png')
     bpy.ops.render.render(write_still=True)
 apply_preset('evening')
+for name,position,target,lens in [
+    ('riverside',(10,-22,3.2),(0,3,7),24),
+    ('north',(-2,41,7),(0,-3,10),26),
+    ('water',(0,-11,1.5),(0,17,-.1),30),
+]:
+    s.camera.location=position;s.camera.data.lens=lens
+    s.camera.rotation_euler=(Vector(target)-s.camera.location).to_track_quat('-Z','Y').to_euler()
+    s.render.filepath=str(ROOT/'public/renders'/f'dotonbori-{name}.png');bpy.ops.render.render(write_still=True)
 s.camera.location=(5,-70,67);s.camera.data.lens=28
 s.camera.rotation_euler=(Vector((0,7,6))-s.camera.location).to_track_quat('-Z','Y').to_euler()
 s.render.filepath=str(ROOT/'public/renders/dotonbori-overview.png');bpy.ops.render.render(write_still=True)

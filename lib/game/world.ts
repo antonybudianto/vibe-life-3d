@@ -6,13 +6,13 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { moveWithCollision, resolveTime, groundHeight, followGround, type Collider, type WalkSurface } from './physics';
+import { moveWithCollision, resolveTime, groundHeight, followGround, canStepTo, type Collider, type WalkSurface } from './physics';
 import phases from './lighting.json';
 import dotonboriPhases from './dotonbori-lighting.json';
 import { elevatedPitch, zoomDistance } from './camera';
 import { Ambience } from './ambience';
 import { CitySky } from './sky';
-import { CanalWater } from './canal-water';
+import { CanalWater, findCanalSurface } from './canal-water';
 
 export type TravelMode = 'walk' | 'motorcycle' | 'car';
 export type TimeMode = 'day' | 'evening' | 'night' | 'live';
@@ -191,7 +191,8 @@ export class World {
       this.character = this.prep(asset.scene); this.scene.add(this.character);
       this.limbs = ['Arm_L', 'Arm_R', 'Leg_L', 'Leg_R'].map((n) => this.character!.getObjectByName(n)!);
       this.status.progress = 25; this.emit();
-      await this.switchMap('crossing');
+      const requestedMap = new URLSearchParams(window.location.search).get('map');
+      await this.switchMap(requestedMap === 'dotonbori' || requestedMap === 'park' ? requestedMap : 'crossing');
     } catch (e) { this.fail(e); }
   }
 
@@ -208,8 +209,10 @@ export class World {
         fetch(`/models/${id}.json`).then((r) => { if (!r.ok) throw new Error('Map description unavailable'); return r.json() as Promise<MapData>; }),
       ]);
       let life: Ambience | null = null;
+      let waterNormals: THREE.Texture | null = null;
       try {
         await this.loadBakedLighting(asset.scene);
+        if (id === 'dotonbori') waterNormals = await new THREE.TextureLoader().loadAsync('/textures/dotonbori-water-normal.png');
         if (id === 'crossing') {
           const landmarkData = await fetch('/models/hachiko.json').then((r) => { if (!r.ok) throw new Error('Landmark unavailable'); return r.json() as Promise<LandmarkData>; });
           const landmark = await this.loader.loadAsync('/models/hachiko.glb');
@@ -222,8 +225,8 @@ export class World {
           life = await Ambience.load(this.loader, data.colliders);
         }
       }
-      catch (error) { this.disposeObject(asset.scene); throw error; }
-      if (!this.alive || serial !== this.loadSerial) { this.disposeObject(asset.scene); life?.dispose(); return; }
+      catch (error) { this.disposeObject(asset.scene); waterNormals?.dispose(); throw error; }
+      if (!this.alive || serial !== this.loadSerial) { this.disposeObject(asset.scene); life?.dispose(); waterNormals?.dispose(); return; }
       const next = this.prep(asset.scene, true);
       this.canalWater?.dispose(); this.canalWater = null;
       if (this.environment) { this.scene.remove(this.environment); this.disposeObject(this.environment); }
@@ -233,11 +236,13 @@ export class World {
       this.environment = next; this.data = data; this.scene.add(next);
       this.cruises = [];
       next.traverse((o) => { if (o.userData.cruise) this.cruises.push(o); });
-      const water = next.getObjectByName('Dotonbori canal water');
-      if (water instanceof THREE.Mesh) { this.canalWater = new CanalWater(water); this.scene.add(this.canalWater.mesh); }
+      const water = findCanalSurface(next);
+      if (water instanceof THREE.Mesh && waterNormals) { this.canalWater = new CanalWater(water, waterNormals); this.scene.add(this.canalWater.mesh); }
+      else waterNormals?.dispose();
       this.movementColliders = [...data.colliders, ...(life?.traffic.colliders ?? [])];
       this.player.fromArray(data.spawn); this.velocity = 0; this.verticalVelocity = 0; this.heading = Math.PI;
-      this.yaw = id === 'crossing' ? .22 : id === 'dotonbori' ? .40 : .02;
+      this.yaw = id === 'crossing' ? .22 : id === 'dotonbori' ? .10 : .02;
+      if (id === 'dotonbori') { this.pitch = .30; this.distance = 9; }
       this.status.map = id; this.status.loading = false; this.status.progress = 100;
       this.lastPhase = ''; this.applyTime(); this.updateCamera(1); this.emit();
     } catch (e) { if (serial === this.loadSerial) this.fail(e); }
@@ -334,7 +339,7 @@ export class World {
     const a = palette[p.phase], b = palette[p.next]; const t = p.blend;
     const sky = new THREE.Color(a.sky).lerp(new THREE.Color(b.sky), t);
     this.scene.background = sky;
-    this.sky.setTime(p.phase, p.next, t, palette);
+    this.sky.setTime(p.phase, p.next, t, palette, this.data?.id === 'dotonbori');
     (this.scene.fog as THREE.Fog).color.copy(sky);
     this.hemi.color.copy(sky).lerp(new THREE.Color(0xc5d3ef), .25);
     this.hemi.groundColor.set(0x3b303d);
@@ -391,6 +396,9 @@ export class World {
       dz = Math.cos(this.heading) * this.velocity * dt;
     }
     const p = moveWithCollision(this.player.x, this.player.z, dx, dz, this.radius(), this.movementColliders, this.data.bounds);
+    if (!canStepTo(this.player.y, oldFloor, groundHeight(p.x, p.z, this.data.surfaces))) {
+      p.x = this.player.x; p.z = this.player.z;
+    }
     if (this.travel !== 'walk' && Math.hypot(p.x - this.player.x, p.z - this.player.z) < Math.hypot(dx, dz) * .3) this.velocity *= .7;
     this.player.x = p.x; this.player.z = p.z;
     const floor = groundHeight(p.x, p.z, this.data.surfaces);
@@ -458,7 +466,7 @@ export class World {
     while (this.accumulator >= 1 / 60) { this.step(1 / 60); this.accumulator -= 1 / 60; }
     this.pose(); this.updateCamera(dt);
     this.sky.update(this.camera, this.elapsed);
-    this.canalWater?.update(this.elapsed);
+    this.canalWater?.update(this.elapsed, this.camera, this.sun);
     // Follow the player with a bounded shadow camera instead of shadowing the entire map.
     this.sun.position.set(this.player.x - 22, 28, this.player.z + 14);
     this.sun.target.position.copy(this.player);

@@ -1,12 +1,13 @@
 """Blender-authored Dotonbori canal district. Z-up geometry, Y-up navigation.
 
 blender -b -t 8 --python-exit-code 1 --python scripts/build_dotonbori.py
-Then run bake_dotonbori.py. No downloaded geometry or billboard screenshots.
+Then run bake_dotonbori.py. Geometry is authored here; selected sign prints
+are rectified from the user's concept boards inside Blender.
 """
 import bpy, math, random, sys, json
 import numpy as np
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Vector, Matrix
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
 import scene_geometry as g
@@ -19,7 +20,7 @@ jp=bpy.data.fonts.load('C:/Windows/Fonts/YuGothB.ttc')
 def mat(n,c,r=.65,m=0,e=0):return g.material('Dotonbori '+n,c,r,m,e)
 stone=mat('limestone',(.39,.38,.36),.86)
 cap=mat('bridge coping',(.59,.57,.53),.75)
-paving=mat('promenade paving',(.30,.285,.265),.8)
+paving=mat('promenade paving',(.24,.235,.24),.54)
 joint=mat('paving joints',(.12,.13,.14),.9)
 dark=mat('graphite steel',(.025,.038,.052),.38,.65)
 silver=mat('brushed rails',(.37,.40,.44),.3,.72)
@@ -29,19 +30,22 @@ cream=mat('ivory',(.83,.79,.67),.68)
 white=mat('white sign',(.92,.95,1),.4,0,.65)
 red=mat('vermilion enamel',(.72,.018,.025),.26,.25)
 black=mat('ink',(.008,.014,.031),.8)
-neonred=mat('red neon',(.95,.018,.033),.35,0,1.25)
-blue=mat('cobalt neon',(.015,.12,.75),.4,0,1)
+neonred=mat('red neon',(.8,.0015,.004),.35,0,1.25)
+blue=mat('cobalt neon',(.0015,.027,.72),.4,0,1)
 cyan=mat('cyan neon',(.015,.6,.96),.4,0,1.25)
 yellow=mat('gold light',(.99,.54,.026),.4,0,.8)
-warm=mat('lantern glow',(1,.49,.13),.45,0,2.2)
+warm=mat('lantern glow',(1,.36,.07),.36,0,3.2)
+windows=[mat('interior amber '+str(i),c,.62,0,e) for i,(c,e) in enumerate([((.40,.18,.055),.5),((.65,.32,.10),.7),((.23,.12,.065),.25),((.018,.03,.045),0)])]
 pink=mat('pink neon',(.94,.04,.25),.4,0,1.5)
 green=mat('green neon',(.025,.49,.19),.5,0,.85)
 orange=mat('orange sign',(.98,.12,.014),.5,0,.8)
 boatmat=mat('cruise yellow',(.94,.47,.015),.35,.22)
-water=mat('canal water',(.008,.057,.083),.17,.67)
+water=mat('canal water',(.008,.045,.058),.13,.45)
+water.node_tree.nodes['Principled BSDF'].inputs['IOR'].default_value=1.333
 water['water_surface']=True
 facades=[mat('facade '+str(i),c,.82) for i,c in enumerate([(.21,.245,.28),(.38,.36,.33),(.14,.17,.21),(.47,.46,.41),(.28,.24,.235),(.18,.22,.25)])]
-leaves=[mat('leaves '+str(i),c,.82) for i,c in enumerate([(.035,.105,.031),(.085,.18,.042),(.14,.235,.051)])]
+leaves=[mat('leaves '+str(i),c,.8) for i,c in enumerate([(.018,.065,.02),(.04,.12,.027),(.095,.18,.038),(.035,.09,.046),(.17,.23,.06)])]
+for m in leaves:m.use_backface_culling=False
 skin=mat('pedestrian skin',(.58,.33,.20),.78)
 hair=mat('pedestrian hair',(.018,.012,.012),.78)
 coats=[mat('pedestrian coat '+str(i),c,.9) for i,c in enumerate([(.59,.60,.59),(.035,.06,.095),(.28,.10,.095),(.72,.63,.40),(.18,.27,.24),(.57,.34,.39)])]
@@ -55,6 +59,7 @@ def lamp(x,y,z=0):
     for dx in [-.23,.23]:
         for dy in [-.23,.23]:g.rod((x+dx,y+dy,z+2.53),(x+dx,y+dy,z+3.26),.023,dark,6)
     for zz in [2.52,3.27]:g.box((x,y,z+zz),(.55,.55,.085),dark)
+    collider(x,y,.23,.23,z+3.32,cameraMinY=z,cameraRadius=.28)
 def rail(a,b,z):
     length=(Vector(b)-Vector(a)).length
     for h in [.25,.65,1.1]:g.rod((*a,z+h),(*b,z+h),.035,silver,8)
@@ -62,19 +67,33 @@ def rail(a,b,z):
         t=i/math.ceil(length/.65);x=a[0]+(b[0]-a[0])*t;y=a[1]+(b[1]-a[1])*t
         g.rod((x,y,z+.07),(x,y,z+1.15),.033,dark,6)
 def tree(x,y):
-    g.box((x,y,.23),(1.85,1.6,.46),stone)
-    g.box((x,y,.46),(1.65,1.4,.04),wood)
-    g.rod((x,y,.48),(x+.13,y,3.4),.12,wood,10,r2=.065)
-    for i in range(9):
-        a=i*2.4;r=random.uniform(.3,1.5);z=random.uniform(2.9,4.5)
-        dest=(x+math.cos(a)*r,y+math.sin(a)*r,z)
-        g.rod((x+.1,y,2.2),dest,.055,wood,6,r2=.012)
-        g.sphere(dest,(.86,.75,.61),leaves[i%3],10,6)
-        for k in range(8):
-            p=(dest[0]+random.uniform(-.7,.7),dest[1]+random.uniform(-.6,.6),z+random.uniform(-.4,.5))
-            g.sphere(p,(.24,.18,.13),leaves[k%3],6,4)
-        if i%2==0:g.sphere((dest[0],dest[1]-.3,z-.4),(.045,.045,.045),warm,6,4)
-    collider(x,y,.98,.83,1.0,cameraRadius=.18)
+    g.box((x,y,.20),(1.5,1.5,.4),stone)
+    g.box((x,y,.40),(1.3,1.3,.035),wood)
+    trunk=Vector((x+.13,y-.06,2.85))
+    g.rod((x,y,.42),trunk,.105,wood,10,r2=.06)
+    # Open branching structure and thousands of individual folded leaf blades.
+    # There are no opaque spheres inside these canopies.
+    for branch in range(11):
+        a=branch*2.399;reach=random.uniform(.65,1.45)
+        tip=Vector((x+math.cos(a)*reach,y+math.sin(a)*reach,random.uniform(3.8,5.2)))
+        fork=trunk.lerp(tip,.52)
+        g.rod(trunk,fork,.057,wood,7,r2=.03);g.rod(fork,tip,.03,wood,6,r2=.008)
+        for twig in range(5):
+            az=random.uniform(0,math.tau)
+            end=tip+Vector((math.cos(az)*.63,math.sin(az)*.63,random.uniform(-.45,.48)))
+            g.rod(fork.lerp(tip,.72),end,.013,wood,5,r2=.003)
+            for k in range(48):
+                center=end+Vector((random.gauss(0,.30),random.gauss(0,.30),random.gauss(0,.24)))
+                rot=Matrix.Rotation(random.uniform(-math.pi,math.pi),3,'X')@Matrix.Rotation(random.uniform(0,math.tau),3,'Z')
+                length=random.uniform(.11,.20);w=length*.56
+                points=[(-length,0,0),(0,-w,0),(0,0,.025),(0,w,0),(length,0,0)]
+                g.mesh([tuple(center+rot@Vector(p)) for p in points],[(0,1,2),(0,2,3),(2,1,4),(3,2,4)],random.choice(leaves))
+            if twig<2:g.sphere(tuple(end),(.025,.025,.032),warm,6,4)
+    for i in range(24):
+        a=i*.9;z=.9+i*.085
+        g.sphere((x+.12*math.cos(a),y+.12*math.sin(a),z),(.018,.018,.026),warm,6,4)
+    collider(x,y,.78,.78,.42,cameraRadius=.14)
+    collider(x,y,.12,.12,6.0,cameraRadius=1.4)
 def umbrella(x,y):
     g.rod((x,y,0),(x,y,2.8),.035,wood)
     v=[(x,y,2.96)]+[(x+1.2*math.cos(i*math.tau/8),y+1.2*math.sin(i*math.tau/8),2.58) for i in range(8)]
@@ -104,48 +123,72 @@ for side in [-1,1]:
     for lo,hi in [(-70,-52),(-44,-4.2),(4.2,44),(52,70)]:
         rail((side*8.38,lo),(side*8.38,hi),.08)
         collider(side*8.37,(lo+hi)/2,.08,(hi-lo)/2,1.28)
-    for y in [-59,-34,-20,18,33,60]:tree(side*16.5,y)
+    for y in [-59,-32,-18,18,33,60]:tree(side*16.7,y)
     for y in [-25,24,57]:umbrella(side*17,y)
 
-# Three continuous bridges. The central Ebisubashi has broad, gently sloped
-# approaches, with shallow scored risers beside them as an architectural detail.
+# Stone bridges with longitudinal stairs, matching the concept's riverbank access.
 def bridge(y,main=True):
-    width=7.6 if main else 6.8;half=width/2;top=2.4 if main else 1.8
-    xs=[-15.8,-8.5,8.5,15.8];hs=[0,top,top,0]
-    for j in range(3):
-        a,b=xs[j:j+2];ha,hb=hs[j:j+2]
-        v=[(a,y-half,ha),(b,y-half,hb),(b,y+half,hb),(a,y+half,ha),(a,y-half,ha-.42),(b,y-half,hb-.42),(b,y+half,hb-.42),(a,y+half,ha-.42)]
-        g.mesh(v,[(0,1,2,3),(4,7,6,5),(0,4,5,1),(1,5,6,2),(2,6,7,3),(3,7,4,0)],cap,'Ebisubashi deck' if main else 'Canal footbridges')
+    half=3.8 if main else 3.4;top=2.55 if main else 1.8;crown=.24 if main else .14
+    name='Ebisubashi deck' if main else 'Canal footbridges'
+    def elevation(x):return top+crown*max(0,1-(x/8.5)**2)
+    # Slight arch, deep segmented stone fascia and continuous bridge railing.
+    for j in range(24):
+        a=-8.5+j*17/24;b=-8.5+(j+1)*17/24;ha=elevation(a);hb=elevation(b)
+        g.mesh([(a,y-half,ha),(b,y-half,hb),(b,y+half,hb),(a,y+half,ha)],[(0,1,2,3)],cap,name)
         surfaces.append(dict(minX=a,maxX=b,minZ=-y-half,maxZ=-y+half,height=ha,endHeight=hb))
-        for side in [-1,1]:
-            yy=y+side*(half-.06)
-            for h in [.42,.8,1.22]:g.rod((a,yy,ha+h),(b,yy,hb+h),.048,silver)
-            for i in range(math.ceil((b-a)/.52)+1):
-                t=i/math.ceil((b-a)/.52);xx=a+(b-a)*t;zz=ha+(hb-ha)*t
-                g.rod((xx,yy,zz),(xx,yy,zz+1.27),.032,dark)
-            collider((a+b)/2,yy,(b-a)/2,.06,max(ha,hb)+1.3,cameraMinY=min(ha,hb))
-        for i in range(math.ceil((b-a)/.7)):
-            t=(i+.5)/math.ceil((b-a)/.7);xx=a+(b-a)*t;zz=ha+(hb-ha)*t
-            g.box((xx,y,zz+.008),(.014,width-.18,.016),joint)
+        for sgn in [-1,1]:
+            yy=y+sgn*half
+            g.mesh([(a,yy,ha),(b,yy,hb),(b,yy,hb-.94),(a,yy,ha-.94)],[(0,1,2,3),(3,2,1,0)],stone)
+            g.rod((a,yy,ha-.92),(a,yy,ha-.02),.012,joint,4)
+            for h in [.12,.65,1.10]:g.rod((a,yy,ha+h),(b,yy,hb+h),.04,silver,8)
+            for t in [0,.5]:
+                x=a+(b-a)*t;z=ha+(hb-ha)*t
+                g.rod((x,yy,z+.1),(x,yy,z+1.15),.026,dark,6)
+        g.box(((a+b)/2,y,(ha+hb)/2+.012),(.014,half*2,.018),joint)
+    for sgn in [-1,1]:
+        yy=y+sgn*half
+        collider(0,yy,8.5,.055,top+crown+1.2,cameraMinY=top-.95)
+        g.text('え び す 橋' if main else '道 頓 堀',(0,yy+sgn*.022,top+crown-.5),.64 if main else .45,black,0 if sgn==-1 else math.pi,font=jp)
+    # Both banks have a broad upper landing and two real flights along the canal.
+    count=20 if main else 15;run=6.8 if main else 5.4;rise=top/count;tread=run/count
     for side in [-1,1]:
-        g.box((0,y+side*(half+.03),top-.41),(16.95,.20,.82),stone)
-        g.text('え び す 橋' if main else '道 頓 堀',(0,y+side*(half+.145),top-.37),.46 if main else .32,black,0 if side==-1 else math.pi,font=jp)
-        for x in [-8,8]:lamp(x,y+side*(half-.15),top)
-    for x in [-8.1,8.1]:g.box((x,y,-.45),(.7,width,3.35),stone)
+        x=side*11.0;lo=8.5;hi=13.5
+        g.mesh([(side*lo,y-half,top),(side*hi,y-half,top),(side*hi,y+half,top),(side*lo,y+half,top)],[(0,1,2,3),(3,2,1,0)],cap,name)
+        surfaces.append(dict(minX=min(side*lo,side*hi),maxX=max(side*lo,side*hi),minZ=-y-half,maxZ=-y+half,height=top))
+        g.box((side*13.42,y,top-.48),(.18,half*2,.96),stone)
+        rail((side*13.48,y-half),(side*13.48,y+half),top)
+        collider(side*13.48,y,.06,half,top+1.2)
+        for end in [-1,1]:
+            for i in range(count):
+                yy=y+end*(half+(count-i-.5)*tread);height=(i+1)*rise
+                # Separate vertex-baked risers and planar-UV tread surfaces.
+                g.box((x,yy,height/2),(4.95,tread,height),stone,name='Bridge stair risers')
+                g.mesh([(x-2.48,yy-tread/2,height+.008),(x+2.48,yy-tread/2,height+.008),(x+2.48,yy+tread/2,height+.008),(x-2.48,yy+tread/2,height+.008)],[(0,1,2,3)],cap,name)
+                surfaces.append(dict(minX=x-2.5,maxX=x+2.5,minZ=-yy-tread/2,maxZ=-yy+tread/2,height=height+.008))
+                g.box((x,yy+end*(tread/2-.025),height+.022),(4.9,.042,.025),silver)
+            for xx in [side*8.52,side*13.48]:
+                a=(xx,y+end*half,top+1.1);b=(xx,y+end*(half+run),1.1)
+                g.rod(a,b,.05,silver,10)
+                for i in range(count+1):
+                    t=i/count;yy=y+end*(half+t*run);h=top*(1-t)
+                    g.rod((xx,yy,h),(xx,yy,h+1.1),.034,dark,8)
+                collider(xx,y+end*(half+run/2),.06,run/2,top+1.2)
+            lamp(side*13.0,y+end*(half-.25),top)
+        g.box((side*8.2,y,(top-1.6)/2),(.65,half*2,top+1.6),stone)
 for y in [-48,0,48]:bridge(y,y==0)
 for lo,hi in [(-70,-51.4),(-44.6,-3.8),(3.8,44.6),(51.4,70)]:
     collider(0,(lo+hi)/2,8.22,(hi-lo)/2,0,cameraIgnore=True)
 
 # Blender water grid: wave geometry catches dynamic sunlight in the game.
 verts=[];faces=[]
-for j in range(281):
-    y=-70+j*.5
-    for i in range(35):
-        x=-8.5+i*.5;z=-1.43+.027*math.sin(x*3+y*4)+.021*math.sin(y*6-x*2)
+for j in range(561):
+    y=-70+j*.25
+    for i in range(69):
+        x=-8.5+i*.25;z=-1.43+.019*math.sin(x*4.3+y*7.7)+.012*math.sin(y*14-x*3.1)
         verts.append((x,y,z))
-for j in range(280):
-    for i in range(34):
-        k=j*35+i;faces.append((k,k+1,k+36,k+35))
+for j in range(560):
+    for i in range(68):
+        k=j*69+i;faces.append((k,k+1,k+70,k+69))
 g.mesh(verts,faces,water,'Dotonbori canal water',True)
 
 # Facade coordinates: u follows the canal, v projects out from each storefront.
@@ -157,7 +200,9 @@ def panel(side,y,u,h,w,height,background,label='',ink=None,size=None):
     if label:g.text(label,pos(side,y,u,.81,h),size or min(w/max(len(label)*.56,1),height*.42),ink or white,angle,font=jp if any(ord(c)>128 for c in label) else font)
 def vertical(side,y,u,h,label,bg,height=8,w=1.35):
     panel(side,y,u,h,w,height,bg)
-    for i,c in enumerate(label):g.text(c,pos(side,y,u,.83,h+height*.39-i*height*.78/max(1,len(label)-1)),min(w*.74,height*.75/len(label)),white if bg in [neonred,blue,black] else neonred,-side*math.pi/2,font=jp)
+    for i,c in enumerate(label):
+        o=g.text(c,pos(side,y,u,.83,h+height*.37-i*height*.74/max(1,len(label)-1)),w*1.05,white if bg in [neonred,blue,black] else black if bg==yellow else neonred,-side*math.pi/2,font=jp)
+        o.scale.y=min(1.8,height*.82/len(label)/w)
 
 def artwork(name,corners,width=512,height=1024):
     # Rectify the supplied sign artwork inside Blender. Only individual signs
@@ -175,37 +220,58 @@ def artwork(name,corners,width=512,height=1024):
     return m
 
 labels=['たこ焼','大阪王将','串かつ','道頓堀','居酒屋','らーめん','焼肉','寿司','うどん','珈琲','お好み焼','餃子']
-signs=[neonred,cream,blue,yellow,white,green,orange,pink]
+signs=[neonred,white,blue,yellow,white,neonred,cream,white]
 for side in [-1,1]:
     for idx,y in enumerate(range(-65,66,10)):
         h=random.choice([19,22,25,28,32]);w=9.7
         if side==-1 and y in [-5,5,15]:h=33
         g.box((side*24.1,y,h/2),(10.2,w,h),facades[(idx+(side+1)*2)%len(facades)])
-        collider(side*24.1,y,5.1,w/2,h)
+        collider(side*24.1,y,6.25,w/2,h)
         for level in range(1,int(h/3)):
             z=level*3+.8
             g.box((side*18.93,y,z-1.4),(.35,w,.19),silver)
             for u in [-3.4,-1.15,1.15,3.4]:
                 g.box(pos(side,y,u,.055,z),(.08,1.83,2.04),glass)
                 if (level+idx+int(u))%3:
-                    g.panel(pos(side,y,u,.108,z),1.65,1.83,warm,-side*math.pi/2)
+                    interior=windows[(level+idx+round(u))%4]
+                    g.panel(pos(side,y,u,.108,z),1.65,1.83,interior,-side*math.pi/2)
                     g.box(pos(side,y,u,.2,z-.5),(.09,1.85,.09),dark)
                     g.box(pos(side,y,u,.2,z),(.09,.045,2.05),dark)
+                    # Tables, pendant lights and shelves read through the glazing.
+                    g.box(pos(side,y,u,.23,z-.51),(.21,1.2,.10),wood)
+                    if level<4:
+                        for off in [-.35,.35]:
+                            g.box(pos(side,y,u+off,.19,z-.78),(.09,.09,.50),dark)
+                        g.sphere(pos(side,y,u,.18,z+.5),(.09,.19,.12),cream,10,6)
             for u in [-4.75,0,4.75]:g.box(pos(side,y,u,.22,z),(.22,.13,2.9),facades[idx%6])
         # Recessed shop doors, transom, noren curtain, menus, lanterns.
         g.box(pos(side,y,0,.2,1.45),(.22,8.7,2.9),glass)
         for u in [-3,-1,1,3]:
-            g.panel(pos(side,y,u,.33,1.5),1.8,2.7,warm,-side*math.pi/2)
+            g.panel(pos(side,y,u,.33,1.5),1.8,2.7,windows[(idx+1)%3],-side*math.pi/2)
             g.box(pos(side,y,u-.93,.41,1.45),(.17,.09,2.9),wood)
             g.box(pos(side,y,u,.47,.58),(.15,1.85,.10),wood)
+            g.box(pos(side,y,u,.57,.98),(.36,1.6,.10),wood)
+            for k in range(5):g.rod(pos(side,y,u-.55+k*.27,.45,1.13),pos(side,y,u-.55+k*.27,.45,1.52),.052,green if k%2 else yellow,8)
+            for off in [-.43,.43]:
+                g.rod(pos(side,y,u+off,.90,.08),pos(side,y,u+off,.90,.62),.033,dark)
+                g.sphere(pos(side,y,u+off,.9,.63),(.18,.18,.045),red,12,6)
         g.box(pos(side,y,0,.8,3.15),(1.5,9.9,.20),dark)
         panel(side,y,0,3.72,8.9,.95,cream,labels[idx%12],neonred,.62)
         for u in [-3.8,-2.85,-1.9,-.95,0,.95,1.9,2.85,3.8]:
             p=pos(side,y,u,.81,2.65);g.sphere(p,(.19,.25,.36),warm,10,7)
             g.rod((p[0],p[1],2.99),(p[0],p[1],3.12),.025,dark)
-        vertical(side,y,side*3.6,11,labels[(idx+3)%12],signs[idx%8],11,1.3)
-        panel(side,y,-side*1.9,7.3,3.2,3.5,signs[(idx+2)%8],labels[(idx+5)%12],None,.60)
-        vertical(side,y,-side*4.4,18,labels[(idx+7)%12],signs[(idx+4)%8],7,.8)
+        vertical(side,y,side*3.3,12,labels[(idx+3)%12],signs[idx%8],12,2.25)
+        panel(side,y,-side*1.2,6.0,5.0,2.9,signs[(idx+2)%8],labels[(idx+5)%12],None,1.02)
+        vertical(side,y,-side*3.6,18,labels[(idx+7)%12],signs[(idx+4)%8],9,1.65)
+        # Dense smaller projecting signs and stacked campaigns break the grid.
+        for k in range(3):
+            panel(side,y,-side*.75,10.0+k*3.2,3.6,2.5,signs[(idx+k+3)%8],labels[(idx+k+2)%12],neonred if (idx+k+3)%8 in [1,4,6,7] else white,1.05)
+        vertical(side,y,side*1.5,min(h-3,24),labels[(idx+9)%12],signs[(idx+6)%8],6,1.7)
+        if idx%2==0:
+            g.box(pos(side,y,4.2,1.5,7.9),(2.1,.18,4.1),dark)
+            # Perpendicular street signs stay visible looking along the river.
+            g.panel((side*17.4,y+4.05,7.9),1.8,3.8,neonred,0)
+            g.text('酒\n場',(side*17.4,y+4.02,7.9),.78,white,0,font=jp)
         # Roof enclosures, AC condensers, pipes and railings make orbit views complete.
         g.box((side*24,y,h+.18),(10.3,9.8,.36),stone)
         g.box((side*25,y+1,h+1.9),(4.2,3.2,3.8),facades[(idx+2)%6])
@@ -270,6 +336,12 @@ def crab(side,y,h):
     panel(side,y,0,h-3.75,8.8,1.35,white,'かに道楽',neonred,1)
 crab(1,7,10)
 vertical(1,7,4.3,22,'かに道楽',white,14,1.65)
+# Traditional Kani Doraku surround: pale vertical slats, tiled eaves and lanterns.
+for u in np.linspace(-4.5,4.5,30):g.box(pos(1,7,float(u),.65,10),(.2,.11,6.2),cream)
+for row in range(4):
+    for u in np.linspace(-5,5,34):
+        g.rod(pos(1,7,float(u),.6+row*.23,13.45-row*.10),pos(1,7,float(u),.83+row*.23,13.35-row*.10),.10,dark,8)
+for u in np.linspace(-4.6,4.6,17):g.sphere(pos(1,7,float(u),1.1,12.75),(.18,.20,.25),warm,10,7)
 
 # Takoyaki octopus with curling, sucker-lined tentacles.
 def octopus(side,y,h):
@@ -323,13 +395,13 @@ for sign in [-1,1]:
             yy=sign*(76+i*11);h=random.uniform(21,39)
             g.box((side*24,yy,h/2),(11,10.5,h),facades[i%6])
             for z in range(4,int(h),3):
-                for u in [-3,0,3]:g.panel((side*18.45,yy+u,z),1.9,1.4,warm,-side*math.pi/2)
+                for u in [-3,0,3]:g.panel((side*18.45,yy+u,z),1.9,1.4,windows[(z+int(u))%4],-side*math.pi/2)
             panel(side,yy,0,11,3,11,signs[i%8],labels[i],white,1.2)
-    for x in range(-42,43,8):
-        h=random.uniform(24,53)
-        g.box((x,sign*126,h/2),(7,12,h),facades[abs(x)%6])
+    for x in [-43,-33,-22,-9,6,21,38]:
+        h=random.uniform(19,41);depth=random.uniform(133,160)
+        g.box((x,sign*depth,h/2),(random.uniform(7,11),12,h),facades[abs(x)%6])
         for z in range(4,int(h),3):
-            for u in [-2,0,2]:g.panel((x+u,sign*119.9,z),.75,1.25,warm,0 if sign==1 else math.pi)
+            for u in [-2,0,2]:g.panel((x+u,sign*(depth-6.1),z),.75,1.25,windows[(z+int(u))%4],0 if sign==1 else math.pi)
 objects=g.flush()
 def person(x,y,z,coat,scale=1,angle=0):
     def p(a,b,h):return (x+scale*(a*math.cos(angle)-b*math.sin(angle)),y+scale*(a*math.sin(angle)+b*math.cos(angle)),z+scale*h)
@@ -364,7 +436,7 @@ for i,(x,y) in enumerate([(-3,-24),(3,30)]):
 for side in [-1,1]:
     for i,y in enumerate([-58,-40,-29,-15,12,24,39,57]):
         person(side*(11.3+(i%3)*1.3),y,0,coats[(i+(side+1))%6],random.uniform(.88,1.05),random.uniform(-math.pi,math.pi))
-for x in [-6,-3,3,6]:person(x,2.75,2.4,coats[int(abs(x))%6],.97,math.pi/2)
+for x in [-6,-3,3,6]:person(x,2.75,2.55+.24*(1-(x/8.5)**2),coats[int(abs(x))%6],.97,math.pi/2)
 objects+=g.flush()
 
 # Practical light spill is baked separately from the sun.
@@ -380,14 +452,17 @@ bpy.ops.object.light_add(type='SUN');bpy.context.object.name='Dotonbori sun'
 bpy.context.scene.world=bpy.data.worlds.new('Dotonbori sky')
 bpy.context.scene['location_id']='dotonbori'
 apply_preset('evening')
-bpy.ops.object.camera_add(location=(3,-43,13));cam=bpy.context.object;cam.name='Dotonbori review camera'
-cam.rotation_euler=(Vector((-1,5,10))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.lens=25
+bpy.ops.object.camera_add(location=(3,-42,7.6));cam=bpy.context.object;cam.name='Dotonbori review camera'
+cam.rotation_euler=(Vector((-1,5,10))-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.lens=26
 s=bpy.context.scene;s.camera=cam;s.render.resolution_x=1500;s.render.resolution_y=1000;s.render.resolution_percentage=100
 s['design_reference']='Four user supplied Dotonbori directional concept boards; compact stylized reconstruction'
-s['bridge_navigation']='Geometry and navigation share x endpoints -15.8,-8.5,8.5,15.8; main deck 2.4m'
+s['bridge_navigation']='Four longitudinal stair flights per bridge; 0.1275m main risers, 5m landings, parabolic crown 2.79m'
 s['pedestrian_count']=20
-data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[11.8,0,20],bounds=[-18.8,18.8,-68,68],colliders=colliders,surfaces=surfaces,pedestrians=20,cruises=2)
+data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-68,68],colliders=colliders,surfaces=surfaces,pedestrians=20,cruises=2,artRevision=2)
 (ROOT/'public/models/dotonbori.json').write_text(json.dumps(data,indent=2))
+if '--navigation-only' in sys.argv:
+    print('DOTONBORI_NAVIGATION_UPDATED',len(colliders),flush=True)
+    sys.exit(0)
 g.export(ROOT/'public/models/dotonbori.glb',objects)
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets/blender/dotonbori.blend'),compress=True)
 print('DOTONBORI_AUTHORED',len(objects),len(colliders),flush=True)

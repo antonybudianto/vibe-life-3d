@@ -4,7 +4,8 @@ from pathlib import Path
 from blender_lighting import linear_rgb
 
 def camera_sky(preset):
-    path=Path(__file__).resolve().parents[1]/'public/textures/clouds.webp'
+    filename='dotonbori-clouds.webp' if bpy.context.scene.get('location_id')=='dotonbori' else 'clouds.webp'
+    path=Path(__file__).resolve().parents[1]/'public/textures'/filename
     if not path.exists():return
     world=bpy.context.scene.world;nodes=world.node_tree.nodes;links=world.node_tree.links
     # Rebuild only our named nodes. Keep the calibrated ambient world untouched.

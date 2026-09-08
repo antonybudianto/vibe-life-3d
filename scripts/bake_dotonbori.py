@@ -57,6 +57,8 @@ report.update(irradiance(ground,mats,'dotonbori',2048))
 for o in ground:o.data.uv_layers.active_index=0
 for m in bpy.data.materials:
     if m.use_nodes and m.node_tree.nodes.get('Cycles bake target'):m.node_tree.nodes.remove(m.node_tree.nodes['Cycles bake target'])
+from dotonbori_water import bake_water_normal
+report.update(bake_water_normal(ROOT))
 g.compact_baked_colors(objects)
 s['baking_pipeline']='Cycles vertex AO, 2048px UV1 ambient occlusion and independent shop irradiance; sunlight remains dynamic'
 roots=[o for o in s.objects if o.type=='EMPTY']

@@ -18,6 +18,10 @@ export function followGround(y: number, velocity: number, oldFloor: number, floo
   const nextY = y + nextVelocity * dt;
   return nextY <= floor ? { y: floor, velocity: 0 } : { y: nextY, velocity: nextVelocity };
 }
+/** Stair risers are climbable; a raised landing cannot be entered through its side. */
+export function canStepTo(y: number, oldFloor: number, floor: number) {
+  return floor <= Math.max(y, oldFloor) + .24;
+}
 export function moveWithCollision(x: number, z: number, dx: number, dz: number, radius: number, colliders: Collider[], bounds: [number, number, number, number]) {
   // Axis-separated circle/AABB resolution permits wall sliding and prevents tunneling
   // at the fixed simulation step. Also resolves an overlapping vehicle on entry.

@@ -5,109 +5,139 @@
   "vertexBakes": [
     {
       "mesh": "Lettering Dotonbori ink",
-      "corners": 6858,
-      "minimum": 0.031000003218650818,
+      "corners": 12774,
+      "minimum": 0.02015000395476818,
       "maximum": 0.031000003218650818
     },
     {
       "mesh": "Dotonbori paving joints",
-      "corners": 23856,
+      "corners": 25656,
       "minimum": 0.09099999070167542,
       "maximum": 0.14000004529953003
     },
     {
       "mesh": "Dotonbori limestone",
-      "corners": 2304,
+      "corners": 2880,
       "minimum": 0.25349998474121094,
       "maximum": 0.38999998569488525
     },
     {
       "mesh": "Dotonbori bridge coping",
       "corners": 48,
-      "minimum": 0.3864576816558838,
+      "minimum": 0.38645774126052856,
       "maximum": 0.5894623398780823
     },
     {
       "mesh": "Dotonbori graphite steel",
-      "corners": 109632,
+      "corners": 155160,
       "minimum": 0.03380000591278076,
       "maximum": 0.052000001072883606
     },
     {
       "mesh": "Dotonbori brushed rails",
-      "corners": 14064,
+      "corners": 39360,
       "minimum": 0.2860001027584076,
       "maximum": 0.43999993801116943
     },
     {
       "mesh": "Dotonbori cedar",
-      "corners": 11880,
+      "corners": 53568,
       "minimum": 0.14949995279312134,
       "maximum": 0.23000000417232513
     },
     {
-      "mesh": "Dotonbori leaves 0",
-      "corners": 35136,
-      "minimum": 0.06824998557567596,
-      "maximum": 0.10476075112819672
+      "mesh": "Dotonbori leaves 3",
+      "corners": 76116,
+      "minimum": 0.0585000142455101,
+      "maximum": 0.09000001847743988
+    },
+    {
+      "mesh": "Dotonbori leaves 4",
+      "corners": 75612,
+      "minimum": 0.14949995279312134,
+      "maximum": 0.23000000417232513
     },
     {
       "mesh": "Dotonbori leaves 1",
-      "corners": 35136,
-      "minimum": 0.1170000284910202,
-      "maximum": 0.1795898675918579
+      "corners": 75804,
+      "minimum": 0.07799997925758362,
+      "maximum": 0.1199999675154686
+    },
+    {
+      "mesh": "Dotonbori leaves 0",
+      "corners": 76224,
+      "minimum": 0.04224999248981476,
+      "maximum": 0.065000019967556
     },
     {
       "mesh": "Dotonbori leaves 2",
-      "corners": 26064,
-      "minimum": 0.15275001525878906,
-      "maximum": 0.23446452617645264
+      "corners": 76404,
+      "minimum": 0.1170000284910202,
+      "maximum": 0.18000003695487976
     },
     {
       "mesh": "Dotonbori ivory",
-      "corners": 3416,
+      "corners": 53464,
       "minimum": 0.5395001769065857,
       "maximum": 0.8300000429153442
     },
     {
+      "mesh": "Bridge stair risers",
+      "corners": 4800,
+      "minimum": 0.25349998474121094,
+      "maximum": 0.33543556928634644
+    },
+    {
       "mesh": "Dotonbori facade 0",
-      "corners": 3384,
+      "corners": 3528,
       "minimum": 0.18199998140335083,
       "maximum": 0.28000009059906006
     },
     {
       "mesh": "Dotonbori shop glass",
-      "corners": 20016,
+      "corners": 20208,
       "minimum": 0.044200003147125244,
       "maximum": 0.06799999624490738
     },
     {
+      "mesh": "Dotonbori interior amber 3",
+      "corners": 1320,
+      "minimum": 0.02925000712275505,
+      "maximum": 0.04500000923871994
+    },
+    {
+      "mesh": "Dotonbori vermilion enamel",
+      "corners": 72976,
+      "minimum": 0.4680001139640808,
+      "maximum": 0.720000147819519
+    },
+    {
       "mesh": "Dotonbori facade 2",
-      "corners": 2976,
+      "corners": 2544,
       "minimum": 0.13649997115135193,
       "maximum": 0.21000002324581146
     },
     {
       "mesh": "Dotonbori facade 1",
-      "corners": 3480,
+      "corners": 3384,
       "minimum": 0.2470000684261322,
       "maximum": 0.3800000846385956
     },
     {
       "mesh": "Dotonbori facade 3",
-      "corners": 2280,
+      "corners": 2640,
       "minimum": 0.3055000305175781,
       "maximum": 0.4699999988079071
     },
     {
       "mesh": "Dotonbori facade 4",
-      "corners": 2304,
+      "corners": 2064,
       "minimum": 0.18199998140335083,
       "maximum": 0.28000009059906006
     },
     {
       "mesh": "Dotonbori facade 5",
-      "corners": 2088,
+      "corners": 2304,
       "minimum": 0.16249996423721313,
       "maximum": 0.25
     },
@@ -116,12 +146,6 @@
       "corners": 5272,
       "minimum": 0.02015000395476818,
       "maximum": 0.030957620590925217
-    },
-    {
-      "mesh": "Dotonbori vermilion enamel",
-      "corners": 13840,
-      "minimum": 0.4680001139640808,
-      "maximum": 0.720000147819519
     },
     {
       "mesh": "Lettering Dotonbori ink.001",
@@ -139,67 +163,67 @@
       "mesh": "Dotonbori cedar.001",
       "corners": 24,
       "minimum": 0.1498144119977951,
-      "maximum": 0.22234831750392914
+      "maximum": 0.22245314717292786
     },
     {
       "mesh": "Dotonbori graphite steel.001",
       "corners": 1248,
       "minimum": 0.03380000591278076,
-      "maximum": 0.04941693693399429
+      "maximum": 0.049416929483413696
     },
     {
       "mesh": "Dotonbori pedestrian skin",
       "corners": 3600,
       "minimum": 0.3769999146461487,
-      "maximum": 0.5699557065963745
+      "maximum": 0.5707485675811768
     },
     {
       "mesh": "Dotonbori pedestrian hair",
       "corners": 3600,
       "minimum": 0.01170000247657299,
-      "maximum": 0.017991801723837852
-    },
-    {
-      "mesh": "Dotonbori pedestrian coat 2",
-      "corners": 960,
-      "minimum": 0.18199998140335083,
-      "maximum": 0.2725989520549774
-    },
-    {
-      "mesh": "Dotonbori ink.001",
-      "corners": 1200,
-      "minimum": 0.02015000395476818,
-      "maximum": 0.02800494246184826
-    },
-    {
-      "mesh": "Dotonbori ivory.001",
-      "corners": 4400,
-      "minimum": 0.5395001769065857,
-      "maximum": 0.7029063105583191
-    },
-    {
-      "mesh": "Dotonbori pedestrian coat 5",
-      "corners": 1440,
-      "minimum": 0.37050002813339233,
-      "maximum": 0.5557128190994263
+      "maximum": 0.01798359863460064
     },
     {
       "mesh": "Dotonbori pedestrian coat 1",
       "corners": 960,
       "minimum": 0.06175001710653305,
-      "maximum": 0.09015104174613953
+      "maximum": 0.09248893707990646
+    },
+    {
+      "mesh": "Dotonbori ink.001",
+      "corners": 1200,
+      "minimum": 0.02015000395476818,
+      "maximum": 0.028075581416487694
+    },
+    {
+      "mesh": "Dotonbori ivory.001",
+      "corners": 4400,
+      "minimum": 0.5395001769065857,
+      "maximum": 0.7029063701629639
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 0",
+      "corners": 960,
+      "minimum": 0.39000004529953003,
+      "maximum": 0.5822266340255737
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 4",
+      "corners": 480,
+      "minimum": 0.17549997568130493,
+      "maximum": 0.25548046827316284
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 5",
+      "corners": 1440,
+      "minimum": 0.37050002813339233,
+      "maximum": 0.5409062504768372
     },
     {
       "mesh": "Dotonbori pedestrian coat 3",
       "corners": 960,
       "minimum": 0.4680001139640808,
-      "maximum": 0.6816093921661377
-    },
-    {
-      "mesh": "Dotonbori pedestrian coat 0",
-      "corners": 480,
-      "minimum": 0.39000004529953003,
-      "maximum": 0.5677344799041748
+      "maximum": 0.6806251406669617
     },
     {
       "mesh": "Dotonbori brushed rails.001",
@@ -210,7 +234,7 @@
     {
       "mesh": "Dotonbori cruise yellow",
       "corners": 24,
-      "minimum": 0.7262357473373413,
+      "minimum": 0.7253789305686951,
       "maximum": 0.9399999976158142
     },
     {
@@ -229,7 +253,7 @@
       "mesh": "Dotonbori cedar.002",
       "corners": 24,
       "minimum": 0.1498144119977951,
-      "maximum": 0.22245311737060547
+      "maximum": 0.22234830260276794
     },
     {
       "mesh": "Dotonbori graphite steel.002",
@@ -239,57 +263,57 @@
     },
     {
       "mesh": "Dotonbori pedestrian skin.001",
-      "corners": 3600,
+      "corners": 3960,
       "minimum": 0.3769999146461487,
-      "maximum": 0.5702199339866638
+      "maximum": 0.5707485675811768
     },
     {
       "mesh": "Dotonbori pedestrian hair.001",
-      "corners": 3600,
+      "corners": 3960,
       "minimum": 0.01170000247657299,
-      "maximum": 0.017991801723837852
-    },
-    {
-      "mesh": "Dotonbori pedestrian coat 2.001",
-      "corners": 960,
-      "minimum": 0.18199998140335083,
-      "maximum": 0.2725989520549774
-    },
-    {
-      "mesh": "Dotonbori ink.002",
-      "corners": 1200,
-      "minimum": 0.02015000395476818,
-      "maximum": 0.02800494246184826
-    },
-    {
-      "mesh": "Dotonbori ivory.002",
-      "corners": 4400,
-      "minimum": 0.5395001769065857,
-      "maximum": 0.70177161693573
-    },
-    {
-      "mesh": "Dotonbori pedestrian coat 1.001",
-      "corners": 1440,
-      "minimum": 0.06175001710653305,
-      "maximum": 0.09261881560087204
-    },
-    {
-      "mesh": "Dotonbori pedestrian coat 0.001",
-      "corners": 480,
-      "minimum": 0.39000004529953003,
-      "maximum": 0.5677344799041748
+      "maximum": 0.01798359863460064
     },
     {
       "mesh": "Dotonbori pedestrian coat 3.001",
-      "corners": 960,
+      "corners": 1920,
       "minimum": 0.4680001139640808,
-      "maximum": 0.6835782527923584
+      "maximum": 0.7019531726837158
+    },
+    {
+      "mesh": "Dotonbori ink.002",
+      "corners": 1320,
+      "minimum": 0.02015000395476818,
+      "maximum": 0.028061455115675926
+    },
+    {
+      "mesh": "Dotonbori ivory.002",
+      "corners": 4840,
+      "minimum": 0.5395001769065857,
+      "maximum": 0.7040411233901978
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 1.001",
+      "corners": 960,
+      "minimum": 0.06175001710653305,
+      "maximum": 0.09214257448911667
     },
     {
       "mesh": "Dotonbori pedestrian coat 5.001",
       "corners": 960,
       "minimum": 0.37050002813339233,
-      "maximum": 0.5396074652671814
+      "maximum": 0.5370098352432251
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 2",
+      "corners": 960,
+      "minimum": 0.18199998140335083,
+      "maximum": 0.2650702893733978
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 0.001",
+      "corners": 480,
+      "minimum": 0.39000004529953003,
+      "maximum": 0.5677343606948853
     },
     {
       "mesh": "Dotonbori brushed rails.002",
@@ -300,7 +324,7 @@
     {
       "mesh": "Dotonbori cruise yellow.001",
       "corners": 24,
-      "minimum": 0.7240937948226929,
+      "minimum": 0.7236654162406921,
       "maximum": 0.9399999976158142
     },
     {
@@ -319,31 +343,31 @@
       "mesh": "Dotonbori pedestrian coat 0.002",
       "corners": 2400,
       "minimum": 0.39000004529953003,
-      "maximum": 0.5983594655990601
+      "maximum": 0.5980859994888306
     },
     {
       "mesh": "Dotonbori ink.003",
       "corners": 2400,
       "minimum": 0.02015000395476818,
-      "maximum": 0.02919166535139084
+      "maximum": 0.029149286448955536
     },
     {
       "mesh": "Dotonbori ivory.003",
       "corners": 8800,
       "minimum": 0.5395001769065857,
-      "maximum": 0.7925527095794678
+      "maximum": 0.7914179563522339
     },
     {
       "mesh": "Dotonbori pedestrian coat 1.002",
       "corners": 1440,
       "minimum": 0.06175001710653305,
-      "maximum": 0.09474024176597595
+      "maximum": 0.09430728852748871
     },
     {
-      "mesh": "Dotonbori pedestrian coat 2.002",
+      "mesh": "Dotonbori pedestrian coat 2.001",
       "corners": 1440,
       "minimum": 0.18199998140335083,
-      "maximum": 0.27910685539245605
+      "maximum": 0.279489666223526
     },
     {
       "mesh": "Dotonbori pedestrian coat 3.002",
@@ -352,23 +376,27 @@
       "maximum": 0.7180313467979431
     },
     {
-      "mesh": "Dotonbori pedestrian coat 4",
+      "mesh": "Dotonbori pedestrian coat 4.001",
       "corners": 960,
       "minimum": 0.17549997568130493,
-      "maximum": 0.2692617177963257
+      "maximum": 0.26950782537460327
     },
     {
       "mesh": "Dotonbori pedestrian coat 5.002",
       "corners": 960,
       "minimum": 0.37050002813339233,
-      "maximum": 0.5658437013626099
+      "maximum": 0.5689609050750732
     }
   ],
   "ao": "dotonbori-ao.png",
   "resolution": 2048,
-  "aoStd": 0.45704537630081177,
+  "aoStd": 0.4441635310649872,
   "lightmap": "dotonbori-light.webp",
   "lightmapScale": 4,
-  "lightmapMaximum": 2.9874560832977295,
-  "seconds": 71.1
+  "lightmapMaximum": 2.333117961883545,
+  "waterNormal": "/textures/dotonbori-water-normal.png",
+  "waterNormalSize": 512,
+  "waterNormalStd": 0.11622670956611245,
+  "waterNormalEngine": "CYCLES",
+  "seconds": 87.6
 }

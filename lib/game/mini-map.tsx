@@ -11,7 +11,13 @@ export function MiniMap({ map, x, z }: { map: MapId; x: number; z: number }) {
       <rect x={side === -1 ? -18.8 : 8.4} y="-70" width="10.4" height="140" fill="#8c9796" opacity=".65"/>
       {Array.from({length:14},(_,i) => <rect key={i} x={side === -1 ? -30 : 20} y={-69+i*10} width="10" height="8" fill={i%3 === 0 ? '#c37b85' : '#5b6875'}/>)}
     </g>)}
-    {[-48,0,48].map((z) => <rect key={z} x="-15.8" y={z-3.8} width="31.6" height="7.6" fill="#decdb2"/>)}
+    {[-48,0,48].map((z) => <g key={z} fill="#decdb2">
+      <rect x="-13.5" y={z-3.8} width="27" height="7.6"/>
+      {[-1,1].map((side) => <g key={side}>
+        <rect x={side===-1?-13.5:8.5} y={z-(z===0?10.6:8.8)} width="5" height={z===0?21.2:17.6}/>
+        {[-1,1].map((end) => <path key={end} d={`M${side*11-1} ${z+end*7}h2m-2 ${end*1.2}h2m-2 ${end*1.2}h2`} fill="none" stroke="#82745f" strokeWidth=".6"/>)}
+      </g>)}
+    </g>)}
     <text x="0" y="-7" textAnchor="middle" fontSize="4.7" fill="#fbe7bf">Ebisubashi</text>
     <circle cx="-19" cy="-7" r="2" fill="#6bbdff"><title>Glico runner</title></circle>
     <circle cx={x} cy={z} r="4" fill="#e8a4bf" opacity=".3"/>
