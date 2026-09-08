@@ -23,7 +23,7 @@ def build(n):
     # Center, frontage, height, architecture family, reserved landmark.
     parcels={
         -1:[(-65,9.6,22,0,''),(-55.5,8.8,28,2,''),(-46.7,7.5,25,1,''),
-            (-38.3,8.7,21,0,''),(-23.8,19.6,25,4,'tsutaya'),
+            (-38.3,8.7,21,0,''),(-23.8,19.6,34,4,'tsutaya'),
             (-9,9.7,33,0,'asahi'),(11.5,22.7,35,1,'glico'),(28.5,10.7,31,0,'promise'),
             (42,15.7,32,3,''),(56,11.7,28,2,''),(66.5,8.7,22,0,'')],
         1:[(-65,9.6,27,1,''),(-55,9.7,22,0,''),(-40,18.7,32,3,'wheel'),
@@ -40,7 +40,13 @@ def build(n):
             if abs(y)>55:front=19.2
             if hero=='asahi':front=17.95
             n['frontages'][side,y]=front
-            if hero in ['tsutaya','glass-tower','glass-retail','wheel']:
+            if hero=='tsutaya':
+                from dotonbori_tsutaya import build as build_tsutaya
+                build_tsutaya(n,side,y,w,h,front)
+                collider(side*(front+5),y,5.7,w/2,h)
+                report.append(dict(side=side,center=y,width=w,height=h,front=front,family='billboard cafe tower',landmark=hero))
+                continue
+            if hero in ['glass-tower','glass-retail','wheel']:
                 from dotonbori_realism import frontage
                 frontage(n,side,y,w,h,front,hero)
                 collider(side*(front+5),y,5.7,w/2,h)

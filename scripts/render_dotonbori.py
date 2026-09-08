@@ -73,6 +73,10 @@ for name,position,target,lens in [
     ('cruise',(8,-12,6),(-3,-24,-.1),34),
     ('kukuru',(-5,22,5.4),(-17.7,28.5,4.7),29),
     ('acchichi',(7,-64,5.8),(17.5,-55,4.6),30),
+    ('tsutaya',(12,-13,18),(-18,-23.8,17),19),
+    ('snow-brand',(13,8,20),(-18,5,20),26),
+    ('bridge-detail',(8,21,7),(0,2.8,2.8),31),
+    ('bridge-plaza',(2,17,22),(0,0,2.0),29),
 ]:
     s.camera.location=position;s.camera.data.lens=lens
     s.camera.rotation_euler=(Vector(target)-s.camera.location).to_track_quat('-Z','Y').to_euler()

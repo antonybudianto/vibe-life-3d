@@ -34,14 +34,24 @@ def perimeter_ramps(n,y,edge,top):
             if not (a>=-17/24-.001 and b<=17/24+.001):
                 ha=2.55+.24*max(0,1-(a/8.5)**2);hb=2.55+.24*max(0,1-(b/8.5)**2)
                 g.mesh([(a,ia,za-.2),(b,ib,zb-.2),(b,ib,hb),(a,ia,ha)],[(0,1,2,3),(3,2,1,0)],stone)
-                for h in [.65,.95]:g.rod((a,ia,za+h),(b,ib,zb+h),.032,silver,8)
+                g.rod((a,ia+end*.07,za+.86),(b,ib+end*.07,zb+.86),.032,silver,8)
             g.mesh([(a,oa,za),(b,ob,zb),(b,ob,zb-.6),(a,oa,za-.6)],[(0,1,2,3),(3,2,1,0)],silver)
-            for h in [.12,.65,1.1]:g.rod((a,oa,za+h),(b,ob,zb+h),.035,silver,8)
-            for t in [0,.5]:
+            from dotonbori_bridge import baluster
+            for h in [.10,1.1]:g.rod((a,oa,za+h),(b,ob,zb+h),.040,silver,8)
+            tangent=(b-a,ob-oa)
+            count=max(1,math.ceil(math.hypot(*tangent)/.27))
+            for k in range(count):
+                t=(k+.5)/count
                 x=a+(b-a)*t;yy=oa+(ob-oa)*t;z=za+(zb-za)*t
-                g.rod((x,yy,z+.08),(x,yy,z+1.12),.025,silver,6)
-            n['collider']((a+b)/2,(oa+ob)/2,(b-a)/2+.01,abs(ob-oa)/2+.035,top+1.2,cameraMinY=min(za,zb)-.2)
-        g.text('えびす橋',(0,y+end*(edge(0)+width+.024),top-.34),.40,n['black'],0 if end==-1 else math.pi,font=n['jp'])
+                baluster(n,(x,yy,z),tangent)
+            # Folded panel casing with fine vertical seams and rolled lower edge.
+            g.rod((a,oa+end*.015,za-.56),(b,ob+end*.015,zb-.56),.048,silver,10)
+            g.rod((a,oa+end*.019,za-.53),(a,oa+end*.019,za-.025),.009,n['joint'],6)
+            for k in range(4):
+                ta=k/4;tb=(k+1)/4;xa=a+(b-a)*ta;xb=a+(b-a)*tb
+                ya=oa+(ob-oa)*ta;yb=oa+(ob-oa)*tb
+                n['collider']((xa+xb)/2,(ya+yb)/2,(xb-xa)/2+.01,abs(yb-ya)/2+.035,top+1.2,cameraMinY=min(za,zb)-.2)
+        g.text('え び す 橋',(0,y+end*(edge(0)+width+.038),top-.29),.42,n['black'],0 if end==-1 else math.pi,font=n['jp'])
         for side in [-1,1]:
             # The existing promenade at z=0 is the lower landing. A second
             # coplanar floor here causes flashing beside the stairs at a distance.
@@ -59,23 +69,7 @@ def frontage(n,side,y,w,h,front,hero):
     def box(u,v,z,d,ww,hh,m):g.box(pos(side,y,u,v,z),(d,ww,hh),m)
     def face(u,v,z,ww,hh,m):g.panel(pos(side,y,u,v,z),ww,hh,m,angle)
     box(0,-5.0,h/2,9.0,w,h,pale)
-    if hero=='tsutaya':
-        # Low broad storefront with a glazed cafe mezzanine and pale upper shell.
-        for z in [2.0,5.4,8.8,12.2]:
-            face(0,.04,z,w-.5,3.1,glazing)
-            for u in [(-w/2+.3)+j*(w-.6)/10 for j in range(11)]:box(u,.19,z,.20,.10,3.2,silver)
-            box(0,.24,z-1.65,.50,w,.20,pale)
-        for u in [-w*.34,0,w*.34]:
-            box(u,.25,19.2,.42,.25,10.7,pale)
-            face(u,.12,19.2,w*.28,9.5,glass)
-            for k in range(8):box(u-w*.13+k*w*.037,.30,19.2,.25,.065,9.5,silver)
-        panel(side,y,0,10.5,w-.4,2.1,n['blue'],'TSUTAYA',white,1.7)
-        panel(side,y,0,3.95,w-.8,.85,dark,'STARBUCKS COFFEE',white,.65)
-        box(0,1.0,3.4,2.4,w,.18,dark)
-        for u in [-6,-3,0,3,6]:
-            box(u,-.03,5.0,.50,1.2,.10,n['wood'])
-            g.sphere(pos(side,y,u,-.12,6.3),(.16,.16,.20),n['warm'],10,6)
-    elif hero in ['glass-retail','glass-tower']:
+    if hero in ['glass-retail','glass-tower']:
         # Contrasting white vertical tower and blue-finned glazed west wing.
         if hero=='glass-tower':
             face(0,.06,h*.5,w-1,h-1,glazing)

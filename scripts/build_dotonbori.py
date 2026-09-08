@@ -139,12 +139,12 @@ def bridge(y,main=True):
     half=3.8 if main else 3.4;top=2.55 if main else 1.8;crown=.24 if main else .14
     name='Ebisubashi deck' if main else 'Canal footbridges'
     def elevation(x):return top+crown*max(0,1-(x/8.5)**2)
-    def edge(x):return half+3.1*max(0,1-(x/8.5)**2) if main else half
+    def edge(x):return max(half,math.sqrt(max(0,6.9**2-x*x))) if main else half
     # Slight arch, deep segmented stone fascia and continuous bridge railing.
     for j in range(24):
         a=-8.5+j*17/24;b=-8.5+(j+1)*17/24;ha=elevation(a);hb=elevation(b)
         ea,eb=edge(a),edge(b)
-        g.mesh([(a,y-ea,ha),(b,y-eb,hb),(b,y+eb,hb),(a,y+ea,ha)],[(0,1,2,3)],cap,name)
+        if not main:g.mesh([(a,y-ea,ha),(b,y-eb,hb),(b,y+eb,hb),(a,y+ea,ha)],[(0,1,2,3)],cap,name)
         # The reflection camera sees the real underside. A top-only bridge lets
         # billboards show through its back faces in the water.
         g.mesh([(a,y+ea,ha-.94),(b,y+eb,hb-.94),(b,y-eb,hb-.94),(a,y-ea,ha-.94)],[(0,1,2,3)],stone,'Bridge solid soffits')
@@ -154,7 +154,10 @@ def bridge(y,main=True):
             g.mesh([(a,yy,ha),(b,yb,hb),(b,yb,hb-.94),(a,yy,ha-.94)],[(0,1,2,3),(3,2,1,0)],silver if main else stone)
             g.rod((a,yy,ha-.92),(a,yy,ha-.02),.012,joint,4)
             entrance=main and j in [11,12]
-            if not entrance:
+            if main and not entrance:
+                from dotonbori_bridge import parapet
+                parapet(globals(),(a,yy,ha),(b,yb,hb))
+            elif not entrance:
                 for h in [.12,.65,1.10]:g.rod((a,yy,ha+h),(b,yb,hb+h),.04,silver,8)
                 for t in ([0,.2,.4,.6,.8] if main else [0,.5]):
                     x=a+(b-a)*t;z=ha+(hb-ha)*t
@@ -165,10 +168,7 @@ def bridge(y,main=True):
                     ta=k/4;tb=(k+1)/4
                     xa=a+(b-a)*ta;xb=a+(b-a)*tb;ya=yy+(yb-yy)*ta;yc=yy+(yb-yy)*tb
                     collider((xa+xb)/2,(ya+yc)/2,(xb-xa)/2+.012,abs(yc-ya)/2+.035,top+crown+1.2,cameraMinY=top-.95)
-        g.box(((a+b)/2,y,(ha+hb)/2+.012),(.014,(ea+eb),.018),joint)
-        if main:
-            for k in range(-9,10):
-                if abs(k*.7)<min(ea,eb):g.box(((a+b)/2,y+k*.7,(ha+hb)/2+.012),(b-a,.012,.018),joint)
+        if not main:g.box(((a+b)/2,y,(ha+hb)/2+.012),(.014,(ea+eb),.018),joint)
     for x in ([-8.0,8.0] if main else [-5.9,5.9]):
         soffit=elevation(x)-.94
         g.box((x,y,(-1.8+soffit)/2),(.75,half*2-.3,soffit+1.8),stone,name='Bridge support piers')
@@ -186,7 +186,7 @@ def bridge(y,main=True):
     count=20 if main else 15;run=6.8 if main else 5.4;rise=top/count;tread=run/count
     for side in [-1,1]:
         x=side*11.0;lo=8.5;hi=13.5
-        g.mesh([(side*lo,y-half,top),(side*hi,y-half,top),(side*hi,y+half,top),(side*lo,y+half,top)],[(0,1,2,3) if side==1 else (3,2,1,0)],cap,name)
+        if not main:g.mesh([(side*lo,y-half,top),(side*hi,y-half,top),(side*hi,y+half,top),(side*lo,y+half,top)],[(0,1,2,3) if side==1 else (3,2,1,0)],cap,name)
         g.box((x,y,top-.26),(4.95,half*2,.50),stone,name='Bridge landing soffits')
         surfaces.append(dict(minX=min(side*lo,side*hi),maxX=max(side*lo,side*hi),minZ=-y-half,maxZ=-y+half,height=top))
         g.box((side*13.42,y,top-.48),(.18,half*2,.96),stone)
@@ -212,6 +212,8 @@ def bridge(y,main=True):
             lamp(side*13.0,y+end*(half-.25),top)
         g.box((side*8.2,y,(top-1.6)/2),(.65,half*2,top+1.6),stone)
     if main:
+        from dotonbori_bridge import paving as bridge_paving
+        bridge_paving(globals(),y,edge,elevation)
         from dotonbori_realism import perimeter_ramps
         perimeter_ramps(globals(),y,edge,top+crown)
 for y in [-48,0,48]:bridge(y,y==0)
@@ -279,7 +281,9 @@ def campaign(side,y,u,h,w,height,name,corners,source='dotonbori-north-v2.png'):
     for z in [h-height/2-.09,h+height/2+.09]:g.box(pos(side,y,u,.81,z),(.35,w+.3,.12),silver)
 
 campaign(-1,11.5,2.0,19.0,10.2,25.0,'Glico north',[(791,174),(919,174),(919,438),(791,438)])
-campaign(-1,11.5,-6.5,19.0,5.8,25.0,'Snowflake city',[(697,174),(786,174),(786,438),(697,438)])
+# The adjacent sign is Snow Brand / 6P cheese, not the concept's city artwork.
+from dotonbori_billboards import snow_brand
+snow_brand(globals())
 campaign(-1,28.5,-2.7,26.0,4.55,8.7,'Estem north',[(927,211),(1008,211),(1008,287),(927,287)])
 campaign(-1,28.5,2.7,26.0,4.55,8.7,'Promise north',[(1014,209),(1084,209),(1084,293),(1014,293)])
 campaign(-1,28.5,0,18.8,9.9,4.8,'Gam City',[(1022,294),(1126,294),(1126,339),(1022,339)])
@@ -359,7 +363,7 @@ s=bpy.context.scene;s.camera=cam;s.render.resolution_x=1500;s.render.resolution_
 s['design_reference']='Photo-informed Ebisubashi plaza, retail corner buildings and Ebisu Tower; compact stylized reconstruction'
 s['bridge_navigation']='Rounded Ebisubashi plaza, four straight bank stairs, separate curved perimeter ramps with central entrances and lower landings'
 s['pedestrian_count']=36
-data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-layout['promenadeEnd'],layout['promenadeEnd']],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=10,architecture=architecture,background=background)
+data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-layout['promenadeEnd'],layout['promenadeEnd']],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=11,architecture=architecture,background=background)
 (ROOT/'public/models/dotonbori.json').write_text(json.dumps(data,indent=2))
 if '--navigation-only' in sys.argv:
     print('DOTONBORI_NAVIGATION_UPDATED',len(colliders),flush=True)

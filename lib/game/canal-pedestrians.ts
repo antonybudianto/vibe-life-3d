@@ -46,7 +46,7 @@ export class CanalNavigation {
       if (n.y === 0 && Math.abs(n.x) > 10 && Math.abs(n.x) < 15.6) this.banks[n.x < 0 ? 0 : 1].push(id);
     }
     for (const z of BRIDGES) for (const x of [-5, -2.5, 2.5, 5]) for (const end of [-1, 1]) {
-      const node = this.nearest({ x, z: z + end * (z === 0 ? 3.8+3.1*(1-(x/8.5)**2)-.85 : 2.65) });
+      const node = this.nearest({ x, z: z + end * (z === 0 ? Math.max(3.8,Math.sqrt(Math.max(0,6.9**2-x*x)))-.85 : 2.65) });
       if (seen.has(node)) this.spots.push({ node, yaw: end < 0 ? Math.PI : 0 });
     }
     if (!this.banks[0].length || !this.banks[1].length || this.spots.length !== 24) throw new Error('Canal pedestrian routes are disconnected');

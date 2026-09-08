@@ -121,7 +121,7 @@ assert.equal(mainTreads.length,20,'Main bank approach has twenty actual stair tr
 assert.ok(mainTreads.every(s=>s.endHeight===undefined&&s.endHeightZ===undefined),'Bank stairs have level treads');
 for(const side of [-1,1])for(const end of [-1,1]) {
   const w=world(0,0),points=[[0,end*7.725]];
-  for(let i=1;i<=17;i++) { const x=i*.5;points.push([side*x,end*(3.8+3.1*(1-(x/8.5)**2)+.825)]); }
+  for(let i=1;i<=34;i++) { const x=i*.25;points.push([side*x,end*(Math.max(3.8,Math.sqrt(Math.max(0,6.9**2-x*x)))+.825)]); }
   points.push([side*9.4,end*4.625],[side*9.4,end*8]);
   for(const [x,z] of points)walkTo(w,x,z);
   assert.equal(w.player.y,0,'Perimeter ramp exits beside the stairs onto the riverwalk');
@@ -210,7 +210,7 @@ for(let time=0;time<=CRUISE_CYCLE;time+=.1){
 }
 assert.ok(crossed.every(bridges=>bridges.size===14),'Both boats pass under all seven bridges in both directions');
 console.log('PASS: both boats pass under all seven bridges in both directions; passengers clear soffits, full hulls clear piers and U-turns, and opposing boats stay separated.');
-assert.equal(gltf.materials.filter(m=>m.extras?.bakedLightmap).length,3,'Every walkable surface batch has its completed light bake');
+assert.equal(gltf.materials.filter(m=>m.extras?.bakedLightmap).length,9,'Walkways, bridges and all six Ebisubashi paving finishes have completed light bakes');
 assert.ok(gltf.materials.filter(m=>m.extras?.bake_mode).length>25,'Completed detail bakes must be in the delivered GLB');
 const bake=JSON.parse(fs.readFileSync('assets/bakes/dotonbori.json','utf8'));
 assert.equal(bake.engine,'CYCLES');assert.ok(bake.vertexBakes.length>30);assert.ok(bake.aoStd>.03);assert.ok(bake.lightmapMaximum>.1);

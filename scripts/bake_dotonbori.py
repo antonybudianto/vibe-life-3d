@@ -15,7 +15,7 @@ for o in s.objects:
 for m in bpy.data.materials:
     if m.use_nodes and 'base_emission' in m:m.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value=m['base_emission']
 objects=[o for o in s.objects if o.type=='MESH']
-ground=[o for o in objects if o.name in ['Dotonbori promenade paving','Ebisubashi deck','Canal footbridges']]
+ground=[o for o in objects if o.name in ['Dotonbori promenade paving','Ebisubashi deck','Canal footbridges'] or o.data.materials[0].get('walkable_paving')]
 for o in ground:
     m=o.data.materials[0].copy();m.name=o.name+' baked surface';o.data.materials[0]=m
 detail=[o for o in objects if o not in ground and not o.data.materials[0].get('water_surface') and o.data.materials[0].get('base_emission',0)==0]

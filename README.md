@@ -4,6 +4,15 @@ A playable third-person exploration prototype, using Blender-authored glTF asset
 
 ## Osaka Dotonbori
 
+Central landmark revision 11 rebuilds TSUTAYA EBISUBASHI as a billboard tower
+with a two-level Starbucks frontage, real sign artwork and its green siren
+logo. The panel immediately left of Glico now shows the photographed Snow
+Brand / yellow 6P cheese advertisement. Ebisubashi has a circular plaza, solid
+granite parapets with rounded caps, slotted metal balustrades on the outer
+ramps, segmented silver fascia, and radial paving with dark approach strips.
+Reference dates and sources are in `assets/references/central-landmarks-sources.md`.
+These are photo-informed details within the existing compressed district.
+
 Kukuru and Acchichi Honpo now have distinct modeled storefronts: Kukuru's charcoal shell, striped noren and eight long red octopus arms; Acchichi's orange awning, blue Japanese lettering and rounded octopus mascot. Both include recessed serving counters, griddles, takoyaki trays and menus. `scripts/dotonbori_takoyaki.py` authors these tenants. Kukuru is on the south bank west of Ebisubashi; Acchichi is on the north bank beside the eastern bridge. Both face the playable riverwalk at this compressed game scale: the real Kukuru main store faces Dotonbori Street. Reference photos and placement notes are recorded in `assets/references/takoyaki-sources.md`. `dotonbori-kukuru.png` and `dotonbori-acchichi.png` show their daytime detail views.
 
 Architecture revision 7 opens both canal ends through two further bridges in each direction, at game Z ±91 and ±140. Both banks are continuously walkable to visible end railings at ±152, beyond the last stair descents. Seven bridges now have full decks, landings, stairs and collision rails. Lamps beside the new stairs move onto the outer promenade; buildings, planters and benches have matching colliders. `lib/game/dotonbori-layout.json` supplies the extension limits to Blender and the minimap. The 56 background shop, office and hotel blocks retain recessed glazing, floor bands, roof setbacks and equipment. Beyond the playable railings, the canal bends behind overlapping neighborhood blocks as scenery. `scripts/dotonbori_background.py` authors both the extension and the farther scenery.
