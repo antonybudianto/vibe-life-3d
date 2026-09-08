@@ -56,3 +56,12 @@ for name,position,target,lens in [
 s.camera.location=(5,-70,67);s.camera.data.lens=28
 s.camera.rotation_euler=(Vector((0,7,6))-s.camera.location).to_track_quat('-Z','Y').to_euler()
 render_view('overview')
+# Photo-matching reviews use daylight to expose the metalwork and open seating.
+apply_preset('day')
+for name,position,target,lens in [
+    ('asahi',(12,17,16),(-21,-9,17),24),
+    ('cruise',(8,-12,6),(-3,-24,-.1),34),
+]:
+    s.camera.location=position;s.camera.data.lens=lens
+    s.camera.rotation_euler=(Vector(target)-s.camera.location).to_track_quat('-Z','Y').to_euler()
+    render_view(name)

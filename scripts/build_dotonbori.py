@@ -39,8 +39,7 @@ windows=[mat('interior amber '+str(i),c,.62,0,e) for i,(c,e) in enumerate([((.40
 pink=mat('pink neon',(.94,.04,.25),.4,0,1.5)
 green=mat('green neon',(.025,.49,.19),.5,0,.85)
 orange=mat('orange sign',(.98,.12,.014),.5,0,.8)
-boatmat=mat('cruise navy',(.035,.065,.12),.36,.25)
-cruiseglass=g.material('Cruise Glazing',(.13,.24,.33),.18,.15,0,.34)
+boatmat=mat('cruise yellow enamel',(.98,.58,.008),.31,.12)
 water=mat('canal water',(.008,.045,.058),.13,.45)
 water.node_tree.nodes['Principled BSDF'].inputs['IOR'].default_value=1.333
 water['water_surface']=True
@@ -224,16 +223,25 @@ def vertical(side,y,u,h,label,bg,height=8,w=1.35,ink=None):
         o=g.text(c,pos(side,y,u,.83,h+(len(label)-1)*step/2-i*step),glyph,ink or (white if bg in [neonred,blue,black] else black if bg==yellow else neonred),-side*math.pi/2,font=jp)
         o.scale.y=min(2.8,step/glyph*1.10)
 
-def artwork(name,corners,width=512,height=1024,source_name='dotonbori-south.png'):
+def artwork(name,corners,width=512,height=1024,source_name='dotonbori-south.png',reference_size=(1448,1086),perspective=False):
     # Rectify the supplied sign artwork inside Blender. Only individual signs
     # become textures; the streets, landmarks and all depth remain modeled.
     source=bpy.data.images.load(str(ROOT/'assets/references'/source_name),check_existing=True)
     sw,sh=source.size;pixels=np.asarray(source.pixels[:],dtype=np.float32).reshape(sh,sw,4)
     u,v=np.meshgrid(np.linspace(0,1,width),np.linspace(1,0,height))
-    a,b,c,d=[np.asarray(p)*np.array([sw/1448,sh/1086]) for p in corners]
-    coords=(1-v[...,None])*((1-u[...,None])*a+u[...,None]*b)+v[...,None]*((1-u[...,None])*d+u[...,None]*c)
-    xx=np.clip(coords[...,0].astype(int),0,sw-1);yy=np.clip((sh-1-coords[...,1]).astype(int),0,sh-1)
-    im=bpy.data.images.new('Dotonbori reference '+name,width,height);im.pixels.foreach_set(pixels[yy,xx].reshape(-1));im.pack()
+    a,b,c,d=[np.asarray(p)*np.array([sw/reference_size[0],sh/reference_size[1]]) for p in corners]
+    if perspective:
+        rows=[];values=[]
+        for (uu,vv),(xx,yy) in zip([(0,0),(1,0),(1,1),(0,1)],[a,b,c,d]):
+            rows.extend([[uu,vv,1,0,0,0,-xx*uu,-xx*vv],[0,0,0,uu,vv,1,-yy*uu,-yy*vv]]);values.extend([xx,yy])
+        h=np.linalg.solve(np.asarray(rows),np.asarray(values));den=h[6]*u+h[7]*v+1
+        coords=np.stack([(h[0]*u+h[1]*v+h[2])/den,(h[3]*u+h[4]*v+h[5])/den],axis=-1)
+    else:coords=(1-v[...,None])*((1-u[...,None])*a+u[...,None]*b)+v[...,None]*((1-u[...,None])*d+u[...,None]*c)
+    xx=np.clip(coords[...,0],0,sw-1);yy=np.clip(sh-1-coords[...,1],0,sh-1)
+    x0=xx.astype(int);y0=yy.astype(int);x1=np.minimum(x0+1,sw-1);y1=np.minimum(y0+1,sh-1)
+    fx=(xx-x0)[...,None];fy=(yy-y0)[...,None]
+    samples=(pixels[y0,x0]*(1-fx)+pixels[y0,x1]*fx)*(1-fy)+(pixels[y1,x0]*(1-fx)+pixels[y1,x1]*fx)*fy
+    im=bpy.data.images.new('Dotonbori reference '+name,width,height);im.pixels.foreach_set(samples.astype(np.float32).reshape(-1));im.pack()
     m=mat('artwork '+name,(1,1,1),.54,0,.65)
     n=m.node_tree.nodes.new('ShaderNodeTexImage');n.image=im;p=m.node_tree.nodes['Principled BSDF']
     m.node_tree.links.new(n.outputs['Color'],p.inputs['Base Color']);m.node_tree.links.new(n.outputs['Color'],p.inputs['Emission Color'])
@@ -258,8 +266,7 @@ campaign(-1,28.5,-2.7,26.0,4.55,8.7,'Estem north',[(927,211),(1008,211),(1008,28
 campaign(-1,28.5,2.7,26.0,4.55,8.7,'Promise north',[(1014,209),(1084,209),(1084,293),(1014,293)])
 campaign(-1,28.5,0,18.8,9.9,4.8,'Gam City',[(1022,294),(1126,294),(1126,339),(1022,339)])
 campaign(-1,28.5,0,12.7,9.9,6.6,'Chintai north',[(928,357),(1036,357),(1036,415),(928,415)])
-# Retain the Asahi campaign on the opposite restaurant bank.
-campaign(1,7,0,23.5,7.0,13.3,'Asahi',[(745,156),(830,178),(830,352),(745,348)],'dotonbori-south.png')
+# Asahi's two billboard faces are authored with its full corner building.
 
 # Giant Kani Doraku crab. Broad domed shell, articulated legs and large pincers.
 def crab(side,y,h):
@@ -285,14 +292,14 @@ def crab(side,y,h):
         g.rod(p(sgn*.44,1.45,.67),p(sgn*.5,1.58,1.22),.065,enamel)
         g.sphere(p(sgn*.5,1.59,1.23),(.095,.105,.13),black,12,8)
     panel(side,y,0,h-5.2,14.8,1.75,white,'かに道楽',black,1.45)
-crab(-1,-20,15.6)
-vertical(-1,-20,8.35,15.3,'本場の味',white,17,1.65)
+crab(-1,-23.8,15.6)
+vertical(-1,-23.8,8.35,15.3,'本場の味',white,17,1.65)
 # Traditional Kani Doraku surround: pale vertical slats, tiled eaves and lanterns.
-for u in np.linspace(-7.5,7.5,50):g.box(pos(-1,-20,float(u),.65,15.6),(.2,.11,9.2),cream)
+for u in np.linspace(-7.5,7.5,50):g.box(pos(-1,-23.8,float(u),.65,15.6),(.2,.11,9.2),cream)
 for row in range(4):
     for u in np.linspace(-7.8,7.8,50):
-        g.rod(pos(-1,-20,float(u),.6+row*.23,20.45-row*.10),pos(-1,-20,float(u),.83+row*.23,20.35-row*.10),.10,dark,8)
-for u in np.linspace(-7.3,7.3,26):g.sphere(pos(-1,-20,float(u),1.1,20.0),(.18,.20,.25),warm,10,7)
+        g.rod(pos(-1,-23.8,float(u),.6+row*.23,20.45-row*.10),pos(-1,-23.8,float(u),.83+row*.23,20.35-row*.10),.10,dark,8)
+for u in np.linspace(-7.3,7.3,26):g.sphere(pos(-1,-23.8,float(u),1.1,20.0),(.18,.20,.25),warm,10,7)
 
 # Takoyaki octopus with curling, sucker-lined tentacles.
 def octopus(side,y,h):
@@ -351,7 +358,7 @@ for i in range(16):
 campaign(side,y,0,23,4.2,6.8,'Don Quijote mascot',[(1311,205),(1364,205),(1364,290),(1311,290)])
 panel(side,y,0,6.5,13.7,2.4,black,'ドン・キホーテ',yellow,1.6)
 
-# Two covered river cruisers; each is authored as an independent movable root.
+# The two open-deck vessels are added after the static scenery is batched.
 # Continue the visual corridor beyond the playable bounds and close the horizon
 # with a compact skyline so orbit views never reveal a world ending in empty sky.
 for sign in [-1,1]:
@@ -386,46 +393,8 @@ for sign in [-1,1]:
         for z in range(4,int(h),3):
             for u in [-2,0,2]:g.panel((x+u,sign*(depth-6.1),z),.75,1.25,windows[(z+int(u))%4],0 if sign==1 else math.pi)
 objects=g.flush()
-def person(x,y,z,coat,scale=1,angle=0):
-    def p(a,b,h):return (x+scale*(a*math.cos(angle)-b*math.sin(angle)),y+scale*(a*math.sin(angle)+b*math.cos(angle)),z+scale*h)
-    g.sphere(p(0,0,1.48),(.17*scale,.16*scale,.21*scale),skin,12,8)
-    g.sphere(p(0,.025,1.59),(.178*scale,.16*scale,.145*scale),hair,12,8)
-    g.sphere(p(0,0,1.04),(.24*scale,.15*scale,.33*scale),coat,12,8)
-    for a in [-.12,.12]:
-        g.rod(p(a,0,.8),p(a,.02,.15),.083*scale,black,10)
-        g.sphere(p(a,-.07,.09),(.105*scale,.18*scale,.08*scale),cream,10,6)
-    for a in [-.25,.25]:g.rod(p(a,0,1.26),p(a*1.2,-.04,.78),.068*scale,coat,10)
-for i,(x,y) in enumerate([(-3,-24),(3,30)]):
-    # Hull shape is narrower at the bow, with a full open passenger well.
-    z=-1.04;v=[(x+a,y+b,z+c) for a,b,c in [(-1.65,-4.5,0),(1.65,-4.5,0),(1.8,3.5,0),(.9,4.8,0),(-.9,4.8,0),(-1.8,3.5,0),(-1.8,-4.5,.7),(1.8,-4.5,.7),(1.85,3.5,.7),(.95,4.8,.7),(-.95,4.8,.7),(-1.85,3.5,.7)]]
-    g.mesh(v,[(0,5,4,3,2,1)]+[(k,(k+1)%6,(k+1)%6+6,k+6) for k in range(6)],boatmat,'Cruise hull')
-    g.box((x,y,z+.24),(3.35,8.5,.16),wood)
-    for yy in [-3,-1.8,-.6,.6,1.8]:
-        g.box((x,y+yy,z+.64),(2.9,.43,.12),dark)
-        g.box((x,y+yy+.2,z+.85),(2.9,.1,.44),dark)
-        for xx in [-.88,.15,.95]:
-            if random.random()<.70:person(x+xx,y+yy,z+.24,coats[random.randrange(6)],.64,math.pi)
-    for xx in [-1.8,1.8]:rail((x+xx,y-4.4),(x+xx,y+3.5),z+.34)
-    g.box((x,y-4.54,z+.8),(3.6,.08,.62),cream)
-    g.text('とんぼりクルーズ',(x,y-4.59,z+.79),.30,black,0,font=jp)
-    for xx in [-1.6,1.6]:g.box((x+xx,y,z+1.43),(.055,7.8,.055),warm)
-    # Enclosed river cruisers from the revised concept: glazed cabin, pale roof
-    # ribs, a dark hull and a continuous warm cabin light.
-    for xx in [-1.75,1.75]:
-        g.box((x+xx,y,z+1.58),(.03,8.1,1.25),cruiseglass,name='Cruise Glazing')
-        for yy in [-4,-2.7,-1.35,0,1.35,2.7,4]:g.rod((x+xx,y+yy,z+.95),(x+xx,y+yy,z+2.22),.043,cream,8)
-        for zz in [z+.91,z+2.23]:g.box((x+xx,y,zz),(.10,8.3,.11),cream)
-    for yy in [-4.05,4.05]:g.box((x,y+yy,z+1.58),(3.5,.035,1.25),cruiseglass,name='Cruise Glazing')
-    g.box((x,y,z+2.25),(3.64,8.35,.10),silver)
-    for yy in [-3.3,-1.65,0,1.65,3.3]:
-        g.box((x,y+yy,z+2.32),(2.9,1.35,.035),cruiseglass,name='Cruise Glazing')
-        g.box((x,y+yy-.73,z+2.32),(3.66,.075,.075),cream)
-    for xx in [-1.82,1.82]:g.box((x+xx,y,z+.76),(.07,8.45,.17),neonred)
-    parts=g.flush();root=bpy.data.objects.new('River cruise '+str(i),None);bpy.context.collection.objects.link(root)
-    root['cruise']=True;root['cruiseIndex']=i
-    # Keep world-authored coordinates in the mesh; a root offset animates the cruise.
-    for o in parts:o.parent=root
-    objects+=parts+[root]
+from dotonbori_cruises import build_cruises
+objects+=build_cruises(globals())
 
 # On-foot visitors use the same animated pedestrian asset as Shibuya at runtime.
 # Boat passengers remain part of their moving vessel; no static walkers are baked.
@@ -449,7 +418,7 @@ s=bpy.context.scene;s.camera=cam;s.render.resolution_x=1500;s.render.resolution_
 s['design_reference']='Four user supplied Dotonbori directional concept boards; compact stylized reconstruction'
 s['bridge_navigation']='Four longitudinal stair flights per bridge; 0.1275m main risers, 5m landings, parabolic crown 2.79m'
 s['pedestrian_count']=36
-data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-68,68],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=4,architecture=architecture)
+data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-68,68],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=5,architecture=architecture)
 (ROOT/'public/models/dotonbori.json').write_text(json.dumps(data,indent=2))
 if '--navigation-only' in sys.argv:
     print('DOTONBORI_NAVIGATION_UPDATED',len(colliders),flush=True)

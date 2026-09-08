@@ -987,31 +987,31 @@
     },
     {
       "x": -23.88,
-      "z": 45,
+      "z": 46.7,
       "halfX": 5.9,
-      "halfZ": 5.9,
+      "halfZ": 3.75,
       "height": 25
     },
     {
       "x": -24.35,
-      "z": 34.5,
+      "z": 38.3,
       "halfX": 5.9,
       "halfZ": 4.35,
       "height": 31
     },
     {
       "x": -24.15,
-      "z": 20,
+      "z": 23.8,
       "halfX": 5.9,
       "halfZ": 9.8,
       "height": 25
     },
     {
-      "x": -24.65,
-      "z": 5,
+      "x": -22.95,
+      "z": 9,
       "halfX": 5.9,
       "halfZ": 4.85,
-      "height": 27
+      "height": 33
     },
     {
       "x": -23.88,
@@ -3162,7 +3162,7 @@
   ],
   "pedestrians": 36,
   "cruises": 2,
-  "artRevision": 4,
+  "artRevision": 5,
   "architecture": [
     {
       "side": -1,
@@ -3184,8 +3184,8 @@
     },
     {
       "side": -1,
-      "center": -45,
-      "width": 11.8,
+      "center": -46.7,
+      "width": 7.5,
       "height": 25,
       "front": 18.88,
       "family": 1,
@@ -3193,7 +3193,7 @@
     },
     {
       "side": -1,
-      "center": -34.5,
+      "center": -38.3,
       "width": 8.7,
       "height": 31,
       "front": 19.35,
@@ -3202,7 +3202,7 @@
     },
     {
       "side": -1,
-      "center": -20,
+      "center": -23.8,
       "width": 19.6,
       "height": 25,
       "front": 19.15,
@@ -3211,12 +3211,12 @@
     },
     {
       "side": -1,
-      "center": -5,
+      "center": -9,
       "width": 9.7,
-      "height": 27,
-      "front": 19.65,
-      "family": 0,
-      "landmark": "alley"
+      "height": 33,
+      "front": 17.95,
+      "family": "asahi corner",
+      "landmark": "asahi"
     },
     {
       "side": -1,
@@ -3324,7 +3324,7 @@
       "height": 31,
       "front": 19.15,
       "family": 2,
-      "landmark": "asahi"
+      "landmark": ""
     },
     {
       "side": 1,

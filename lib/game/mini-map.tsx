@@ -20,7 +20,8 @@ export function MiniMap({ map, x, z }: { map: MapId; x: number; z: number }) {
     </g>)}
     <text x="0" y="-7" textAnchor="middle" fontSize="4.7" fill="#fbe7bf">Ebisubashi</text>
     <circle cx="-19" cy="-13.5" r="2" fill="#6bbdff"><title>Glico runner</title></circle>
-    <circle cx="-19" cy="20" r="2" fill="#ec675a"><title>Kani Doraku</title></circle>
+    <circle cx="-19" cy="23.8" r="2" fill="#ec675a"><title>Kani Doraku</title></circle>
+    <circle cx="-18" cy="9" r="2" fill="#ffe088"><title>Asahi corner building</title></circle>
     <circle cx="19" cy="40" r="2" fill="#f8c74f"><title>Don Quijote wheel — north bank, east of Ebisubashi</title></circle>
     <circle cx={x} cy={z} r="4" fill="#e8a4bf" opacity=".3"/>
     <circle cx={x} cy={z} r="1.8" fill="#ffd6e6"/>

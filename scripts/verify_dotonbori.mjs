@@ -136,6 +136,37 @@ const glico=data.architecture.find(p=>p.landmark==='glico'),donki=data.architect
 assert.equal(donki.side,1,'Don Quijote occupies the north bank');
 assert.equal(glico.side,-1,'Glico occupies the opposite south bank');
 assert.ok(donki.center<0&&glico.center>0,'Don Quijote is east of Ebisubashi; Glico is west (game +Z is east)');
+const asahi=data.architecture.find(p=>p.landmark==='asahi');
+assert.equal(asahi.side,glico.side,'Asahi shares Glico’s bank in the supplied photograph');
+assert.ok(asahi.center<0,'Asahi occupies the corner east of the main bridge');
+assert.ok(!gltf.nodes.some(n=>n.name.startsWith('Cruise Glazing')),'The photo reference requires open passenger decks');
+// Use exported mesh bounds and the actual World.step cruise motion, so a longer
+// replacement hull cannot silently pass through a bridge or retaining wall.
+function vesselBounds(index) {
+  const bounds=new THREE.Box3();
+  function visit(id,parent) {
+    const node=gltf.nodes[id],local=node.matrix?new THREE.Matrix4().fromArray(node.matrix):new THREE.Matrix4().compose(new THREE.Vector3().fromArray(node.translation??[0,0,0]),new THREE.Quaternion().fromArray(node.rotation??[0,0,0,1]),new THREE.Vector3().fromArray(node.scale??[1,1,1]));
+    const matrix=parent.clone().multiply(local);
+    if(node.mesh!==undefined)for(const primitive of gltf.meshes[node.mesh].primitives){
+      const {min,max}=gltf.accessors[primitive.attributes.POSITION];
+      for(const x of [min[0],max[0]])for(const y of [min[1],max[1]])for(const z of [min[2],max[2]])bounds.expandByPoint(new THREE.Vector3(x,y,z).applyMatrix4(matrix));
+    }
+    for(const child of node.children??[])visit(child,matrix);
+  }
+  visit(index,new THREE.Matrix4());return bounds;
+}
+const cruiseWorld=world(0,0);
+const vessels=gltf.nodes.flatMap((node,index)=>node.extras?.cruise?[{node,bounds:vesselBounds(index)}]:[]);
+cruiseWorld.cruises=vessels.map(({node})=>{const object=new THREE.Object3D();object.userData=node.extras;return object;});
+for(let time=0;time<=72;time+=.25){
+  cruiseWorld.elapsed=time;cruiseWorld.step(1/60);
+  vessels.forEach(({bounds},index)=>{
+    const moved=bounds.clone().translate(cruiseWorld.cruises[index].position);
+    assert.ok(moved.min.x>-7.9&&moved.max.x<7.9,'Cruisers clear both retaining walls');
+    for(const bridge of [-48,0,48]){const half=bridge===0?3.8:3.4;assert.ok(moved.max.z<bridge-half||moved.min.z>bridge+half,'The full hull and stern equipment clear every bridge throughout the cruise');}
+  });
+}
+console.log('PASS: photo-reference Asahi placement and both open cruisers clear walls and bridges over a full movement cycle.');
 assert.equal(gltf.materials.filter(m=>m.extras?.bakedLightmap).length,3,'Every walkable surface batch has its completed light bake');
 assert.ok(gltf.materials.filter(m=>m.extras?.bake_mode).length>25,'Completed detail bakes must be in the delivered GLB');
 const bake=JSON.parse(fs.readFileSync('assets/bakes/dotonbori.json','utf8'));

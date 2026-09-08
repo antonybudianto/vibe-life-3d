@@ -5,8 +5,8 @@
   "vertexBakes": [
     {
       "mesh": "Lettering Dotonbori ink",
-      "corners": 49719,
-      "minimum": 0.03013821691274643,
+      "corners": 51078,
+      "minimum": 0.03066094033420086,
       "maximum": 0.031000003218650818
     },
     {
@@ -17,7 +17,7 @@
     },
     {
       "mesh": "Dotonbori limestone",
-      "corners": 28344,
+      "corners": 27408,
       "minimum": 0.25349998474121094,
       "maximum": 0.38999998569488525
     },
@@ -29,19 +29,19 @@
     },
     {
       "mesh": "Dotonbori graphite steel",
-      "corners": 215496,
+      "corners": 214212,
       "minimum": 0.03380000591278076,
       "maximum": 0.052000001072883606
     },
     {
       "mesh": "Dotonbori brushed rails",
-      "corners": 49668,
+      "corners": 49692,
       "minimum": 0.2860001027584076,
       "maximum": 0.43999993801116943
     },
     {
       "mesh": "Dotonbori cedar",
-      "corners": 44304,
+      "corners": 44160,
       "minimum": 0.14949995279312134,
       "maximum": 0.23000000417232513
     },
@@ -77,7 +77,7 @@
     },
     {
       "mesh": "Dotonbori ivory",
-      "corners": 5512,
+      "corners": 5504,
       "minimum": 0.5395001769065857,
       "maximum": 0.8300000429153442
     },
@@ -96,14 +96,14 @@
     {
       "mesh": "Bridge pier capitals",
       "corners": 144,
-      "minimum": 0.4308229386806488,
+      "minimum": 0.43082284927368164,
       "maximum": 0.5900000929832458
     },
     {
       "mesh": "Bridge landing soffits",
       "corners": 144,
       "minimum": 0.25349998474121094,
-      "maximum": 0.28869137167930603
+      "maximum": 0.2886914014816284
     },
     {
       "mesh": "Bridge stair risers",
@@ -113,55 +113,55 @@
     },
     {
       "mesh": "Dotonbori pearl ceramic",
-      "corners": 11160,
+      "corners": 9504,
       "minimum": 0.3119999170303345,
       "maximum": 0.4799998700618744
     },
     {
       "mesh": "Dotonbori pedestrian skin",
-      "corners": 14544,
+      "corners": 14112,
       "minimum": 0.3769999146461487,
-      "maximum": 0.5390300154685974
+      "maximum": 0.5390300750732422
     },
     {
       "mesh": "Dotonbori pedestrian coat 0",
-      "corners": 1296,
+      "corners": 1224,
       "minimum": 0.39000004529953003,
-      "maximum": 0.5592578649520874
+      "maximum": 0.56089848279953
     },
     {
       "mesh": "Dotonbori pedestrian coat 3",
       "corners": 1128,
       "minimum": 0.4680001139640808,
-      "maximum": 0.673078179359436
+      "maximum": 0.6730782389640808
     },
     {
       "mesh": "Dotonbori ceramic joints",
-      "corners": 10440,
+      "corners": 8928,
       "minimum": 0.17549997568130493,
-      "maximum": 0.18854300677776337
+      "maximum": 0.1868203580379486
     },
     {
       "mesh": "Dotonbori shop glass",
-      "corners": 3552,
-      "minimum": 0.04478880763053894,
+      "corners": 3468,
+      "minimum": 0.04423099011182785,
       "maximum": 0.06799999624490738
     },
     {
       "mesh": "Dotonbori bronze window frames",
-      "corners": 19968,
+      "corners": 19728,
       "minimum": 0.07799997925758362,
       "maximum": 0.1199999675154686
     },
     {
       "mesh": "Dotonbori vermilion enamel",
-      "corners": 16800,
+      "corners": 16848,
       "minimum": 0.4680001139640808,
       "maximum": 0.7196719646453857
     },
     {
       "mesh": "Dotonbori cool concrete",
-      "corners": 7056,
+      "corners": 6552,
       "minimum": 0.25349998474121094,
       "maximum": 0.38999998569488525
     },
@@ -190,6 +190,42 @@
       "maximum": 0.28000009059906006
     },
     {
+      "mesh": "Asahi corner podium",
+      "corners": 24,
+      "minimum": 0.18863211572170258,
+      "maximum": 0.28999999165534973
+    },
+    {
+      "mesh": "Dotonbori Asahi anodized aluminum",
+      "corners": 2376,
+      "minimum": 0.2340000569820404,
+      "maximum": 0.3600000739097595
+    },
+    {
+      "mesh": "Dotonbori interior amber 3",
+      "corners": 1336,
+      "minimum": 0.03210058808326721,
+      "maximum": 0.04500000923871994
+    },
+    {
+      "mesh": "Asahi billboard plinth",
+      "corners": 24,
+      "minimum": 0.03380000591278076,
+      "maximum": 0.05197630450129509
+    },
+    {
+      "mesh": "Asahi wraparound cabinet",
+      "corners": 24,
+      "minimum": 0.6175001263618469,
+      "maximum": 0.9274870753288269
+    },
+    {
+      "mesh": "Dotonbori Asahi gray spandrels",
+      "corners": 24,
+      "minimum": 0.19180402159690857,
+      "maximum": 0.28999999165534973
+    },
+    {
       "mesh": "Dotonbori ink",
       "corners": 2688,
       "minimum": 0.02015000395476818,
@@ -208,12 +244,6 @@
       "maximum": 0.21000002324581146
     },
     {
-      "mesh": "Dotonbori interior amber 3",
-      "corners": 1316,
-      "minimum": 0.031957030296325684,
-      "maximum": 0.04500000923871994
-    },
-    {
       "mesh": "Dotonbori facade 4",
       "corners": 336,
       "minimum": 0.19795052707195282,
@@ -228,181 +258,295 @@
     {
       "mesh": "Dotonbori facade 1",
       "corners": 240,
-      "minimum": 0.2504635751247406,
+      "minimum": 0.250463604927063,
       "maximum": 0.3800000846385956
     },
     {
       "mesh": "Lettering Dotonbori ink.001",
-      "corners": 840,
-      "minimum": 0.031000003218650818,
+      "corners": 4680,
+      "minimum": 0.03037838265299797,
       "maximum": 0.031000003218650818
     },
     {
-      "mesh": "Cruise hull",
-      "corners": 30,
-      "minimum": 0.07799997925758362,
-      "maximum": 0.1199999675154686
+      "mesh": "Cruise yellow hull",
+      "corners": 35,
+      "minimum": 0.6370000839233398,
+      "maximum": 0.6959531307220459
     },
     {
-      "mesh": "Dotonbori cedar.001",
-      "corners": 24,
-      "minimum": 0.14960478246212006,
-      "maximum": 0.2207760214805603
+      "mesh": "Cruise open deck",
+      "corners": 7,
+      "minimum": 0.20826175808906555,
+      "maximum": 0.24449217319488525
     },
     {
-      "mesh": "Dotonbori graphite steel.001",
-      "corners": 1248,
-      "minimum": 0.03380000591278076,
-      "maximum": 0.049251049757003784
+      "mesh": "Dotonbori cruise yellow enamel",
+      "corners": 492,
+      "minimum": 0.6370000839233398,
+      "maximum": 0.9799997210502625
+    },
+    {
+      "mesh": "Dotonbori cruise rubber rubbing strip",
+      "corners": 3492,
+      "minimum": 0.022749997675418854,
+      "maximum": 0.033309247344732285
+    },
+    {
+      "mesh": "Cruise passenger seats",
+      "corners": 1536,
+      "minimum": 0.09750001132488251,
+      "maximum": 0.14931641519069672
+    },
+    {
+      "mesh": "Dotonbori brushed rails.001",
+      "corners": 3072,
+      "minimum": 0.2860001027584076,
+      "maximum": 0.42897137999534607
     },
     {
       "mesh": "Dotonbori pedestrian skin.001",
-      "corners": 3960,
+      "corners": 10080,
       "minimum": 0.3769999146461487,
-      "maximum": 0.5657264590263367
+      "maximum": 0.5768280625343323
     },
     {
       "mesh": "Dotonbori pedestrian hair",
-      "corners": 3960,
+      "corners": 10080,
       "minimum": 0.01170000247657299,
-      "maximum": 0.017409376800060272
+      "maximum": 0.017991801723837852
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 1",
+      "corners": 3000,
+      "minimum": 0.06175001710653305,
+      "maximum": 0.0913199931383133
+    },
+    {
+      "mesh": "Dotonbori ink.001",
+      "corners": 6720,
+      "minimum": 0.02015000395476818,
+      "maximum": 0.029022134840488434
+    },
+    {
+      "mesh": "Dotonbori graphite steel.001",
+      "corners": 12344,
+      "minimum": 0.03380000591278076,
+      "maximum": 0.05060183256864548
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 2",
+      "corners": 1800,
+      "minimum": 0.18199998140335083,
+      "maximum": 0.26711198687553406
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 3.001",
+      "corners": 4800,
+      "minimum": 0.4680001139640808,
+      "maximum": 0.6875156760215759
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 4",
+      "corners": 1800,
+      "minimum": 0.17549997568130493,
+      "maximum": 0.2572031319141388
     },
     {
       "mesh": "Dotonbori pedestrian coat 5",
       "corners": 2400,
       "minimum": 0.37050002813339233,
-      "maximum": 0.5463613867759705
-    },
-    {
-      "mesh": "Dotonbori ink.001",
-      "corners": 1320,
-      "minimum": 0.02015000395476818,
-      "maximum": 0.02803320251405239
-    },
-    {
-      "mesh": "Dotonbori ivory.001",
-      "corners": 5752,
-      "minimum": 0.5395001769065857,
-      "maximum": 0.8300000429153442
+      "maximum": 0.5609081983566284
     },
     {
       "mesh": "Dotonbori pedestrian coat 0.001",
-      "corners": 480,
+      "corners": 3000,
       "minimum": 0.39000004529953003,
-      "maximum": 0.5644532442092896
+      "maximum": 0.5896093845367432
     },
     {
-      "mesh": "Dotonbori pedestrian coat 2",
-      "corners": 1920,
-      "minimum": 0.18199998140335083,
-      "maximum": 0.2643046975135803
+      "mesh": "Cruise yellow handrails",
+      "corners": 1248,
+      "minimum": 0.6370000839233398,
+      "maximum": 0.9505235552787781
     },
     {
-      "mesh": "Dotonbori pedestrian coat 3.001",
-      "corners": 480,
-      "minimum": 0.4680001139640808,
-      "maximum": 0.6773438453674316
+      "mesh": "Dotonbori cruise cream advertising",
+      "corners": 8,
+      "minimum": 0.8005701899528503,
+      "maximum": 0.8400000929832458
     },
     {
-      "mesh": "Dotonbori brushed rails.001",
-      "corners": 312,
-      "minimum": 0.2860001027584076,
-      "maximum": 0.43999993801116943
+      "mesh": "Cruise helm",
+      "corners": 24,
+      "minimum": 0.6374467015266418,
+      "maximum": 0.9786600470542908
     },
     {
-      "mesh": "Cruise Glazing",
-      "corners": 216,
-      "minimum": 0.21449998021125793,
-      "maximum": 0.32999998331069946
+      "mesh": "Cruise stern equipment",
+      "corners": 48,
+      "minimum": 0.14949995279312134,
+      "maximum": 0.1869199275970459
+    },
+    {
+      "mesh": "Cruise stern equipment.001",
+      "corners": 48,
+      "minimum": 0.6053475737571716,
+      "maximum": 0.9160138368606567
+    },
+    {
+      "mesh": "Cruise stern equipment.002",
+      "corners": 48,
+      "minimum": 0.022765949368476868,
+      "maximum": 0.03496810793876648
     },
     {
       "mesh": "Lettering Dotonbori ink.002",
-      "corners": 840,
-      "minimum": 0.031000003218650818,
+      "corners": 4680,
+      "minimum": 0.03037838451564312,
       "maximum": 0.031000003218650818
     },
     {
-      "mesh": "Cruise hull.001",
-      "corners": 30,
-      "minimum": 0.07799997925758362,
-      "maximum": 0.1199999675154686
+      "mesh": "Cruise yellow hull.001",
+      "corners": 35,
+      "minimum": 0.6370000839233398,
+      "maximum": 0.6968464255332947
     },
     {
-      "mesh": "Dotonbori cedar.002",
-      "corners": 24,
-      "minimum": 0.14960478246212006,
-      "maximum": 0.22067122161388397
+      "mesh": "Cruise open deck.001",
+      "corners": 7,
+      "minimum": 0.20826175808906555,
+      "maximum": 0.24476562440395355
     },
     {
-      "mesh": "Dotonbori graphite steel.002",
-      "corners": 1248,
-      "minimum": 0.03380000591278076,
-      "maximum": 0.049298446625471115
+      "mesh": "Dotonbori cruise yellow enamel.001",
+      "corners": 492,
+      "minimum": 0.6370000839233398,
+      "maximum": 0.9799997210502625
     },
     {
-      "mesh": "Dotonbori pedestrian skin.002",
-      "corners": 3240,
-      "minimum": 0.3769999146461487,
-      "maximum": 0.5659908652305603
+      "mesh": "Dotonbori cruise rubber rubbing strip.001",
+      "corners": 3492,
+      "minimum": 0.022749997675418854,
+      "maximum": 0.03329329192638397
     },
     {
-      "mesh": "Dotonbori pedestrian hair.001",
-      "corners": 3240,
-      "minimum": 0.01170000247657299,
-      "maximum": 0.0174257829785347
-    },
-    {
-      "mesh": "Dotonbori pedestrian coat 0.002",
-      "corners": 1920,
-      "minimum": 0.39000004529953003,
-      "maximum": 0.5745704174041748
-    },
-    {
-      "mesh": "Dotonbori ink.002",
-      "corners": 1080,
-      "minimum": 0.02015000395476818,
-      "maximum": 0.02799081616103649
-    },
-    {
-      "mesh": "Dotonbori ivory.002",
-      "corners": 4872,
-      "minimum": 0.5395001769065857,
-      "maximum": 0.8300000429153442
-    },
-    {
-      "mesh": "Dotonbori pedestrian coat 1",
-      "corners": 1440,
-      "minimum": 0.06175001710653305,
-      "maximum": 0.09058398008346558
-    },
-    {
-      "mesh": "Dotonbori pedestrian coat 3.002",
-      "corners": 960,
-      "minimum": 0.4680001139640808,
-      "maximum": 0.6832500696182251
+      "mesh": "Cruise passenger seats.001",
+      "corners": 1536,
+      "minimum": 0.09750001132488251,
+      "maximum": 0.14917971193790436
     },
     {
       "mesh": "Dotonbori brushed rails.002",
-      "corners": 312,
+      "corners": 3072,
       "minimum": 0.2860001027584076,
-      "maximum": 0.43999993801116943
+      "maximum": 0.42897137999534607
     },
     {
-      "mesh": "Cruise Glazing.001",
-      "corners": 216,
-      "minimum": 0.21449998021125793,
-      "maximum": 0.32999998331069946
+      "mesh": "Dotonbori pedestrian skin.002",
+      "corners": 10440,
+      "minimum": 0.3769999146461487,
+      "maximum": 0.5773566961288452
+    },
+    {
+      "mesh": "Dotonbori pedestrian hair.001",
+      "corners": 10440,
+      "minimum": 0.01170000247657299,
+      "maximum": 0.017991801723837852
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 1.001",
+      "corners": 5400,
+      "minimum": 0.06175001710653305,
+      "maximum": 0.09305175393819809
+    },
+    {
+      "mesh": "Dotonbori ink.002",
+      "corners": 6960,
+      "minimum": 0.02015000395476818,
+      "maximum": 0.028951501473784447
+    },
+    {
+      "mesh": "Dotonbori graphite steel.002",
+      "corners": 12784,
+      "minimum": 0.03380000591278076,
+      "maximum": 0.05057813227176666
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 2.001",
+      "corners": 1800,
+      "minimum": 0.18199998140335083,
+      "maximum": 0.2664739489555359
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 3.002",
+      "corners": 2400,
+      "minimum": 0.4680001139640808,
+      "maximum": 0.6898126006126404
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 4.001",
+      "corners": 3600,
+      "minimum": 0.17549997568130493,
+      "maximum": 0.25867971777915955
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 5.001",
+      "corners": 2400,
+      "minimum": 0.37050002813339233,
+      "maximum": 0.5474003553390503
+    },
+    {
+      "mesh": "Dotonbori pedestrian coat 0.002",
+      "corners": 1800,
+      "minimum": 0.39000004529953003,
+      "maximum": 0.5920702815055847
+    },
+    {
+      "mesh": "Cruise yellow handrails.001",
+      "corners": 1248,
+      "minimum": 0.6370000839233398,
+      "maximum": 0.9357849955558777
+    },
+    {
+      "mesh": "Dotonbori cruise cream advertising.001",
+      "corners": 8,
+      "minimum": 0.8001874685287476,
+      "maximum": 0.8400000929832458
+    },
+    {
+      "mesh": "Cruise helm.001",
+      "corners": 24,
+      "minimum": 0.6374467015266418,
+      "maximum": 0.9786600470542908
+    },
+    {
+      "mesh": "Cruise stern equipment.003",
+      "corners": 48,
+      "minimum": 0.14949995279312134,
+      "maximum": 0.1869199275970459
+    },
+    {
+      "mesh": "Cruise stern equipment.004",
+      "corners": 48,
+      "minimum": 0.6053475737571716,
+      "maximum": 0.9160138368606567
+    },
+    {
+      "mesh": "Cruise stern equipment.005",
+      "corners": 48,
+      "minimum": 0.022765949368476868,
+      "maximum": 0.03496810793876648
     }
   ],
   "ao": "dotonbori-ao.png",
   "resolution": 2048,
-  "aoStd": 0.44856324791908264,
+  "aoStd": 0.4479024410247803,
   "lightmap": "dotonbori-light.webp",
   "lightmapScale": 4,
-  "lightmapMaximum": 2.3672103881835938,
+  "lightmapMaximum": 2.303093433380127,
   "waterNormal": "/textures/dotonbori-water-normal.png",
   "waterNormalSize": 512,
-  "waterNormalStd": 0.11622672648392796,
+  "waterNormalStd": 0.11622670956611245,
   "waterNormalEngine": "CYCLES",
-  "seconds": 95.2
+  "seconds": 123.5
 }
