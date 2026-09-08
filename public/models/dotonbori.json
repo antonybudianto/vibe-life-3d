@@ -3012,6 +3012,13 @@
       "height": 31
     },
     {
+      "x": -16.61,
+      "z": -28.5,
+      "halfX": 0.64,
+      "halfZ": 5.1,
+      "height": 1.43
+    },
+    {
       "x": -22.349999999999998,
       "z": -42,
       "halfX": 5.9,
@@ -3045,6 +3052,13 @@
       "halfX": 5.9,
       "halfZ": 4.85,
       "height": 22
+    },
+    {
+      "x": 16.61,
+      "z": 55,
+      "halfX": 0.64,
+      "halfZ": 4.6,
+      "height": 1.43
     },
     {
       "x": 22.349999999999998,
@@ -10410,7 +10424,7 @@
   ],
   "pedestrians": 36,
   "cruises": 2,
-  "artRevision": 9,
+  "artRevision": 10,
   "architecture": [
     {
       "side": -1,
@@ -10419,7 +10433,8 @@
       "height": 22,
       "front": 19.2,
       "family": 0,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": -1,
@@ -10428,7 +10443,8 @@
       "height": 28,
       "front": 19.2,
       "family": 2,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": -1,
@@ -10437,7 +10453,8 @@
       "height": 25,
       "front": 17.08,
       "family": 1,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": -1,
@@ -10446,7 +10463,8 @@
       "height": 21,
       "front": 17.55,
       "family": 0,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": -1,
@@ -10473,7 +10491,8 @@
       "height": 35,
       "front": 18.38,
       "family": 1,
-      "landmark": "glico"
+      "landmark": "glico",
+      "store": ""
     },
     {
       "side": -1,
@@ -10482,7 +10501,8 @@
       "height": 31,
       "front": 17.55,
       "family": 0,
-      "landmark": "promise"
+      "landmark": "promise",
+      "store": "kukuru"
     },
     {
       "side": -1,
@@ -10491,7 +10511,8 @@
       "height": 32,
       "front": 17.349999999999998,
       "family": 3,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": -1,
@@ -10500,7 +10521,8 @@
       "height": 28,
       "front": 19.2,
       "family": 2,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": -1,
@@ -10509,7 +10531,8 @@
       "height": 22,
       "front": 19.2,
       "family": 0,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": 1,
@@ -10518,7 +10541,8 @@
       "height": 27,
       "front": 19.2,
       "family": 1,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": 1,
@@ -10527,7 +10551,8 @@
       "height": 22,
       "front": 17.55,
       "family": 0,
-      "landmark": ""
+      "landmark": "",
+      "store": "acchichi"
     },
     {
       "side": 1,
@@ -10545,7 +10570,8 @@
       "height": 19,
       "front": 17.849999999999998,
       "family": 0,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": 1,
@@ -10554,7 +10580,8 @@
       "height": 23,
       "front": 17.08,
       "family": 1,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": 1,
@@ -10581,7 +10608,8 @@
       "height": 24,
       "front": 17.849999999999998,
       "family": 2,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": 1,
@@ -10590,7 +10618,8 @@
       "height": 31,
       "front": 17.08,
       "family": 1,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": 1,
@@ -10599,7 +10628,8 @@
       "height": 31,
       "front": 17.55,
       "family": 3,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": 1,
@@ -10608,7 +10638,8 @@
       "height": 26,
       "front": 17.349999999999998,
       "family": 0,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": 1,
@@ -10617,7 +10648,8 @@
       "height": 30,
       "front": 19.2,
       "family": 2,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     },
     {
       "side": 1,
@@ -10626,7 +10658,8 @@
       "height": 22,
       "front": 19.2,
       "family": 1,
-      "landmark": ""
+      "landmark": "",
+      "store": ""
     }
   ],
   "background": {

@@ -3,17 +3,20 @@ import bpy,sys,math
 from pathlib import Path
 from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
+RENDERS=ROOT/'work/renders';RENDERS.mkdir(parents=True,exist_ok=True)
+PUBLIC_RENDERS=ROOT/'public/renders';PUBLIC_RENDERS.mkdir(parents=True,exist_ok=True)
 from blender_lighting import apply_preset
 from bake_assets import cycles
 
 for name in ['character','crossing','park']:
     bpy.ops.wm.open_mainfile(filepath=str(ROOT/'assets/blender'/f'{name}.blend'))
     s=bpy.context.scene;cycles(s);s.cycles.samples=64;apply_preset('evening')
-    s.render.image_settings.file_format='PNG';s.render.filepath=str(ROOT/'public/renders'/f'{name}.png')
+    destination=PUBLIC_RENDERS if name=='character' else RENDERS
+    s.render.image_settings.file_format='PNG';s.render.filepath=str(destination/f'{name}.png')
     bpy.ops.render.render(write_still=True)
     if name=='character':
         s.render.image_settings.file_format='WEBP';s.render.image_settings.quality=86
-        bpy.data.images['Render Result'].save_render(str(ROOT/'public/renders/character.webp'),scene=s)
+        bpy.data.images['Render Result'].save_render(str(PUBLIC_RENDERS/'character.webp'),scene=s)
     if name!='crossing':continue
     with bpy.data.libraries.load(str(ROOT/'assets/blender/character.blend'),link=False) as (source,destination):
         destination.objects=[n for n in source.objects if n not in ['Studio ground','Camera','Evening sun','Sky bounce']]
@@ -25,6 +28,6 @@ for name in ['character','crossing','park']:
     cam.rotation_euler=(Vector((0,-10,2.35))-cam.location).to_track_quat('-Z','Y').to_euler()
     s.render.resolution_x=1280;s.render.resolution_y=800
     for phase in ['evening','night']:
-        apply_preset(phase);s.render.filepath=str(ROOT/'public/renders'/f'crossing-{phase}-cycles.png')
+        apply_preset(phase);s.render.filepath=str(RENDERS/f'crossing-{phase}-cycles.png')
         bpy.ops.render.render(write_still=True)
     print('CYCLES_REVIEW_COMPLETE',name,flush=True)

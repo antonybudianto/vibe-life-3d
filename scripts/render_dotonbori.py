@@ -3,10 +3,11 @@ import bpy,sys,json,math,hashlib
 from pathlib import Path
 from mathutils import Vector,Matrix
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
+RENDERS=ROOT/'work/renders';RENDERS.mkdir(parents=True,exist_ok=True)
 requested=next((arg.split('=',1)[1].split(',') for arg in sys.argv if arg.startswith('--views=')),None)
 def render_view(name):
     if requested is not None and name not in requested:return
-    s.render.filepath=str(ROOT/'public/renders'/f'dotonbori-{name}.png')
+    s.render.filepath=str(RENDERS/f'dotonbori-{name}.png')
     bpy.ops.render.render(write_still=True)
 from bake_assets import cycles
 from blender_lighting import apply_preset
@@ -70,6 +71,8 @@ for name,position,target,lens in [
     ('bridge-stairs',(17,20,8),(7,1,2.0),28),
     ('asahi',(12,17,16),(-21,-9,17),24),
     ('cruise',(8,-12,6),(-3,-24,-.1),34),
+    ('kukuru',(-5,22,5.4),(-17.7,28.5,4.7),29),
+    ('acchichi',(7,-64,5.8),(17.5,-55,4.6),30),
 ]:
     s.camera.location=position;s.camera.data.lens=lens
     s.camera.rotation_euler=(Vector(target)-s.camera.location).to_track_quat('-Z','Y').to_euler()

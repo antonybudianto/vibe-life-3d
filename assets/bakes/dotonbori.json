@@ -5,14 +5,26 @@
   "vertexBakes": [
     {
       "mesh": "Lettering Dotonbori ink",
-      "corners": 49155,
-      "minimum": 0.030788082629442215,
+      "corners": 48447,
+      "minimum": 0.02015000395476818,
       "maximum": 0.031000003218650818
+    },
+    {
+      "mesh": "Lettering Dotonbori takoyaki octopus lacquer",
+      "corners": 4272,
+      "minimum": 0.6459882855415344,
+      "maximum": 0.7799999713897705
+    },
+    {
+      "mesh": "Lettering Dotonbori Acchichi blue lettering",
+      "corners": 4617,
+      "minimum": 0.3341926336288452,
+      "maximum": 0.3999999761581421
     },
     {
       "mesh": "Lettering Dotonbori vermilion enamel",
       "corners": 2538,
-      "minimum": 0.5670938491821289,
+      "minimum": 0.5670937895774841,
       "maximum": 0.720000147819519
     },
     {
@@ -35,19 +47,19 @@
     },
     {
       "mesh": "Dotonbori graphite steel",
-      "corners": 191356,
+      "corners": 190972,
       "minimum": 0.03380000591278076,
       "maximum": 0.052000001072883606
     },
     {
       "mesh": "Dotonbori brushed rails",
-      "corners": 126324,
+      "corners": 126432,
       "minimum": 0.2860001027584076,
       "maximum": 0.43999993801116943
     },
     {
       "mesh": "Dotonbori cedar",
-      "corners": 30504,
+      "corners": 30312,
       "minimum": 0.14949995279312134,
       "maximum": 0.23000000417232513
     },
@@ -103,13 +115,13 @@
       "mesh": "Bridge landing soffits",
       "corners": 336,
       "minimum": 0.25349998474121094,
-      "maximum": 0.37809181213378906
+      "maximum": 0.37809187173843384
     },
     {
       "mesh": "Bridge stair risers",
       "corners": 10560,
       "minimum": 0.25349998474121094,
-      "maximum": 0.35391995310783386
+      "maximum": 0.3539199233055115
     },
     {
       "mesh": "Dotonbori pearl ceramic",
@@ -139,7 +151,7 @@
       "mesh": "Dotonbori ceramic joints",
       "corners": 10272,
       "minimum": 0.17549997568130493,
-      "maximum": 0.1869433969259262
+      "maximum": 0.18694338202476501
     },
     {
       "mesh": "Dotonbori shop glass",
@@ -149,19 +161,19 @@
     },
     {
       "mesh": "Dotonbori bronze window frames",
-      "corners": 12072,
+      "corners": 11592,
       "minimum": 0.07799997925758362,
       "maximum": 0.1199999675154686
     },
     {
       "mesh": "Dotonbori vermilion enamel",
-      "corners": 19320,
+      "corners": 12592,
       "minimum": 0.4680001139640808,
       "maximum": 0.720000147819519
     },
     {
       "mesh": "Dotonbori ivory",
-      "corners": 1740,
+      "corners": 1724,
       "minimum": 0.5395001769065857,
       "maximum": 0.8300000429153442
     },
@@ -223,7 +235,7 @@
       "mesh": "Asahi wraparound cabinet",
       "corners": 24,
       "minimum": 0.6175001263618469,
-      "maximum": 0.9274871349334717
+      "maximum": 0.9274870157241821
     },
     {
       "mesh": "Dotonbori Asahi gray spandrels",
@@ -232,22 +244,202 @@
       "maximum": 0.28999999165534973
     },
     {
+      "mesh": "Kukuru frontage",
+      "corners": 1440,
+      "minimum": 0.015599998645484447,
+      "maximum": 0.023999996483325958
+    },
+    {
+      "mesh": "Kukuru frontage.001",
+      "corners": 192,
+      "minimum": 0.055250003933906555,
+      "maximum": 0.08500000834465027
+    },
+    {
+      "mesh": "Kukuru frontage.002",
+      "corners": 72,
+      "minimum": 0.2860001027584076,
+      "maximum": 0.43999993801116943
+    },
+    {
+      "mesh": "Kukuru sculpture",
+      "corners": 39560,
+      "minimum": 0.42899996042251587,
+      "maximum": 0.6587969064712524
+    },
+    {
+      "mesh": "Kukuru frontage.003",
+      "corners": 48,
+      "minimum": 0.623999834060669,
+      "maximum": 0.8913124799728394
+    },
+    {
+      "mesh": "Kukuru frontage.005",
+      "corners": 24,
+      "minimum": 0.5069999694824219,
+      "maximum": 0.7213476896286011
+    },
+    {
+      "mesh": "Kukuru sculpture.001",
+      "corners": 6440,
+      "minimum": 0.08449998497962952,
+      "maximum": 0.130000039935112
+    },
+    {
+      "mesh": "Kukuru sculpture.002",
+      "corners": 45080,
+      "minimum": 0.14949995279312134,
+      "maximum": 0.2298952043056488
+    },
+    {
+      "mesh": "Dotonbori takoyaki charcoal",
+      "corners": 8,
+      "minimum": 0.021834373474121094,
+      "maximum": 0.023037496954202652
+    },
+    {
+      "mesh": "Dotonbori takoyaki octopus lacquer",
+      "corners": 28,
+      "minimum": 0.5077109336853027,
+      "maximum": 0.7679141759872437
+    },
+    {
+      "mesh": "Kukuru sculpture.004",
+      "corners": 920,
+      "minimum": 0.5069999694824219,
+      "maximum": 0.7792890071868896
+    },
+    {
+      "mesh": "Kukuru sculpture.005",
+      "corners": 37720,
+      "minimum": 0.5915002226829529,
+      "maximum": 0.9099999666213989
+    },
+    {
+      "mesh": "Kukuru curved tentacles.001",
+      "corners": 8160,
+      "minimum": 0.5069999694824219,
+      "maximum": 0.7760899066925049
+    },
+    {
+      "mesh": "Kukuru sculpture.006",
+      "corners": 1840,
+      "minimum": 0.623999834060669,
+      "maximum": 0.959124743938446
+    },
+    {
+      "mesh": "Kukuru sculpture.007",
+      "corners": 1840,
+      "minimum": 0.02015000395476818,
+      "maximum": 0.0309858750551939
+    },
+    {
+      "mesh": "Dotonbori takoyaki stained timber",
+      "corners": 48,
+      "minimum": 0.055250003933906555,
+      "maximum": 0.06791699677705765
+    },
+    {
       "mesh": "Dotonbori facade 3",
       "corners": 48,
       "minimum": 0.3055000305175781,
       "maximum": 0.3301321864128113
     },
     {
+      "mesh": "Acchichi Honpo frontage",
+      "corners": 1392,
+      "minimum": 0.015599998645484447,
+      "maximum": 0.023999996483325958
+    },
+    {
+      "mesh": "Acchichi Honpo frontage.001",
+      "corners": 144,
+      "minimum": 0.055250003933906555,
+      "maximum": 0.08360546827316284
+    },
+    {
+      "mesh": "Acchichi Honpo frontage.002",
+      "corners": 72,
+      "minimum": 0.2860001027584076,
+      "maximum": 0.43999993801116943
+    },
+    {
+      "mesh": "Acchichi Honpo sculpture",
+      "corners": 38640,
+      "minimum": 0.42899996042251587,
+      "maximum": 0.6593983769416809
+    },
+    {
+      "mesh": "Acchichi Honpo frontage.003",
+      "corners": 48,
+      "minimum": 0.623999834060669,
+      "maximum": 0.8917499780654907
+    },
+    {
+      "mesh": "Acchichi Honpo frontage.005",
+      "corners": 24,
+      "minimum": 0.5073554515838623,
+      "maximum": 0.7185039520263672
+    },
+    {
+      "mesh": "Acchichi Honpo sculpture.001",
+      "corners": 5520,
+      "minimum": 0.08449998497962952,
+      "maximum": 0.130000039935112
+    },
+    {
+      "mesh": "Acchichi Honpo sculpture.002",
+      "corners": 38640,
+      "minimum": 0.14949995279312134,
+      "maximum": 0.23000000417232513
+    },
+    {
+      "mesh": "Acchichi Honpo frontage.006",
+      "corners": 48,
+      "minimum": 0.6370000839233398,
+      "maximum": 0.9799997210502625
+    },
+    {
+      "mesh": "Dotonbori takoyaki golden yellow",
+      "corners": 8,
+      "minimum": 0.623999834060669,
+      "maximum": 0.9599997401237488
+    },
+    {
+      "mesh": "Acchichi Honpo orange awning",
+      "corners": 4,
+      "minimum": 0.6370000839233398,
+      "maximum": 0.6562044620513916
+    },
+    {
+      "mesh": "Acchichi Honpo sculpture.003",
+      "corners": 1840,
+      "minimum": 0.5069999694824219,
+      "maximum": 0.7796444892883301
+    },
+    {
+      "mesh": "Acchichi Honpo curved tentacles.001",
+      "corners": 5280,
+      "minimum": 0.5069999694824219,
+      "maximum": 0.7785781621932983
+    },
+    {
+      "mesh": "Acchichi Honpo sculpture.005",
+      "corners": 2760,
+      "minimum": 0.02015000395476818,
+      "maximum": 0.031000003218650818
+    },
+    {
       "mesh": "Dotonbori retail blue fins",
       "corners": 264,
-      "minimum": 0.16375324130058289,
+      "minimum": 0.1637532114982605,
       "maximum": 0.25
     },
     {
       "mesh": "Dotonbori ink",
-      "corners": 1520,
+      "corners": 720,
       "minimum": 0.02015000395476818,
-      "maximum": 0.030971746891736984
+      "maximum": 0.03090110793709755
     },
     {
       "mesh": "Ebisu Tower 32 gondolas",
@@ -258,7 +450,7 @@
     {
       "mesh": "Ebisu and Donpen relief",
       "corners": 1488,
-      "minimum": 0.20277148485183716,
+      "minimum": 0.20277146995067596,
       "maximum": 0.3099999725818634
     },
     {
@@ -373,7 +565,7 @@
       "mesh": "Dotonbori cruise rubber rubbing strip",
       "corners": 3492,
       "minimum": 0.022749997675418854,
-      "maximum": 0.033309243619441986
+      "maximum": 0.033309247344732285
     },
     {
       "mesh": "Cruise passenger seats",
@@ -403,7 +595,7 @@
       "mesh": "Dotonbori pedestrian coat 1",
       "corners": 3000,
       "minimum": 0.06175001710653305,
-      "maximum": 0.09110350906848907
+      "maximum": 0.09110351651906967
     },
     {
       "mesh": "Dotonbori ink.001",
@@ -433,7 +625,7 @@
       "mesh": "Dotonbori pedestrian coat 4",
       "corners": 1800,
       "minimum": 0.17549997568130493,
-      "maximum": 0.2573261260986328
+      "maximum": 0.2573261857032776
     },
     {
       "mesh": "Dotonbori pedestrian coat 5",
@@ -451,7 +643,7 @@
       "mesh": "Cruise yellow handrails",
       "corners": 1248,
       "minimum": 0.6370000839233398,
-      "maximum": 0.9505233764648438
+      "maximum": 0.9505234956741333
     },
     {
       "mesh": "Dotonbori cruise cream advertising",
@@ -469,7 +661,7 @@
       "mesh": "Cruise stern equipment",
       "corners": 48,
       "minimum": 0.14949995279312134,
-      "maximum": 0.1869199275970459
+      "maximum": 0.1869199126958847
     },
     {
       "mesh": "Cruise stern equipment.001",
@@ -486,7 +678,7 @@
     {
       "mesh": "Lettering Dotonbori ink.002",
       "corners": 4680,
-      "minimum": 0.03037838265299797,
+      "minimum": 0.03037838451564312,
       "maximum": 0.031000003218650818
     },
     {
@@ -498,7 +690,7 @@
     {
       "mesh": "Cruise open deck.001",
       "corners": 7,
-      "minimum": 0.20826172828674316,
+      "minimum": 0.20826175808906555,
       "maximum": 0.24476562440395355
     },
     {
@@ -511,7 +703,7 @@
       "mesh": "Dotonbori cruise rubber rubbing strip.001",
       "corners": 3492,
       "minimum": 0.022749997675418854,
-      "maximum": 0.03329329192638397
+      "maximum": 0.03329329565167427
     },
     {
       "mesh": "Cruise passenger seats.001",
@@ -523,7 +715,7 @@
       "mesh": "Dotonbori brushed rails.002",
       "corners": 3072,
       "minimum": 0.2860001027584076,
-      "maximum": 0.42897137999534607
+      "maximum": 0.4289713501930237
     },
     {
       "mesh": "Dotonbori pedestrian skin.002",
@@ -541,7 +733,7 @@
       "mesh": "Dotonbori pedestrian coat 1.001",
       "corners": 5400,
       "minimum": 0.06175001710653305,
-      "maximum": 0.09322492778301239
+      "maximum": 0.09322493523359299
     },
     {
       "mesh": "Dotonbori ink.002",
@@ -589,7 +781,7 @@
       "mesh": "Cruise yellow handrails.001",
       "corners": 1248,
       "minimum": 0.6370000839233398,
-      "maximum": 0.9357850551605225
+      "maximum": 0.935785174369812
     },
     {
       "mesh": "Dotonbori cruise cream advertising.001",
@@ -624,14 +816,14 @@
   ],
   "ao": "dotonbori-ao.png",
   "resolution": 4096,
-  "aoStd": 0.4376734793186188,
+  "aoStd": 0.43749842047691345,
   "lightmap": "dotonbori-light.webp",
   "lightmapScale": 4,
-  "lightmapMaximum": 2.288414478302002,
+  "lightmapMaximum": 2.4730427265167236,
   "walkableExtent": 152,
   "waterNormal": "/textures/dotonbori-water-normal.png",
   "waterNormalSize": 512,
   "waterNormalStd": 0.11622670956611245,
   "waterNormalEngine": "CYCLES",
-  "seconds": 183.2
+  "seconds": 239.0
 }

@@ -8,8 +8,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'public' / 'models'
 SOURCE = ROOT / 'assets' / 'blender'
-RENDERS = ROOT / 'public' / 'renders'
-for p in (OUT, SOURCE, RENDERS): p.mkdir(parents=True, exist_ok=True)
+RENDERS = ROOT / 'work' / 'renders'
+PUBLIC_RENDERS = ROOT / 'public' / 'renders'
+for p in (OUT, SOURCE, RENDERS, PUBLIC_RENDERS): p.mkdir(parents=True, exist_ok=True)
 random.seed(109)
 M = {}
 
@@ -233,13 +234,14 @@ def camera(pos,target,lens=45):
 
 def save_render(name,w=1440,h=900,render=True):
     s=bpy.context.scene;s.render.resolution_x=w;s.render.resolution_y=h;s.render.resolution_percentage=100
-    s.render.image_settings.file_format='PNG';s.render.filepath=str(RENDERS/(name+'.png'))
+    destination=PUBLIC_RENDERS if name=='character' else RENDERS
+    s.render.image_settings.file_format='PNG';s.render.filepath=str(destination/(name+'.png'))
     bpy.ops.wm.save_as_mainfile(filepath=str(SOURCE/(name+'.blend')))
     if render:
         bpy.ops.render.render(write_still=True)
         if name=='character':
             s.render.image_settings.file_format='WEBP';s.render.image_settings.quality=86
-            bpy.data.images['Render Result'].save_render(str(RENDERS/'character.webp'),scene=s)
+            bpy.data.images['Render Result'].save_render(str(PUBLIC_RENDERS/'character.webp'),scene=s)
             s.render.image_settings.file_format='PNG'
 
 COL=[]

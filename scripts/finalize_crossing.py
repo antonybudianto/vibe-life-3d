@@ -44,4 +44,5 @@ for name in ['crossing','park']:
         if c['halfX']<.5 and c['halfZ']<.5:
             scale=c['halfX']/.225;c.update(cameraRadius=2.25*scale,cameraMinY=2*scale,height=5.5*scale)
     path.write_text(json.dumps(data),encoding='utf8')
-bpy.context.scene.render.filepath=str(root/'public/renders/crossing.png');bpy.ops.render.render(write_still=True)
+renders=root/'work/renders';renders.mkdir(parents=True,exist_ok=True)
+bpy.context.scene.render.filepath=str(renders/'crossing.png');bpy.ops.render.render(write_still=True)

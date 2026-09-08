@@ -98,10 +98,14 @@ def build(n):
                     # Ceramic panel seams, visible independently of the signs.
                     for u in range(math.ceil(-w/2),math.floor(w/2)+1):box(u,.18,z-floor/2,.035,.014,.27,grout)
             # Individual ground-floor restaurant, with two or three entrances.
+            takoyaki = 'kukuru' if (side,y)==(-1,28.5) else 'acchichi' if (side,y)==(1,-55) else None
+            if takoyaki:
+                from dotonbori_takoyaki import build_store
+                build_store(n,side,y,w,front,takoyaki)
             shops=3 if w>12 else 2
             shopw=(w-.6)/shops
             name={'kani':'かに道楽','glico':'道頓堀商店','promise':'たこ焼 道頓堀','fugu':'づぼらや','ohsho':'大阪王将','wheel':'ドン・キホーテ','alley':'道頓堀横丁'}.get(hero,labels[idx%len(labels)])
-            for shop in range(shops):
+            for shop in range(0 if takoyaki else shops):
                 u=(shop-(shops-1)/2)*shopw
                 if hero=='alley':
                     u=(-1 if shop==0 else 1)*(w/2-1.25);shopw=2.15
@@ -128,7 +132,7 @@ def build(n):
                     g.mesh(v,[(0,1,2,3),(3,2,1,0)],n['red'] if style==0 else cream)
             # Reserve landmark surfaces; other parcels use authored sign layouts.
             edge=side*(w/2-1.02)
-            if not hero:
+            if not hero and not takoyaki:
                 layout=idx%4
                 if layout==0:
                     vertical(side,y,edge,13.6,labels[idx%8],white,14,1.55)
@@ -188,5 +192,5 @@ def build(n):
                     for z in range(6,int(h)-1,4):
                         g.panel((side*(front+back),yy,z),1.15,1.55,glass,0 if end<0 else math.pi)
             g.rod(pos(side,y,w*.35,-7,h),pos(side,y,w*.35,-7,h+4.8),.035,silver,6)
-            report.append(dict(side=side,center=y,width=w,height=h,front=front,family=style,landmark=hero))
+            report.append(dict(side=side,center=y,width=w,height=h,front=front,family=style,landmark=hero,store=takoyaki or ''))
     return report

@@ -36,6 +36,12 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+# Review renders are generated locally; the character images are used by the app.
+/public/renders/*.png
+!/public/renders/character.png
+# Optional photo references; required texture inputs remain tracked.
+/assets/references/kukuru-storefront.jpg
+/assets/references/acchichi-storefront.jpg
 work-*.log
 *.tsbuildinfo
 *.blend1

@@ -798,7 +798,8 @@ metadata={'id':'crossing','name':'Shibuya Crossing','spawn':[0,0,16],'bounds':[-
 # Moving traffic owns its current collision volumes in lib/game/traffic.ts.
 (ROOT/'public/models/crossing.json').write_text(json.dumps(metadata,indent=2),encoding='utf8')
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'assets/blender/crossing.blend'),compress=True)
-s=bpy.context.scene;s.render.image_settings.file_format='PNG';s.render.filepath=str(ROOT/'public/renders/crossing.png')
+renders=ROOT/'work/renders';renders.mkdir(parents=True,exist_ok=True)
+s=bpy.context.scene;s.render.image_settings.file_format='PNG';s.render.filepath=str(renders/'crossing.png')
 try:
     prefs=bpy.context.preferences.addons['cycles'].preferences;prefs.compute_device_type='OPTIX';prefs.get_devices()
     for d in prefs.devices:d.use=d.type=='OPTIX'

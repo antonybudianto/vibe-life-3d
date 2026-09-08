@@ -322,25 +322,8 @@ for row in range(4):
         g.rod(pos(1,-23.8,float(u),.6+row*.23,12.35-row*.10),pos(1,-23.8,float(u),.83+row*.23,12.25-row*.10),.10,dark,8)
 for u in np.linspace(-7.3,7.3,26):g.sphere(pos(1,-23.8,float(u),1.1,11.9),(.18,.20,.25),warm,10,7)
 
-# Takoyaki octopus with curling, sucker-lined tentacles.
-def octopus(side,y,h):
-    def p(u,v,z):return pos(side,y,u,v,h+z)
-    g.sphere(p(0,1.12,.6),(.67,1.0,1.12),red,24,14)
-    for j in range(8):
-        a=j*math.tau/8;points=[]
-        for k in range(15):
-            t=k/14;u=math.cos(a)*(1.0+t*1.6)+math.sin(t*math.tau)*.32
-            z=-.1+math.sin(a)*(.7+t*.7)-t*.3+math.sin(t*5)*.32
-            points.append(p(u,1.0+math.sin(t*4)*.4,z))
-        for k,(a1,b1) in enumerate(zip(points,points[1:])):
-            g.rod(a1,b1,.20-k*.009,red,8)
-            if k%2==0:g.sphere((b1[0]-side*.13,b1[1],b1[2]),(.06,.075,.075),pink,8,5)
-    for u in [-.35,.35]:
-        g.sphere(p(u,1.72,.7),(.09,.19,.25),white,12,8)
-        g.sphere(p(u,1.81,.69),(.035,.09,.13),black,10,6)
-    g.sphere(p(0,1.88,.18),(.12,.17,.17),black,12,8)
-frontages[1,-43]=-29.8
-octopus(1,-43,6.8)
+# Kukuru and Acchichi Honpo are authored with their tenant frontages in
+# dotonbori_takoyaki.py, replacing the former unbranded rear octopus.
 
 # Present-day riverfront: no retired Zuboraya lantern on the north bank.
 from dotonbori_realism import wheel, river_details
@@ -376,7 +359,7 @@ s=bpy.context.scene;s.camera=cam;s.render.resolution_x=1500;s.render.resolution_
 s['design_reference']='Photo-informed Ebisubashi plaza, retail corner buildings and Ebisu Tower; compact stylized reconstruction'
 s['bridge_navigation']='Rounded Ebisubashi plaza, four straight bank stairs, separate curved perimeter ramps with central entrances and lower landings'
 s['pedestrian_count']=36
-data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-layout['promenadeEnd'],layout['promenadeEnd']],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=9,architecture=architecture,background=background)
+data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-layout['promenadeEnd'],layout['promenadeEnd']],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=10,architecture=architecture,background=background)
 (ROOT/'public/models/dotonbori.json').write_text(json.dumps(data,indent=2))
 if '--navigation-only' in sys.argv:
     print('DOTONBORI_NAVIGATION_UPDATED',len(colliders),flush=True)

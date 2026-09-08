@@ -1,17 +1,12 @@
 """Use the same Blender assets, crowd placement and camera convention as the game."""
-import bpy,sys,json,math,hashlib,time
+import bpy,sys,json,math,hashlib
 from pathlib import Path
 from mathutils import Vector,Matrix
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
+RENDERS=ROOT/'work/renders';RENDERS.mkdir(parents=True,exist_ok=True)
 def render_image(name):
-    # Write outside the watched public folder before replacing the finished image.
-    path=ROOT/'work'/name;destination=ROOT/'public/renders'/name
-    bpy.context.scene.render.filepath=str(path);bpy.ops.render.render(write_still=True)
-    for attempt in range(10):
-        try:path.replace(destination);return
-        except PermissionError:
-            if attempt==9:raise
-            time.sleep(.25)
+    bpy.context.scene.render.filepath=str(RENDERS/name)
+    bpy.ops.render.render(write_still=True)
 from bake_assets import cycles
 from blender_lighting import apply_preset
 bpy.ops.wm.open_mainfile(filepath=str(ROOT/'assets/blender/crossing.blend'))
