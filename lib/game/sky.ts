@@ -33,9 +33,9 @@ export class CitySky {
     texture.wrapS = THREE.RepeatWrapping; texture.colorSpace = THREE.NoColorSpace;
     this.texture.dispose(); this.texture = texture; this.material.uniforms.clouds.value = texture;
   }
-  setTime(phase: keyof typeof phases, next: keyof typeof phases, blend: number) {
+  setTime(phase: keyof typeof phases, next: keyof typeof phases, blend: number, palette = phases) {
     for (const [uniform, key] of [['zenith','skyZenith'],['horizon','sky'],['cloudTint','cloudTint']] as const) {
-      (this.material.uniforms[uniform].value as THREE.Color).set(phases[phase][key]).lerp(new THREE.Color(phases[next][key]),blend);
+      (this.material.uniforms[uniform].value as THREE.Color).set(palette[phase][key]).lerp(new THREE.Color(palette[next][key]),blend);
     }
   }
   update(camera: THREE.Camera, time: number) { this.mesh.position.copy(camera.position); this.material.uniforms.drift.value = time * .00018; }

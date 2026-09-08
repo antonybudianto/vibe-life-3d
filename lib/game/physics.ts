@@ -1,4 +1,23 @@
-export type Collider = { x: number; z: number; halfX: number; halfZ: number; height?: number; cameraRadius?: number; cameraMinY?: number };
+export type Collider = { x: number; z: number; halfX: number; halfZ: number; height?: number; cameraRadius?: number; cameraMinY?: number; cameraIgnore?: boolean };
+export type WalkSurface = { minX: number; maxX: number; minZ: number; maxZ: number; height: number; endHeight?: number };
+
+/** Sloped decks use the same endpoints as the Blender bridge mesh. */
+export function groundHeight(x: number, z: number, surfaces: WalkSurface[] = []) {
+  let height = 0;
+  for (const s of surfaces) {
+    if (x < s.minX || x > s.maxX || z < s.minZ || z > s.maxZ) continue;
+    const t = (x - s.minX) / Math.max(.001, s.maxX - s.minX);
+    height = Math.max(height, s.height + ((s.endHeight ?? s.height) - s.height) * t);
+  }
+  return height;
+}
+
+export function followGround(y: number, velocity: number, oldFloor: number, floor: number, dt: number) {
+  if (y <= oldFloor + .025 && velocity <= 0) return { y: floor, velocity: 0 };
+  const nextVelocity = velocity - 15 * dt;
+  const nextY = y + nextVelocity * dt;
+  return nextY <= floor ? { y: floor, velocity: 0 } : { y: nextY, velocity: nextVelocity };
+}
 export function moveWithCollision(x: number, z: number, dx: number, dz: number, radius: number, colliders: Collider[], bounds: [number, number, number, number]) {
   // Axis-separated circle/AABB resolution permits wall sliding and prevents tunneling
   // at the fixed simulation step. Also resolves an overlapping vehicle on entry.
@@ -9,7 +28,8 @@ export function moveWithCollision(x: number, z: number, dx: number, dz: number, 
       const cx = Math.max(c.x - c.halfX, Math.min(nx, c.x + c.halfX));
       const cz = Math.max(c.z - c.halfZ, Math.min(nz, c.z + c.halfZ));
       const ax = nx - cx, az = nz - cz;
-      if (ax * ax + az * az >= radius * radius) continue;
+      // Contact rounding must not eject a stationary avatar along a long railing.
+      if (ax * ax + az * az >= radius * radius - 1e-9) continue;
       if (axis === 'x') {
         const inset = Math.sqrt(Math.max(0, radius * radius - az * az));
         nx = nx < c.x ? c.x - c.halfX - inset : c.x + c.halfX + inset;

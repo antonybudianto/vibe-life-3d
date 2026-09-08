@@ -4,6 +4,19 @@ import type { MapId } from './world';
 /** Use world coordinates so the explorer stays visible on the extended roads. */
 export function MiniMap({ map, x, z }: { map: MapId; x: number; z: number }) {
   const crossing = map === 'crossing';
+  if (map === 'dotonbori') return <svg viewBox="-39 -73 78 146" role="img" aria-label="Dotonbori canal, three walkable bridges and riverside promenades">
+    <rect x="-39" y="-73" width="78" height="146" fill="#1b2b37"/>
+    <rect x="-8.4" y="-70" width="16.8" height="140" fill="#267b9b"/>
+    {[-1,1].map((side) => <g key={side}>
+      <rect x={side === -1 ? -18.8 : 8.4} y="-70" width="10.4" height="140" fill="#8c9796" opacity=".65"/>
+      {Array.from({length:14},(_,i) => <rect key={i} x={side === -1 ? -30 : 20} y={-69+i*10} width="10" height="8" fill={i%3 === 0 ? '#c37b85' : '#5b6875'}/>)}
+    </g>)}
+    {[-48,0,48].map((z) => <rect key={z} x="-15.8" y={z-3.8} width="31.6" height="7.6" fill="#decdb2"/>)}
+    <text x="0" y="-7" textAnchor="middle" fontSize="4.7" fill="#fbe7bf">Ebisubashi</text>
+    <circle cx="-19" cy="-7" r="2" fill="#6bbdff"><title>Glico runner</title></circle>
+    <circle cx={x} cy={z} r="4" fill="#e8a4bf" opacity=".3"/>
+    <circle cx={x} cy={z} r="1.8" fill="#ffd6e6"/>
+  </svg>;
   const px = crossing ? x : 80 + x * 2, py = crossing ? z : 75 + z * 2;
   return <svg viewBox={crossing ? '-120 -125 240 235' : '0 0 160 150'} role="img" aria-label="Local navigation map">
     <defs><pattern id="mapGrid" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M16 0H0V16" fill="none" stroke="#fff" strokeWidth=".3" opacity=".1"/></pattern></defs>

@@ -11,7 +11,8 @@ def linear_rgb(value):
 
 def apply_preset(preset='evening'):
     root=Path(__file__).resolve().parents[1]
-    p=json.loads((root/'lib/game/lighting.json').read_text())[preset]
+    path='dotonbori-lighting.json' if bpy.context.scene.get('location_id')=='dotonbori' else 'lighting.json'
+    p=json.loads((root/'lib/game'/path).read_text())[preset]
     s=bpy.context.scene;s['lighting_preset']=preset
     # Cycles world radiance and Three's hemisphere + environment use different units.
     # Calibrated together against the exported crossing under the shared AgX view.

@@ -131,7 +131,7 @@ for(const mode of ['walk','run','motorcycle','car']) {
     Object.assign(world,{data:{...map,colliders:[...map.colliders,...landmark.colliders]},character:{},paused:false,
       status:{loading:false,error:null},keys:new Set(['KeyW']),joystick:{x:0,y:0},
       player:new THREE.Vector3(route.x,0,route.z),travel:mode==='run'?'walk':mode,running:mode==='run',
-      velocity:0,verticalVelocity:0,heading:route.heading,yaw:route.yaw});
+      velocity:0,verticalVelocity:0,heading:route.heading,yaw:route.yaw,cruises:[]});
     const direction=Math.sign(route.end-world.player[route.axis]);
     let reached=false;
     for(let frame=0;frame<60*40;frame++) {

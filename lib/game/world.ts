@@ -6,17 +6,19 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { moveWithCollision, resolveTime, type Collider } from './physics';
+import { moveWithCollision, resolveTime, groundHeight, followGround, type Collider, type WalkSurface } from './physics';
 import phases from './lighting.json';
+import dotonboriPhases from './dotonbori-lighting.json';
 import { elevatedPitch, zoomDistance } from './camera';
 import { Ambience } from './ambience';
 import { CitySky } from './sky';
+import { CanalWater } from './canal-water';
 
 export type TravelMode = 'walk' | 'motorcycle' | 'car';
 export type TimeMode = 'day' | 'evening' | 'night' | 'live';
-export type MapId = 'crossing' | 'park';
+export type MapId = 'crossing' | 'park' | 'dotonbori';
 export type Status = { loading: boolean; progress: number; map: MapId; x: number; z: number; speed: number; fps: number; clock: string; phase: string; error: string | null };
-type MapData = { id: MapId; name: string; spawn: [number, number, number]; bounds: [number, number, number, number]; colliders: Collider[] };
+type MapData = { id: MapId; name: string; spawn: [number, number, number]; bounds: [number, number, number, number]; colliders: Collider[]; surfaces?: WalkSurface[]; pedestrians?: number; cruises?: number };
 type LandmarkData = { model: string; position: [number, number, number]; colliders: Collider[] };
 const INITIAL: Status = { loading: true, progress: 0, map: 'crossing', x: 0, z: 10, speed: 0, fps: 0, clock: '17:30', phase: 'evening', error: null };
 
@@ -62,6 +64,8 @@ export class World {
   private lastPhase = '';
   private cleanup: (() => void)[] = [];
   private limbs: THREE.Object3D[] = [];
+  private cruises: THREE.Object3D[] = [];
+  private canalWater: CanalWater | null = null;
   private hemi = new THREE.HemisphereLight(0xb6c7fa, 0x625c66, 2.1);
   private sun = new THREE.DirectionalLight(0xffc99a, 3.1);
   private fill = new THREE.DirectionalLight(0x95b1ff, 1.2);
@@ -145,7 +149,7 @@ export class World {
           }
           m.aoMapIntensity = .85;
           if (m.aoMap) m.aoMap.anisotropy = Math.min(4, this.renderer.capabilities.getMaxAnisotropy());
-          m.userData.baseEmission = m.emissiveIntensity;
+          m.userData.baseEmission = m.userData.base_emission ?? m.emissiveIntensity;
         }
       }
     });
@@ -221,14 +225,19 @@ export class World {
       catch (error) { this.disposeObject(asset.scene); throw error; }
       if (!this.alive || serial !== this.loadSerial) { this.disposeObject(asset.scene); life?.dispose(); return; }
       const next = this.prep(asset.scene, true);
+      this.canalWater?.dispose(); this.canalWater = null;
       if (this.environment) { this.scene.remove(this.environment); this.disposeObject(this.environment); }
       if (this.ambience) { this.scene.remove(this.ambience.group); this.ambience.dispose(); }
       this.ambience = life;
       if (life) this.scene.add(this.prep(life.group));
       this.environment = next; this.data = data; this.scene.add(next);
+      this.cruises = [];
+      next.traverse((o) => { if (o.userData.cruise) this.cruises.push(o); });
+      const water = next.getObjectByName('Dotonbori canal water');
+      if (water instanceof THREE.Mesh) { this.canalWater = new CanalWater(water); this.scene.add(this.canalWater.mesh); }
       this.movementColliders = [...data.colliders, ...(life?.traffic.colliders ?? [])];
       this.player.fromArray(data.spawn); this.velocity = 0; this.verticalVelocity = 0; this.heading = Math.PI;
-      this.yaw = id === 'crossing' ? .22 : .02;
+      this.yaw = id === 'crossing' ? .22 : id === 'dotonbori' ? .40 : .02;
       this.status.map = id; this.status.loading = false; this.status.progress = 100;
       this.lastPhase = ''; this.applyTime(); this.updateCamera(1); this.emit();
     } catch (e) { if (serial === this.loadSerial) this.fail(e); }
@@ -245,13 +254,14 @@ export class World {
       } catch (e) { this.fail(e); return; }
       this.status.loading = false; this.status.progress = 100; this.emit();
     }
-    this.travel = mode; this.velocity = 0; this.player.y = 0; this.verticalVelocity = 0;
+    this.travel = mode; this.velocity = 0; this.verticalVelocity = 0;
     this.lastPhase = ''; this.applyTime();
     // A larger vehicle cannot spawn inside a wall when changing from walking.
     if (this.data) {
       const p = moveWithCollision(this.player.x, this.player.z, 0, 0, this.radius(), this.movementColliders, this.data.bounds);
       this.player.x = p.x; this.player.z = p.z;
     }
+    this.player.y = groundHeight(this.player.x, this.player.z, this.data?.surfaces);
     for (const [name, object] of Object.entries(this.vehicles)) object!.visible = name === mode;
     if (this.character) this.character.visible = mode !== 'car';
     this.clearInput();
@@ -261,7 +271,7 @@ export class World {
   setPaused(value: boolean) { this.paused = value; this.clearInput(); }
   zoom(delta: number) { this.distance = zoomDistance(this.distance, delta); }
   recenter() { this.yaw = this.heading - Math.PI; this.pitch = .30; }
-  jump() { if (!this.paused && !this.status.loading && this.travel === 'walk' && this.player.y <= .002) this.verticalVelocity = 5.3; }
+  jump() { if (!this.paused && !this.status.loading && this.travel === 'walk' && this.player.y <= groundHeight(this.player.x, this.player.z, this.data?.surfaces) + .025) this.verticalVelocity = 5.3; }
   setQuality(value: 'high' | 'balanced') { this.quality = value; this.bloom.enabled = value === 'high'; this.resize(); }
   private radius() { return this.travel === 'car' ? 1.7 : this.travel === 'motorcycle' ? .95 : .32; }
   private clearInput() { this.keys.clear(); this.joystick.x = 0; this.joystick.y = 0; this.pointers.clear(); }
@@ -320,10 +330,11 @@ export class World {
     const p = resolveTime(this.time, new Date());
     this.status.clock = p.clock; this.status.phase = p.phase;
     const key = `${p.phase}-${p.blend.toFixed(2)}`; if (key === this.lastPhase) return; this.lastPhase = key;
-    const a = phases[p.phase], b = phases[p.next]; const t = p.blend;
+    const palette = this.data?.id === 'dotonbori' ? dotonboriPhases : phases;
+    const a = palette[p.phase], b = palette[p.next]; const t = p.blend;
     const sky = new THREE.Color(a.sky).lerp(new THREE.Color(b.sky), t);
     this.scene.background = sky;
-    this.sky.setTime(p.phase, p.next, t);
+    this.sky.setTime(p.phase, p.next, t, palette);
     (this.scene.fog as THREE.Fog).color.copy(sky);
     this.hemi.color.copy(sky).lerp(new THREE.Color(0xc5d3ef), .25);
     this.hemi.groundColor.set(0x3b303d);
@@ -351,6 +362,7 @@ export class World {
     if (!this.data || !this.character || this.paused || this.status.loading || this.status.error) return;
     this.ambience?.update(dt, { x: this.player.x, z: this.player.z, radius: this.radius() });
     this.movementColliders = [...this.data.colliders, ...(this.ambience?.traffic.colliders ?? [])];
+    const oldFloor = groundHeight(this.player.x, this.player.z, this.data.surfaces);
     const left = this.keys.has('KeyA') || this.keys.has('ArrowLeft');
     const right = this.keys.has('KeyD') || this.keys.has('ArrowRight');
     const forward = this.keys.has('KeyW') || this.keys.has('ArrowUp');
@@ -369,9 +381,6 @@ export class World {
         const target = Math.atan2(dx, dz);
         this.heading += Math.atan2(Math.sin(target - this.heading), Math.cos(target - this.heading)) * Math.min(dt * 12, 1);
       }
-      this.verticalVelocity -= 15 * dt;
-      this.player.y = Math.max(0, this.player.y + this.verticalVelocity * dt);
-      if (this.player.y === 0) this.verticalVelocity = Math.max(0, this.verticalVelocity);
     } else {
       const max = this.travel === 'car' ? 12 : 10;
       this.velocity += -iz * 7 * dt;
@@ -384,6 +393,16 @@ export class World {
     const p = moveWithCollision(this.player.x, this.player.z, dx, dz, this.radius(), this.movementColliders, this.data.bounds);
     if (this.travel !== 'walk' && Math.hypot(p.x - this.player.x, p.z - this.player.z) < Math.hypot(dx, dz) * .3) this.velocity *= .7;
     this.player.x = p.x; this.player.z = p.z;
+    const floor = groundHeight(p.x, p.z, this.data.surfaces);
+    const vertical = this.travel === 'walk' ? followGround(this.player.y, this.verticalVelocity, oldFloor, floor, dt) : { y: floor, velocity: 0 };
+    this.player.y = vertical.y; this.verticalVelocity = vertical.velocity;
+    for (const boat of this.cruises) {
+      // Root offsets remain in the safe interval between bridges; no recycling pops.
+      const phase = this.elapsed * .09 + Number(boat.userData.cruiseIndex) * Math.PI;
+      boat.position.z = Math.sin(phase) * 8;
+      boat.position.y = Math.sin(this.elapsed * 1.2 + phase) * .035;
+      boat.updateMatrixWorld(true);
+    }
   }
 
   private pose() {
@@ -397,7 +416,7 @@ export class World {
       this.limbs[i].rotation.x = swing * (i === 0 || i === 3 ? 1 : -1);
     }
     if (this.travel === 'motorcycle') {
-      this.character.position.y = .67; this.character.scale.setScalar(.83);
+      this.character.position.y = this.player.y + .67; this.character.scale.setScalar(.83);
       this.limbs.forEach((o, i) => { if (o) o.rotation.x = i < 2 ? -1.12 : -1.0; });
     } else this.character.scale.setScalar(1);
     const vehicle = this.vehicles[this.travel];
@@ -415,6 +434,7 @@ export class World {
       const dir = this.desired.clone().sub(this.focus).normalize(); this.ray.set(this.focus, dir);
       let nearest = distance;
       for (const c of this.data.colliders) {
+        if (c.cameraIgnore) continue;
         const halfX = c.cameraRadius ?? c.halfX, halfZ = c.cameraRadius ?? c.halfZ;
         this.cameraBox.min.set(c.x - halfX - .2, c.cameraMinY ?? -.5, c.z - halfZ - .2);
         this.cameraBox.max.set(c.x + halfX + .2, c.height ?? 45, c.z + halfZ + .2);
@@ -438,6 +458,7 @@ export class World {
     while (this.accumulator >= 1 / 60) { this.step(1 / 60); this.accumulator -= 1 / 60; }
     this.pose(); this.updateCamera(dt);
     this.sky.update(this.camera, this.elapsed);
+    this.canalWater?.update(this.elapsed);
     // Follow the player with a bounded shadow camera instead of shadowing the entire map.
     this.sun.position.set(this.player.x - 22, 28, this.player.z + 14);
     this.sun.target.position.copy(this.player);
@@ -454,7 +475,7 @@ export class World {
       this.renderer.domElement.dataset.map = this.status.map;
       this.renderer.domElement.dataset.camera = `${this.yaw.toFixed(2)},${this.pitch.toFixed(2)},${this.distance.toFixed(2)}`;
       this.renderer.domElement.dataset.drawCalls = String(this.renderer.info.render.calls);
-      this.renderer.domElement.dataset.streetLife = this.ambience ? '74 pedestrians, 5 vehicles' : 'none';
+      this.renderer.domElement.dataset.streetLife = this.ambience ? '74 pedestrians, 5 vehicles' : this.data?.id === 'dotonbori' ? '20 visitors, 2 river cruises' : 'none';
       this.renderer.domElement.dataset.crossingPhase = this.ambience?.traffic.phase ?? 'none';
     }
   };
@@ -471,6 +492,7 @@ export class World {
   }
   dispose() {
     this.alive = false; this.loadSerial++; cancelAnimationFrame(this.requestId);
+    this.canalWater?.dispose(); this.canalWater = null;
     if (this.ambience) { this.scene.remove(this.ambience.group); this.ambience.dispose(); this.ambience = null; }
     this.scene.remove(this.sky.mesh); this.sky.dispose();
     this.cleanup.forEach((f) => f()); this.disposeObject(this.scene); this.scene.clear();

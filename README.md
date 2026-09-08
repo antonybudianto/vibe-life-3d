@@ -1,6 +1,25 @@
 # Shibuya Life
 
-A playable third-person exploration prototype, using Blender-authored glTF assets and Three.js. One playable character (Haru), a Shibuya-inspired crossing, a garden map, and motorcycle / kei car travel.
+A playable third-person exploration prototype, using Blender-authored glTF assets and Three.js. One playable character (Haru), a Shibuya-inspired crossing, a garden map, Osaka Dotonbori, and motorcycle / kei car travel.
+
+## Osaka Dotonbori
+
+Choose **Osaka Dotonbori** in the location selector. The new district interprets the four supplied directional concepts as a compact canal with two promenades, Ebisubashi, two additional footbridges, Japanese storefronts, Glico / Promise / Chintai billboards, a modeled Kani Doraku crab, takoyaki octopus, fugu lantern, ferris wheel, trees, lanterns and café seating. Twenty on-foot visitors and seated cruise passengers keep the scene less crowded than the concepts. On-foot visitors are static; two river cruisers gently move within clear sections of canal. Geography and scale are stylized.
+
+All scene geometry is authored in Blender. Selected advertising artwork is rectified from the supplied south-view concept inside Blender and packed into the scene; the source reference is retained in `assets/references/dotonbori-south.png`. The district remains a complete 3D environment when the camera turns. Editable source is `assets/blender/dotonbori.blend`; the game loads `public/models/dotonbori.glb` and its navigation description.
+
+The main bridge rises to **2.4 m**; its broad approaches share exact endpoints with the game's sloped walk surfaces. Haru can walk up either approach, cross, jump and land on the elevated deck, then descend. The outer bridges rise to 1.8 m. Bridge railings and canal barriers keep travel on the promenades and bridges. Ground height also follows the vehicle modes. Collision volumes marked `cameraIgnore` prevent invisible water barriers from shortening the camera.
+
+Cycles bakes local AO into detailed mesh colors and stores 2048px AO / practical-light irradiance atlases for paving and bridge decks. The light bake uses unit-strength shop lighting with sunlight excluded. The runtime scales emission and light maps once for Day, Evening, Night and Live; `lib/game/dotonbori-lighting.json` supplies matching Blender / game presets with a deeper blue dusk. A planar reflection of the actual game scene, using the exported Blender water mesh and small ripple distortion, supplies moving water highlights. The reflection adds one 768px render pass; Cycles and real-time reflection/shadow results are not identical.
+
+```sh
+blender --background --factory-startup -t 8 --python-exit-code 1 --python scripts/build_dotonbori.py
+blender --background --factory-startup -t 8 --python-exit-code 1 --python scripts/bake_dotonbori.py
+blender --background --factory-startup -t 8 --python-exit-code 1 --python scripts/render_dotonbori.py
+node scripts/verify_dotonbori.mjs
+```
+
+Rebuild before rebaking to start from the authored material colors. `assets/bakes/dotonbori.json` records actual Cycles results; `public/renders/dotonbori-day.png`, `dotonbori-evening.png` and `dotonbori-overview.png` review the delivered scene. The focused verifier exercises the real game movement and lighting methods: every bridge in both directions, continuous ramps, elevated jumps, landing, rail contact, canal barriers, pause, repeated time changes, and exported bake data. `scripts/verify_game.mjs` also covers existing locations and their traffic / pedestrian simulation.
 
 ## Run
 

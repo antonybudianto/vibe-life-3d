@@ -1,0 +1,659 @@
+{
+  "id": "dotonbori",
+  "name": "Osaka Dotonbori",
+  "spawn": [
+    11.8,
+    0,
+    20
+  ],
+  "bounds": [
+    -18.8,
+    18.8,
+    -68,
+    68
+  ],
+  "colliders": [
+    {
+      "x": -8.37,
+      "z": 61.0,
+      "halfX": 0.08,
+      "halfZ": 9.0,
+      "height": 1.28
+    },
+    {
+      "x": -8.37,
+      "z": 24.1,
+      "halfX": 0.08,
+      "halfZ": 19.9,
+      "height": 1.28
+    },
+    {
+      "x": -8.37,
+      "z": -24.1,
+      "halfX": 0.08,
+      "halfZ": 19.9,
+      "height": 1.28
+    },
+    {
+      "x": -8.37,
+      "z": -61.0,
+      "halfX": 0.08,
+      "halfZ": 9.0,
+      "height": 1.28
+    },
+    {
+      "x": -16.5,
+      "z": 59,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": -16.5,
+      "z": 34,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": -16.5,
+      "z": 20,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": -16.5,
+      "z": -18,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": -16.5,
+      "z": -33,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": -16.5,
+      "z": -60,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": -17,
+      "z": 25,
+      "halfX": 0.66,
+      "halfZ": 1.1,
+      "height": 0.85
+    },
+    {
+      "x": -17,
+      "z": -24,
+      "halfX": 0.66,
+      "halfZ": 1.1,
+      "height": 0.85
+    },
+    {
+      "x": -17,
+      "z": -57,
+      "halfX": 0.66,
+      "halfZ": 1.1,
+      "height": 0.85
+    },
+    {
+      "x": 8.37,
+      "z": 61.0,
+      "halfX": 0.08,
+      "halfZ": 9.0,
+      "height": 1.28
+    },
+    {
+      "x": 8.37,
+      "z": 24.1,
+      "halfX": 0.08,
+      "halfZ": 19.9,
+      "height": 1.28
+    },
+    {
+      "x": 8.37,
+      "z": -24.1,
+      "halfX": 0.08,
+      "halfZ": 19.9,
+      "height": 1.28
+    },
+    {
+      "x": 8.37,
+      "z": -61.0,
+      "halfX": 0.08,
+      "halfZ": 9.0,
+      "height": 1.28
+    },
+    {
+      "x": 16.5,
+      "z": 59,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": 16.5,
+      "z": 34,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": 16.5,
+      "z": 20,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": 16.5,
+      "z": -18,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": 16.5,
+      "z": -33,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": 16.5,
+      "z": -60,
+      "halfX": 0.98,
+      "halfZ": 0.83,
+      "height": 1.0,
+      "cameraRadius": 0.18
+    },
+    {
+      "x": 17,
+      "z": 25,
+      "halfX": 0.66,
+      "halfZ": 1.1,
+      "height": 0.85
+    },
+    {
+      "x": 17,
+      "z": -24,
+      "halfX": 0.66,
+      "halfZ": 1.1,
+      "height": 0.85
+    },
+    {
+      "x": 17,
+      "z": -57,
+      "halfX": 0.66,
+      "halfZ": 1.1,
+      "height": 0.85
+    },
+    {
+      "x": -12.15,
+      "z": 51.34,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 0
+    },
+    {
+      "x": -12.15,
+      "z": 44.66,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 0
+    },
+    {
+      "x": 0.0,
+      "z": 51.34,
+      "halfX": 8.5,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 1.8
+    },
+    {
+      "x": 0.0,
+      "z": 44.66,
+      "halfX": 8.5,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 1.8
+    },
+    {
+      "x": 12.15,
+      "z": 51.34,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 0
+    },
+    {
+      "x": 12.15,
+      "z": 44.66,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 0
+    },
+    {
+      "x": -12.15,
+      "z": 3.7399999999999998,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.7,
+      "cameraMinY": 0
+    },
+    {
+      "x": -12.15,
+      "z": -3.7399999999999998,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.7,
+      "cameraMinY": 0
+    },
+    {
+      "x": 0.0,
+      "z": 3.7399999999999998,
+      "halfX": 8.5,
+      "halfZ": 0.06,
+      "height": 3.7,
+      "cameraMinY": 2.4
+    },
+    {
+      "x": 0.0,
+      "z": -3.7399999999999998,
+      "halfX": 8.5,
+      "halfZ": 0.06,
+      "height": 3.7,
+      "cameraMinY": 2.4
+    },
+    {
+      "x": 12.15,
+      "z": 3.7399999999999998,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.7,
+      "cameraMinY": 0
+    },
+    {
+      "x": 12.15,
+      "z": -3.7399999999999998,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.7,
+      "cameraMinY": 0
+    },
+    {
+      "x": -12.15,
+      "z": -44.66,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 0
+    },
+    {
+      "x": -12.15,
+      "z": -51.34,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 0
+    },
+    {
+      "x": 0.0,
+      "z": -44.66,
+      "halfX": 8.5,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 1.8
+    },
+    {
+      "x": 0.0,
+      "z": -51.34,
+      "halfX": 8.5,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 1.8
+    },
+    {
+      "x": 12.15,
+      "z": -44.66,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 0
+    },
+    {
+      "x": 12.15,
+      "z": -51.34,
+      "halfX": 3.6500000000000004,
+      "halfZ": 0.06,
+      "height": 3.1,
+      "cameraMinY": 0
+    },
+    {
+      "x": 0,
+      "z": 60.7,
+      "halfX": 8.22,
+      "halfZ": 9.3,
+      "height": 0,
+      "cameraIgnore": true
+    },
+    {
+      "x": 0,
+      "z": 24.2,
+      "halfX": 8.22,
+      "halfZ": 20.400000000000002,
+      "height": 0,
+      "cameraIgnore": true
+    },
+    {
+      "x": 0,
+      "z": -24.2,
+      "halfX": 8.22,
+      "halfZ": 20.400000000000002,
+      "height": 0,
+      "cameraIgnore": true
+    },
+    {
+      "x": 0,
+      "z": -60.7,
+      "halfX": 8.22,
+      "halfZ": 9.3,
+      "height": 0,
+      "cameraIgnore": true
+    },
+    {
+      "x": -24.1,
+      "z": 65,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 19
+    },
+    {
+      "x": -24.1,
+      "z": 55,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": -24.1,
+      "z": 45,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": -24.1,
+      "z": 35,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 25
+    },
+    {
+      "x": -24.1,
+      "z": 25,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 25
+    },
+    {
+      "x": -24.1,
+      "z": 15,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": -24.1,
+      "z": 5,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 33
+    },
+    {
+      "x": -24.1,
+      "z": -5,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 33
+    },
+    {
+      "x": -24.1,
+      "z": -15,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 33
+    },
+    {
+      "x": -24.1,
+      "z": -25,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 19
+    },
+    {
+      "x": -24.1,
+      "z": -35,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 19
+    },
+    {
+      "x": -24.1,
+      "z": -45,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": -24.1,
+      "z": -55,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": -24.1,
+      "z": -65,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 32
+    },
+    {
+      "x": 24.1,
+      "z": 65,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 19
+    },
+    {
+      "x": 24.1,
+      "z": 55,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": 24.1,
+      "z": 45,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 32
+    },
+    {
+      "x": 24.1,
+      "z": 35,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": 24.1,
+      "z": 25,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 32
+    },
+    {
+      "x": 24.1,
+      "z": 15,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 19
+    },
+    {
+      "x": 24.1,
+      "z": 5,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": 24.1,
+      "z": -5,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": 24.1,
+      "z": -15,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 32
+    },
+    {
+      "x": 24.1,
+      "z": -25,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 32
+    },
+    {
+      "x": 24.1,
+      "z": -35,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 22
+    },
+    {
+      "x": 24.1,
+      "z": -45,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 32
+    },
+    {
+      "x": 24.1,
+      "z": -55,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 28
+    },
+    {
+      "x": 24.1,
+      "z": -65,
+      "halfX": 5.1,
+      "halfZ": 4.85,
+      "height": 25
+    }
+  ],
+  "surfaces": [
+    {
+      "minX": -15.8,
+      "maxX": -8.5,
+      "minZ": 44.6,
+      "maxZ": 51.4,
+      "height": 0,
+      "endHeight": 1.8
+    },
+    {
+      "minX": -8.5,
+      "maxX": 8.5,
+      "minZ": 44.6,
+      "maxZ": 51.4,
+      "height": 1.8,
+      "endHeight": 1.8
+    },
+    {
+      "minX": 8.5,
+      "maxX": 15.8,
+      "minZ": 44.6,
+      "maxZ": 51.4,
+      "height": 1.8,
+      "endHeight": 0
+    },
+    {
+      "minX": -15.8,
+      "maxX": -8.5,
+      "minZ": -3.8,
+      "maxZ": 3.8,
+      "height": 0,
+      "endHeight": 2.4
+    },
+    {
+      "minX": -8.5,
+      "maxX": 8.5,
+      "minZ": -3.8,
+      "maxZ": 3.8,
+      "height": 2.4,
+      "endHeight": 2.4
+    },
+    {
+      "minX": 8.5,
+      "maxX": 15.8,
+      "minZ": -3.8,
+      "maxZ": 3.8,
+      "height": 2.4,
+      "endHeight": 0
+    },
+    {
+      "minX": -15.8,
+      "maxX": -8.5,
+      "minZ": -51.4,
+      "maxZ": -44.6,
+      "height": 0,
+      "endHeight": 1.8
+    },
+    {
+      "minX": -8.5,
+      "maxX": 8.5,
+      "minZ": -51.4,
+      "maxZ": -44.6,
+      "height": 1.8,
+      "endHeight": 1.8
+    },
+    {
+      "minX": 8.5,
+      "maxX": 15.8,
+      "minZ": -51.4,
+      "maxZ": -44.6,
+      "height": 1.8,
+      "endHeight": 0
+    }
+  ],
+  "pedestrians": 20,
+  "cruises": 2
+}
