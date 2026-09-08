@@ -28,9 +28,40 @@ imported.scene.updateMatrixWorld(true);
 const water=new CanalWater(waterSource,new THREE.Texture());
 assert.equal(waterSource.visible,false,'The non-reflective source is replaced');
 assert.equal(water.mesh.getRenderTarget().texture.type,THREE.HalfFloatType,'Reflections retain HDR sign colors');
+// Exercise the actual reflector camera: bridge undersides are seen from below
+// the water plane, and the reflection is not a screen-space copy of the deck.
+const mirrorScene=new THREE.Scene();mirrorScene.add(water.mesh);mirrorScene.updateMatrixWorld(true);
+const mirrorCamera=new THREE.PerspectiveCamera(55,1.4,.12,240);
+mirrorCamera.position.set(4,6,13);mirrorCamera.lookAt(0,1,0);mirrorCamera.updateMatrixWorld(true);
+let reflectedY;
+const renderer={xr:{enabled:false},shadowMap:{autoUpdate:true},state:{buffers:{depth:{setMask(){}}}},autoClear:true,getRenderTarget(){return null;},setRenderTarget(){},render(_scene,camera){reflectedY=camera.position.y;}};
+water.mesh.onBeforeRender(renderer,mirrorScene,mirrorCamera);
+assert.ok(Math.abs(reflectedY-(2*-1.43-6))<1e-6,'Camera mirrors at the actual canal level');
+assert.equal(renderer.shadowMap.autoUpdate,true,'Reflection restores renderer state');
 water.dispose();assert.equal(waterSource.visible,true);
 const {World}=moduleFrom('lib/game/world.ts', n => n==='three'?THREE:n==='./physics'?physics:n.endsWith('.json')?{default:JSON.parse(fs.readFileSync('lib/game/'+n.slice(2),'utf8'))}:{});
 const data=JSON.parse(fs.readFileSync('public/models/dotonbori.json','utf8'));
+const {CanalPedestrianSimulation}=moduleFrom('lib/game/canal-pedestrians.ts',()=>physics);
+const crowd=new CanalPedestrianSimulation(data);
+const sawSightseeing=new Set(),resumed=new Set(),stairEntrances=new Set();
+const frozen=JSON.stringify(crowd.walkers);crowd.update(0,{x:12,y:0,z:18,radius:.32});assert.equal(JSON.stringify(crowd.walkers),frozen,'Paused crowd does not advance');
+for(let tick=0;tick<300*30;tick++) {
+  crowd.update(1/30,{x:12,y:0,z:18,radius:.32});
+  if(tick%15)continue;
+  crowd.walkers.forEach((w,i)=>{
+    assert.ok(crowd.navigation.walkable(w,w.radius+.02),'Walkers stay on clear navigation surfaces');
+    assert.ok(Math.abs(w.y-physics.groundHeight(w.x,w.z,data.surfaces))<1e-6,'Feet match authored treads and bridge crowns');
+    if(w.activity==='sightseeing') {
+      sawSightseeing.add(i);assert.ok(w.y>1.7&&Math.abs(w.x)<6,'Sightseeing stops are on bridge railings');
+    } else if(sawSightseeing.has(i))resumed.add(i);
+    for(const z of [-48,0,48])if(Math.abs(w.x)>8.8&&Math.abs(w.x)<13.1&&Math.abs(w.z-z)>4&&w.y>.15)stairEntrances.add(`${z},${Math.sign(w.x)},${Math.sign(w.z-z)}`);
+  });
+}
+assert.equal(crowd.walkers.length,36,'Static visitors have been replaced with the live crowd');
+assert.ok(crowd.walkers.every(w=>w.travelled>100&&w.crossings>0),'Every visitor walks and reaches the opposite bank');
+assert.equal(stairEntrances.size,12,'Live routes use all twelve stair entrances');
+assert.ok(sawSightseeing.size>=30&&resumed.size>=28,'Visitors pause at railings and resume walking');
+console.log(`PASS: 36 animated visitors, all 12 stairs, ${crowd.walkers.reduce((n,w)=>n+w.crossings,0)} bank crossings, ${resumed.size} resumed sightseeing stops in five minutes.`);
 function world(x,z,yaw=0) {
   return Object.assign(Object.create(World.prototype),{data,character:{},paused:false,status:{loading:false,error:null},keys:new Set(),joystick:{x:0,y:0},player:new THREE.Vector3(x,physics.groundHeight(x,z,data.surfaces),z),travel:'walk',running:false,velocity:0,verticalVelocity:0,heading:Math.PI,yaw,cruises:[]});
 }
@@ -99,6 +130,12 @@ assert.ok(b.length<9e6,'Detailed foliage and signs stay within the 9 MB map budg
 assert.equal(gltf.nodes.filter(n=>n.extras?.cruise).length,2);
 assert.ok(gltf.nodes.some(n=>n.name==='Ebisubashi deck'));
 assert.ok(gltf.nodes.some(n=>n.name==='Dotonbori canal water'));
+assert.ok(gltf.nodes.some(n=>n.name==='Bridge solid soffits'),'Bridge undersides are present for reflection cameras');
+assert.ok(gltf.nodes.some(n=>n.name==='Bridge support piers'),'Bridge has actual stone supports');
+const glico=data.architecture.find(p=>p.landmark==='glico'),donki=data.architecture.find(p=>p.landmark==='wheel');
+assert.equal(donki.side,1,'Don Quijote occupies the north bank');
+assert.equal(glico.side,-1,'Glico occupies the opposite south bank');
+assert.ok(donki.center<0&&glico.center>0,'Don Quijote is east of Ebisubashi; Glico is west (game +Z is east)');
 assert.equal(gltf.materials.filter(m=>m.extras?.bakedLightmap).length,3,'Every walkable surface batch has its completed light bake');
 assert.ok(gltf.materials.filter(m=>m.extras?.bake_mode).length>25,'Completed detail bakes must be in the delivered GLB');
 const bake=JSON.parse(fs.readFileSync('assets/bakes/dotonbori.json','utf8'));

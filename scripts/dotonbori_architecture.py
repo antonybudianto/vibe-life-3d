@@ -1,8 +1,8 @@
 """Parcel-specific canal architecture, authored as real Blender meshes.
 
 The four concept boards are art direction rather than consistent geography.
-Keep the established landmark positions and playable promenade, but give each
-landmark its own building, with no generic advertising underneath its cabinet.
+Use the revised north/south board for architecture. Don Quijote follows the
+user's geography correction: the opposite bank, east of Ebisubashi.
 """
 import math
 
@@ -23,14 +23,13 @@ def build(n):
     # Center, frontage, height, architecture family, reserved landmark.
     parcels={
         -1:[(-65,9.6,22,0,''),(-55.5,8.8,28,2,''),(-45,11.8,25,1,''),
-            (-34.5,8.7,31,3,''),(-25,9.6,24,2,''),(-15,9.7,34,0,'estem'),
-            (-5,9.7,32,3,'promise'),(7,13.7,34,1,'glico'),(20,11.7,32,2,'asahi'),
-            (29,5.7,25,0,''),(38,11.7,29,3,''),(48.5,8.7,23,2,''),
-            (58,9.7,29,1,''),(66.5,6.7,21,0,'')],
-        1:[(-65,9.6,27,1,''),(-55,9.7,22,0,''),(-44.5,10.7,31,3,''),
-           (-34,9.7,25,2,''),(-24.5,8.7,29,0,''),(-16,7.7,27,2,'fugu'),
-           (-7,9.7,34,3,'ohsho'),(7,17.7,28,4,'kani'),(21,9.7,24,2,''),
-           (29.5,6.7,31,1,''),(38,9.7,31,3,'wheel'),(48.5,10.7,26,0,''),
+            (-34.5,8.7,31,3,''),(-20,19.6,25,4,'kani'),
+            (-5,9.7,27,0,'alley'),(11.5,22.7,35,1,'glico'),(28.5,10.7,31,0,'promise'),
+            (42,15.7,32,3,''),(56,11.7,28,2,''),(66.5,8.7,22,0,'')],
+        1:[(-65,9.6,27,1,''),(-55,9.7,22,0,''),(-40,18.7,32,3,'wheel'),
+           (-24.5,8.7,29,0,''),(-16,7.7,27,2,'fugu'),
+           (-7,9.7,34,3,'ohsho'),(7,17.7,31,2,'asahi'),(21,9.7,24,2,''),
+           (29.5,6.7,31,1,''),(38,9.7,31,3,''),(48.5,10.7,26,0,''),
            (59,9.7,30,2,''),(67,5.7,22,1,'')]
     }
     labels=['串かつだるま','道頓堀横丁','炭火焼肉','お好み焼','珈琲浪漫','らーめん','寿司処','居酒屋']
@@ -44,7 +43,12 @@ def build(n):
                 g.box(pos(side,y,u,v,z),(depth,width,height),m)
             angle=-side*math.pi/2
             # Opaque core is set behind the glazing, leaving real window reveals.
-            box(0,-5.3,h/2,9.3,w,h,wall)
+            if hero=='alley':
+                # A visible ground-level passage beside the bridge landing.
+                for end in [-1,1]:box(end*(w/4+1),-5.3,h/2,9.3,w/2-2,h,wall)
+                box(0,-5.3,(h+5)/2,9.3,4,h-5,wall)
+                g.panel(pos(side,y,0,-9.5,2.3),3.9,4.6,glass,angle)
+            else:box(0,-5.3,h/2,9.3,w,h,wall)
             collider(side*(front+5),y,5.9,w/2,h)
             for u in [-w/2+.14,w/2-.14]:box(u,-.1,h/2,1.5,.28,h,wall)
             # Every family has its own floor rhythm and bay count.
@@ -59,7 +63,7 @@ def build(n):
                 for j in range(bay_count):
                     u=-usable/2+(j+.5)*bay;ww=bay-.24;hh=floor-.55
                     # Suppress bright windows behind huge opaque landmark prints.
-                    covered=(hero=='glico' and abs(u)<4.6 and z>6) or (hero in ['promise','estem'] and z>15) or (hero=='asahi' and z>16)
+                    covered=(hero=='glico' and abs(u)<9.5 and z>6) or (hero=='promise' and z>9) or (hero=='asahi' and z>16)
                     lit=not covered and (level<4 or (j+level*3+idx)%5<2)
                     interior=windows[(j+idx+level)%3] if lit else glass
                     g.panel(pos(side,y,u,-.57,z),ww,hh,interior,angle)
@@ -82,9 +86,11 @@ def build(n):
             # Individual ground-floor restaurant, with two or three entrances.
             shops=3 if w>12 else 2
             shopw=(w-.6)/shops
-            name={'kani':'かに道楽','glico':'道頓堀商店','promise':'たこ焼 道頓堀','asahi':'道頓堀ビアホール','fugu':'づぼらや','ohsho':'大阪王将','wheel':'ドン・キホーテ','estem':'大阪案内所'}.get(hero,labels[idx%len(labels)])
+            name={'kani':'かに道楽','glico':'道頓堀商店','promise':'たこ焼 道頓堀','asahi':'道頓堀ビアホール','fugu':'づぼらや','ohsho':'大阪王将','wheel':'ドン・キホーテ','alley':'道頓堀横丁'}.get(hero,labels[idx%len(labels)])
             for shop in range(shops):
                 u=(shop-(shops-1)/2)*shopw
+                if hero=='alley':
+                    u=(-1 if shop==0 else 1)*(w/2-1.25);shopw=2.15
                 g.panel(pos(side,y,u,-.57,1.70),shopw-.18,3.2,windows[(idx+shop)%3],angle)
                 for j in range(5):
                     uu=u-shopw/2+.15+j*(shopw-.30)/4
@@ -140,18 +146,21 @@ def build(n):
                 vertical(side,y,side*2.8,12.5,'づぼらや',white,15,1.5)
                 panel(side,y,0,7.2,4.5,1.8,red,'ふぐ料理',white,.9)
             elif hero=='kani':
-                vertical(side,y,-6.8,14.8,'かに道楽',white,19,2.0)
+                vertical(side,y,-8.35,15.3,'かに道楽',white,17,1.65)
                 # Continuous traditional timber wing and pale ribbed upper wall.
-                for u in [i*.28-7.8 for i in range(57)]:box(u,.22,18.3,.19,.065,8.9,cream)
-                for z in [6,13.6,23.1]:box(0,.4,z,1.25,w,.22,wood)
+                for u in [i*.28-7.8 for i in range(57)]:box(u,.22,17,.19,.065,10.0,cream)
+                for z in [9.3,22.3,24.3]:box(0,.4,z,1.25,w,.22,wood)
             elif hero=='glico':
-                vertical(side,y,-5.85,18.5,'道頓堀の味',red,19,1.25)
-                vertical(side,y,5.85,18,'なにわ名物',white,18,1.18)
+                vertical(side,y,-10.3,18.5,'道頓堀の味',red,19,1.20)
+                vertical(side,y,10.3,18,'なにわ名物',white,18,1.18)
             elif hero=='asahi':
                 vertical(side,y,side*4.7,18.5,'本場の味',white,19,1.5)
             elif hero=='wheel':
-                vertical(side,y,-3.8,17,'ドン・キホーテ',red,23,1.65)
-            if hero in ['promise','asahi','estem']:
+                vertical(side,y,-6.5,17,'ドン・キホーテ',n['black'],23,1.65,yellow)
+            elif hero=='alley':
+                panel(side,y,0,5.15,3.8,1.0,red,'道頓堀横丁',white,.8)
+                for u in [-1.7,1.7]:vertical(side,y,u,2.4,'食いだおれ',white,3.9,.43)
+            if hero=='asahi':
                 # Tenant fascias sit between the glazed podium floors and the
                 # campaign cabinets, as in the concept's layered restaurant fronts.
                 panel(side,y,0,10.8,w*.72,.76,red,'居酒屋・串かつ・生ビール',white,.57)

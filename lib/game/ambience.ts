@@ -3,38 +3,24 @@ import type { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TrafficSimulation, type TrafficSpec, type RoadUser } from './traffic';
 import { PedestrianSimulation, type Person } from './pedestrians';
 import type { Collider } from './physics';
+import { CrowdModel, disposeCrowdAsset as disposeShared } from './crowd-model';
 
 type CityLife = { people: Person[]; vehicles: TrafficSpec[] };
 
 /** One shared geometry per body part; no per-pedestrian model downloads. */
 export class Ambience {
   group = new THREE.Group();
-  private parts: { mesh: THREE.InstancedMesh; pivot: THREE.Vector3; swing: number; local: THREE.Matrix4 }[] = [];
-  private dummy = new THREE.Object3D();
-  private matrix = new THREE.Matrix4();
-  private limb = new THREE.Matrix4();
-  private origin = new THREE.Matrix4();
+  private models: CrowdModel;
   private trafficSources: THREE.Group[] = [];
   private vehicleModels: THREE.Group[] = [];
   traffic: TrafficSimulation;
   private crowd: PedestrianSimulation;
 
-  private constructor(private data: CityLife, private pedestrian: THREE.Group, colliders: Collider[]) {
+  private constructor(data: CityLife, pedestrian: THREE.Group, colliders: Collider[]) {
     this.traffic = new TrafficSimulation(data.vehicles);
     this.crowd = new PedestrianSimulation(data.people, colliders);
-    pedestrian.updateMatrixWorld(true);
-    pedestrian.traverse((source) => {
-      if (!(source instanceof THREE.Mesh)) return;
-      const mesh = new THREE.InstancedMesh(source.geometry, source.material, data.people.length);
-      mesh.name = `Crowd ${source.name}`; mesh.castShadow = true; mesh.receiveShadow = true;
-      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-      const mat = Array.isArray(source.material) ? source.material[0] : source.material;
-      if (mat.name === 'Crowd outfit') data.people.forEach((p, i) => mesh.setColorAt(i, new THREE.Color(p.coat)));
-      // The crowd walks within a fixed 90m block; keep one conservative bound.
-      mesh.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 65);
-      this.parts.push({ mesh, pivot: new THREE.Vector3().fromArray(source.userData.pivot ?? [0, 0, 0]), swing: source.userData.swing ?? 0, local: source.matrixWorld.clone() });
-      this.group.add(mesh);
-    });
+    this.models = new CrowdModel(data.people, pedestrian);
+    this.group.add(this.models.group);
     this.group.name = 'Shibuya street life'; this.posePeople();
   }
 
@@ -70,34 +56,9 @@ export class Ambience {
     });
   }
 
-  private posePeople() {
-    this.data.people.forEach((p, i) => {
-      const pose = this.crowd.walkers[i];
-      const gait = Math.sin(pose.gait) * Math.min(1, pose.speed / .9);
-      this.dummy.position.set(pose.x, .1 + Math.abs(gait) * .025, pose.z);
-      this.dummy.rotation.set(0, pose.yaw, 0);
-      this.dummy.scale.setScalar(p.scale); this.dummy.updateMatrix();
-      for (const part of this.parts) {
-        this.matrix.copy(this.dummy.matrix);
-        if (part.swing) {
-          const v = part.pivot;
-          this.limb.makeTranslation(v.x, v.y, v.z).multiply(this.origin.makeRotationX(gait * .34 * part.swing)).multiply(this.origin.makeTranslation(-v.x, -v.y, -v.z));
-          this.matrix.multiply(this.limb);
-        }
-        this.matrix.multiply(part.local); part.mesh.setMatrixAt(i, this.matrix);
-      }
-    });
-    for (const part of this.parts) part.mesh.instanceMatrix.needsUpdate = true;
-  }
+  private posePeople() { this.models.pose(this.crowd.walkers); }
 
   dispose() {
-    for (const part of this.parts) part.mesh.dispose();
-    disposeShared(this.pedestrian); this.trafficSources.forEach(disposeShared); this.group.clear();
+    this.models.dispose(); this.trafficSources.forEach(disposeShared); this.group.clear();
   }
-}
-
-function disposeShared(root: THREE.Object3D) {
-  const geometries = new Set<THREE.BufferGeometry>(), materials = new Set<THREE.Material>();
-  root.traverse((o) => { if (o instanceof THREE.Mesh) { geometries.add(o.geometry); (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => materials.add(m)); } });
-  geometries.forEach((g) => g.dispose()); materials.forEach((m) => m.dispose());
 }

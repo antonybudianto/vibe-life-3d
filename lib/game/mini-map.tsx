@@ -19,7 +19,9 @@ export function MiniMap({ map, x, z }: { map: MapId; x: number; z: number }) {
       </g>)}
     </g>)}
     <text x="0" y="-7" textAnchor="middle" fontSize="4.7" fill="#fbe7bf">Ebisubashi</text>
-    <circle cx="-19" cy="-7" r="2" fill="#6bbdff"><title>Glico runner</title></circle>
+    <circle cx="-19" cy="-13.5" r="2" fill="#6bbdff"><title>Glico runner</title></circle>
+    <circle cx="-19" cy="20" r="2" fill="#ec675a"><title>Kani Doraku</title></circle>
+    <circle cx="19" cy="40" r="2" fill="#f8c74f"><title>Don Quijote wheel — north bank, east of Ebisubashi</title></circle>
     <circle cx={x} cy={z} r="4" fill="#e8a4bf" opacity=".3"/>
     <circle cx={x} cy={z} r="1.8" fill="#ffd6e6"/>
   </svg>;

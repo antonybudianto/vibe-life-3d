@@ -15,6 +15,8 @@ export class CanalWater {
   readonly mesh: Reflector;
   private source: THREE.Mesh;
   private normals: THREE.Texture;
+  private sunPosition = new THREE.Vector3();
+  private sunTarget = new THREE.Vector3();
   constructor(source: THREE.Mesh, normals: THREE.Texture) {
     this.source = source; this.normals = normals;
     normals.wrapS = normals.wrapT = THREE.RepeatWrapping;
@@ -92,6 +94,8 @@ export class CanalWater {
     const u = (this.mesh.material as THREE.ShaderMaterial).uniforms;
     u.time.value = time; u.eye.value.copy(camera.position);
     u.sunlight.value.copy(sun.color).multiplyScalar(sun.intensity);
+    sun.getWorldPosition(this.sunPosition); sun.target.getWorldPosition(this.sunTarget);
+    u.sunDirection.value.copy(this.sunPosition).sub(this.sunTarget).normalize();
   }
   dispose() {
     this.mesh.removeFromParent(); this.mesh.dispose(); this.mesh.geometry.dispose();

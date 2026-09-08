@@ -13,6 +13,7 @@ import { elevatedPitch, zoomDistance } from './camera';
 import { Ambience } from './ambience';
 import { CitySky } from './sky';
 import { CanalWater, findCanalSurface } from './canal-water';
+import { CanalLife } from './canal-life';
 
 export type TravelMode = 'walk' | 'motorcycle' | 'car';
 export type TimeMode = 'day' | 'evening' | 'night' | 'live';
@@ -34,6 +35,7 @@ export class World {
   vehicles: Partial<Record<TravelMode, THREE.Group>> = {};
   environment: THREE.Group | null = null;
   private ambience: Ambience | null = null;
+  private canalLife: CanalLife | null = null;
   private sky = new CitySky();
   private movementColliders: Collider[] = [];
   data: MapData | null = null;
@@ -209,10 +211,14 @@ export class World {
         fetch(`/models/${id}.json`).then((r) => { if (!r.ok) throw new Error('Map description unavailable'); return r.json() as Promise<MapData>; }),
       ]);
       let life: Ambience | null = null;
+      let canalLife: CanalLife | null = null;
       let waterNormals: THREE.Texture | null = null;
       try {
         await this.loadBakedLighting(asset.scene);
-        if (id === 'dotonbori') waterNormals = await new THREE.TextureLoader().loadAsync('/textures/dotonbori-water-normal.png');
+        if (id === 'dotonbori') {
+          waterNormals = await new THREE.TextureLoader().loadAsync('/textures/dotonbori-water-normal.png');
+          canalLife = await CanalLife.load(this.loader, data);
+        }
         if (id === 'crossing') {
           const landmarkData = await fetch('/models/hachiko.json').then((r) => { if (!r.ok) throw new Error('Landmark unavailable'); return r.json() as Promise<LandmarkData>; });
           const landmark = await this.loader.loadAsync('/models/hachiko.glb');
@@ -225,14 +231,17 @@ export class World {
           life = await Ambience.load(this.loader, data.colliders);
         }
       }
-      catch (error) { this.disposeObject(asset.scene); waterNormals?.dispose(); throw error; }
-      if (!this.alive || serial !== this.loadSerial) { this.disposeObject(asset.scene); life?.dispose(); waterNormals?.dispose(); return; }
+      catch (error) { this.disposeObject(asset.scene); life?.dispose(); canalLife?.dispose(); waterNormals?.dispose(); throw error; }
+      if (!this.alive || serial !== this.loadSerial) { this.disposeObject(asset.scene); life?.dispose(); canalLife?.dispose(); waterNormals?.dispose(); return; }
       const next = this.prep(asset.scene, true);
       this.canalWater?.dispose(); this.canalWater = null;
       if (this.environment) { this.scene.remove(this.environment); this.disposeObject(this.environment); }
       if (this.ambience) { this.scene.remove(this.ambience.group); this.ambience.dispose(); }
+      if (this.canalLife) { this.scene.remove(this.canalLife.group); this.canalLife.dispose(); }
       this.ambience = life;
+      this.canalLife = canalLife;
       if (life) this.scene.add(this.prep(life.group));
+      if (canalLife) this.scene.add(this.prep(canalLife.group));
       this.environment = next; this.data = data; this.scene.add(next);
       this.cruises = [];
       next.traverse((o) => { if (o.userData.cruise) this.cruises.push(o); });
@@ -366,6 +375,7 @@ export class World {
   private step(dt: number) {
     if (!this.data || !this.character || this.paused || this.status.loading || this.status.error) return;
     this.ambience?.update(dt, { x: this.player.x, z: this.player.z, radius: this.radius() });
+    this.canalLife?.update(dt, { x: this.player.x, y: this.player.y, z: this.player.z, radius: this.radius() });
     this.movementColliders = [...this.data.colliders, ...(this.ambience?.traffic.colliders ?? [])];
     const oldFloor = groundHeight(this.player.x, this.player.z, this.data.surfaces);
     const left = this.keys.has('KeyA') || this.keys.has('ArrowLeft');
@@ -483,7 +493,9 @@ export class World {
       this.renderer.domElement.dataset.map = this.status.map;
       this.renderer.domElement.dataset.camera = `${this.yaw.toFixed(2)},${this.pitch.toFixed(2)},${this.distance.toFixed(2)}`;
       this.renderer.domElement.dataset.drawCalls = String(this.renderer.info.render.calls);
-      this.renderer.domElement.dataset.streetLife = this.ambience ? '74 pedestrians, 5 vehicles' : this.data?.id === 'dotonbori' ? '20 visitors, 2 river cruises' : 'none';
+      this.renderer.domElement.dataset.streetLife = this.ambience ? '74 pedestrians, 5 vehicles' : this.canalLife ? `${this.canalLife.simulation.walkers.length} walking visitors, 2 river cruises` : 'none';
+      // Visible diagnostics for local scene and animation checks.
+      this.renderer.domElement.dataset.canalCrowd = this.canalLife ? JSON.stringify(this.canalLife.simulation.walkers.map(w => ({x:+w.x.toFixed(2),y:+w.y.toFixed(2),z:+w.z.toFixed(2),gait:+w.gait.toFixed(2),activity:w.activity,crossings:w.crossings}))) : '';
       this.renderer.domElement.dataset.crossingPhase = this.ambience?.traffic.phase ?? 'none';
     }
   };
@@ -502,6 +514,7 @@ export class World {
     this.alive = false; this.loadSerial++; cancelAnimationFrame(this.requestId);
     this.canalWater?.dispose(); this.canalWater = null;
     if (this.ambience) { this.scene.remove(this.ambience.group); this.ambience.dispose(); this.ambience = null; }
+    if (this.canalLife) { this.scene.remove(this.canalLife.group); this.canalLife.dispose(); this.canalLife = null; }
     this.scene.remove(this.sky.mesh); this.sky.dispose();
     this.cleanup.forEach((f) => f()); this.disposeObject(this.scene); this.scene.clear();
     this.sun.shadow.dispose(); this.envTarget.dispose(); this.bloom.dispose(); this.composer.dispose();

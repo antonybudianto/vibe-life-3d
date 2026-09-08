@@ -19,3 +19,6 @@
 @media(max-height:500px){.location-pill{top:0;left:50%;transform:translateX(-50%)}.map-and-name{top:83px}.minimap{height:83px;width:95px}.character-chip{display:none}.mobile-controls{bottom:80px;left:32px;right:36px}.joystick{width:86px;height:86px}.view-tools{top:85px}.footer-right{top:220px}.travel-dock{padding:3px}.travel-mode,.run-button{height:39px!important}.mode-label{display:none}.game-footer{bottom:12px}.place-note{display:none}.game-dialog{max-height:93dvh}.look-hint{display:none}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 .look-hint{top:110px;bottom:auto}
+
+/* Dotonbori is drawn with north across the canal and east downward. */
+.north.canal-north:after{content:'→'}
