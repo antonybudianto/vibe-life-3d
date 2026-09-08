@@ -22,3 +22,5 @@
 
 /* Dotonbori is drawn with north across the canal and east downward. */
 .north.canal-north:after{content:'→'}
+.settings-label{display:block;font-size:13px;font-weight:500;margin-bottom:13px}
+.haze-options>button{height:44px}

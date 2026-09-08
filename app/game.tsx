@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { World, Status, TravelMode, TimeMode, MapId } from '@/lib/game/world';
+import type { HazeLevel } from '@/lib/game/atmosphere';
 import { MiniMap } from '@/lib/game/mini-map';
 const baseStatus: Status = { loading: true, progress: 0, map: 'crossing', x: 0, z: 10, speed: 0, fps: 0, clock: '17:30', phase: 'evening', error: null };
 
@@ -15,6 +16,7 @@ export default function Game() {
   const [status, setStatus] = useState<Status>(baseStatus);
   const [travel, setTravel] = useState<TravelMode>('walk');
   const [time, setTime] = useState<TimeMode>('evening');
+  const [haze, setHaze] = useState<HazeLevel>('clear');
   const [running, setRunning] = useState(false), [paused, setPaused] = useState(false);
   const [panel, setPanel] = useState<'help' | 'settings' | 'character' | null>(null);
   const [quality, setQuality] = useState('balanced');
@@ -81,7 +83,26 @@ export default function Game() {
     {paused && !status.error && !status.loading && <div className="pause-screen"><div className="pause-card glass"><Pause size={26}/><span className="eyebrow">TAKE YOUR TIME</span><h2>The city can wait.</h2><p>Your next story is right where you left it.</p><button className="primary-button" onClick={() => setPaused(false)}><Play size={16}/>Back to {placeName}</button></div></div>}
     <Dialog open={panel !== null} onOpenChange={(v) => { if (!v) setPanel(null); }}><DialogContent className={`game-dialog ${panel === 'character' ? 'character-dialog' : ''}`}>
       <DialogTitle>{panel === 'settings' ? 'Make yourself at home' : panel === 'character' ? 'Meet Haru.' : 'Your city. Your pace.'}</DialogTitle><DialogDescription>{panel === 'settings' ? 'A little change of atmosphere.' : panel === 'character' ? 'One backpack. A whole city of possibilities.' : 'Everything you need to find your way around.'}</DialogDescription>
-      {panel === 'settings' && <div className="settings-content"><span className="settings-label">Time of day</span><ToggleGroup value={[time]} onValueChange={(v) => { if (v[0]) setLight(v[0] as TimeMode); }} className="time-options" aria-label="Time of day">{([['day',Sun,'Day'],['evening',Sunset,'Evening'],['night',Moon,'Night'],['live',Compass,'Live']] as const).map(([v,Icon,label]) => <ToggleGroupItem value={v} key={v}><Icon size={20}/><span>{label}</span></ToggleGroupItem>)}</ToggleGroup><p className="setting-note">Live follows the current time in Tokyo, with gradual dawn and dusk.</p><label htmlFor="graphics-quality">Graphics</label><Select value={quality} onValueChange={(v) => { if (v) { setQuality(v); game.current?.setQuality(v as 'high'|'balanced'); } }}><SelectTrigger id="graphics-quality" className="quality-select"><SelectValue>{quality === 'balanced' ? 'Balanced · smoother on mobile' : 'High · detail & light bloom'}</SelectValue></SelectTrigger><SelectContent><SelectItem value="balanced">Balanced · smoother on mobile</SelectItem><SelectItem value="high">High · sharper detail & light bloom</SelectItem></SelectContent></Select><p className="setting-note">Camera stays in third person. Drag freely to find your angle.</p></div>}
+      {panel === 'settings' && <div className="settings-content">
+        <span className="settings-label">Time of day</span>
+        <ToggleGroup value={[time]} onValueChange={(v) => { if (v[0]) setLight(v[0] as TimeMode); }} className="time-options" aria-label="Time of day">
+          {([['day',Sun,'Day'],['evening',Sunset,'Evening'],['night',Moon,'Night'],['live',Compass,'Live']] as const).map(([v,Icon,label]) => <ToggleGroupItem value={v} key={v}><Icon size={20}/><span>{label}</span></ToggleGroupItem>)}
+        </ToggleGroup>
+        <p className="setting-note">Live follows the current time in Tokyo, with gradual dawn and dusk.</p>
+        <span className="settings-label">Haze</span>
+        <ToggleGroup value={[haze]} onValueChange={(v) => { if (v[0]) { const level = v[0] as HazeLevel; setHaze(level); game.current?.setHaze(level); } }} className="time-options haze-options" aria-label="Haze level">
+          <ToggleGroupItem value="clear">Clear</ToggleGroupItem>
+          <ToggleGroupItem value="small">Small</ToggleGroupItem>
+          <ToggleGroupItem value="medium">Medium</ToggleGroupItem>
+        </ToggleGroup>
+        <p className="setting-note">Clear is the default. Clouds drift at every level.</p>
+        <label htmlFor="graphics-quality">Graphics</label>
+        <Select value={quality} onValueChange={(v) => { if (v) { setQuality(v); game.current?.setQuality(v as 'high'|'balanced'); } }}>
+          <SelectTrigger id="graphics-quality" className="quality-select"><SelectValue>{quality === 'balanced' ? 'Balanced · smoother on mobile' : 'High · detail & light bloom'}</SelectValue></SelectTrigger>
+          <SelectContent><SelectItem value="balanced">Balanced · smoother on mobile</SelectItem><SelectItem value="high">High · sharper detail & light bloom</SelectItem></SelectContent>
+        </Select>
+        <p className="setting-note">Camera stays in third person. Drag freely to find your angle.</p>
+      </div>}
       {panel === 'help' && <div className="help-content"><div><kbd>W A S D</kbd><span>{travel === 'walk' ? 'Walk in the direction of the camera' : 'W / S accelerate and reverse · A / D steer'}</span></div><div><kbd>SHIFT</kbd><span>Hold to run, or use the Run toggle</span></div><div><kbd>SPACE</kbd><span>Jump while exploring on foot</span></div><div><kbd>DRAG</kbd><span>Grab the scene and rotate the view</span></div><div><kbd>SCROLL</kbd><span>Zoom in and out · pinch on mobile</span></div><div><kbd>R</kbd><span>Bring the camera behind you</span></div><div><kbd>ESC</kbd><span>Pause and take a breather</span></div><p>On mobile, use the left joystick to move and drag the right side to look. Choose a location at the top to change maps.</p></div>}
       {panel === 'character' && <div className="character-details"><img src="/renders/character.webp" alt="Blender render of Haru wearing a black cap, gray hoodie, dark trousers, sneakers and backpack"/><div><span className="eyebrow">THE CITY EXPLORER</span><p>A familiar cap, favorite sneakers, and everything for the day in one backpack.</p><span className="character-tag"><Check size={14}/>Your character</span><a href="/renders/character.png" target="_blank" rel="noreferrer">View character render <ChevronRight size={14}/></a></div></div>}
     </DialogContent></Dialog>

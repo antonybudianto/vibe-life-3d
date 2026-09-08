@@ -12,6 +12,7 @@ import dotonboriPhases from './dotonbori-lighting.json';
 import { elevatedPitch, zoomDistance } from './camera';
 import { Ambience } from './ambience';
 import { CitySky } from './sky';
+import { Atmosphere, type HazeLevel } from './atmosphere';
 import { CanalWater, findCanalSurface } from './canal-water';
 import { CanalLife } from './canal-life';
 
@@ -37,6 +38,7 @@ export class World {
   private ambience: Ambience | null = null;
   private canalLife: CanalLife | null = null;
   private sky = new CitySky();
+  private atmosphere = new Atmosphere();
   private movementColliders: Collider[] = [];
   data: MapData | null = null;
   player = new THREE.Vector3(0, 0, 10);
@@ -101,7 +103,7 @@ export class World {
     this.scene.environmentIntensity = .35;
     room.dispose(); pmrem.dispose();
     this.scene.background = new THREE.Color(0x8896b8);
-    this.scene.fog = new THREE.Fog(0x8896b8, 85, 200);
+    this.scene.fog = this.atmosphere.fog;
     this.scene.add(this.sky.mesh);
     this.sun.position.set(-22, 28, 14);
     this.sun.castShadow = true;
@@ -139,6 +141,7 @@ export class World {
         if (world) o.matrixAutoUpdate = false;
         const materials = Array.isArray(o.material) ? o.material : [o.material];
         for (const m of materials) if (m instanceof THREE.MeshStandardMaterial) {
+          this.atmosphere.applyTo(m);
           m.envMapIntensity = .55;
           if (m.name.includes('Glazing')) { m.depthWrite = false; o.castShadow = false; }
           const roadPaint = m.userData.surface_role === 'road-marking';
@@ -246,7 +249,11 @@ export class World {
       this.cruises = [];
       next.traverse((o) => { if (o.userData.cruise) this.cruises.push(o); });
       const water = findCanalSurface(next);
-      if (water instanceof THREE.Mesh && waterNormals) { this.canalWater = new CanalWater(water, waterNormals); this.scene.add(this.canalWater.mesh); }
+      if (water instanceof THREE.Mesh && waterNormals) {
+        this.canalWater = new CanalWater(water, waterNormals);
+        this.atmosphere.applyTo(this.canalWater.mesh.material as THREE.ShaderMaterial);
+        this.scene.add(this.canalWater.mesh);
+      }
       else waterNormals?.dispose();
       this.movementColliders = [...data.colliders, ...(life?.traffic.colliders ?? [])];
       this.player.fromArray(data.spawn); this.velocity = 0; this.verticalVelocity = 0; this.heading = Math.PI;
@@ -281,6 +288,7 @@ export class World {
     this.clearInput();
   }
   setTime(mode: TimeMode) { this.time = mode; this.lastPhase = ''; this.applyTime(); this.emit(); }
+  setHaze(level: HazeLevel) { this.atmosphere.setLevel(level); }
   setRunning(value: boolean) { this.running = value; }
   setPaused(value: boolean) { this.paused = value; this.clearInput(); }
   zoom(delta: number) { this.distance = zoomDistance(this.distance, delta); }
@@ -476,6 +484,7 @@ export class World {
     while (this.accumulator >= 1 / 60) { this.step(1 / 60); this.accumulator -= 1 / 60; }
     this.pose(); this.updateCamera(dt);
     this.sky.update(this.camera, this.elapsed);
+    this.atmosphere.update(this.elapsed);
     this.canalWater?.update(this.elapsed, this.camera, this.sun);
     // Follow the player with a bounded shadow camera instead of shadowing the entire map.
     this.sun.position.set(this.player.x - 22, 28, this.player.z + 14);
@@ -493,6 +502,8 @@ export class World {
       this.renderer.domElement.dataset.map = this.status.map;
       this.renderer.domElement.dataset.camera = `${this.yaw.toFixed(2)},${this.pitch.toFixed(2)},${this.distance.toFixed(2)}`;
       this.renderer.domElement.dataset.drawCalls = String(this.renderer.info.render.calls);
+      this.renderer.domElement.dataset.haze = this.atmosphere.level;
+      this.renderer.domElement.dataset.atmosphereTime = this.elapsed.toFixed(2);
       this.renderer.domElement.dataset.streetLife = this.ambience ? '74 pedestrians, 5 vehicles' : this.canalLife ? `${this.canalLife.simulation.walkers.length} walking visitors, 2 river cruises` : 'none';
       // Visible diagnostics for local scene and animation checks.
       this.renderer.domElement.dataset.canalCrowd = this.canalLife ? JSON.stringify(this.canalLife.simulation.walkers.map(w => ({x:+w.x.toFixed(2),y:+w.y.toFixed(2),z:+w.z.toFixed(2),gait:+w.gait.toFixed(2),activity:w.activity,crossings:w.crossings}))) : '';

@@ -34,7 +34,9 @@ export class CanalWater {
     this.mesh.name = 'Dotonbori rippling canal reflections';
     this.mesh.rotation.x = -Math.PI / 2; this.mesh.position.y = -1.43;
     const material = this.mesh.material as THREE.ShaderMaterial;
+    material.fog = true;
     Object.assign(material.uniforms, {
+      ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog),
       time: { value: 0 }, normalMap: { value: normals }, eye: { value: new THREE.Vector3() },
       sunlight: { value: new THREE.Color() }, sunDirection: { value: new THREE.Vector3(-22, 28, 14).normalize() },
     });
@@ -44,11 +46,15 @@ export class CanalWater {
       varying vec3 worldPosition;
       #include <common>
       #include <logdepthbuf_pars_vertex>
+      #include <fog_pars_vertex>
       void main() {
+        vec3 transformed = position;
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
         mirrorCoord = textureMatrix * vec4(position, 1.0);
         worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         #include <logdepthbuf_vertex>
+        #include <fog_vertex>
       }`;
     material.fragmentShader = `
       uniform sampler2D tDiffuse;
@@ -61,6 +67,7 @@ export class CanalWater {
       varying vec3 worldPosition;
       #include <common>
       #include <logdepthbuf_pars_fragment>
+      #include <fog_pars_fragment>
       void main() {
         #include <logdepthbuf_fragment>
         vec2 p = worldPosition.xz;
@@ -87,6 +94,7 @@ export class CanalWater {
         gl_FragColor = vec4(color, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
+        #include <fog_fragment>
       }`;
     source.visible = false;
   }

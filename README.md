@@ -60,6 +60,8 @@ pnpm exec tsc --noEmit
 
 Settings provide day, evening, night, and live Tokyo time. Live mode uses the current device date converted to Asia/Tokyo; dawn is 05:00–07:00, dusk is 16:00–20:00. This is a clock-driven artistic cycle, not astronomical solar positioning or live weather.
 
+Haze settings apply across all maps: Clear (default) removes distance haze, Small uses 35% strength, and Medium retains the original 85–200 m falloff. The two cloud layers drift at different speeds with gentle shape changes; distant haze wisps move with the same simulation clock. Clouds remain visible on Clear. Atmospheric motion pauses with the game or a hidden tab, and the selected haze level stays in effect when changing maps, lighting or graphics quality during the session. Canal reflections use the same atmosphere.
+
 The following camera now dollies from **4.2 to 60 meters**, using proportional wheel/pinch/button increments. Beyond street distance it gradually rises to reveal the neighborhood, with manual orbit, third-person follow, and building/canopy collision still active. Obstacles can shorten the actual camera distance to keep the character visible.
 
 ## Crossing concept pass
