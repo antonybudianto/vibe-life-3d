@@ -22,6 +22,25 @@ export type MapId = 'crossing' | 'park' | 'dotonbori';
 export type Status = { loading: boolean; progress: number; map: MapId; x: number; z: number; speed: number; fps: number; clock: string; phase: string; error: string | null };
 type MapData = { id: MapId; name: string; spawn: [number, number, number]; bounds: [number, number, number, number]; colliders: Collider[]; surfaces?: WalkSurface[]; pedestrians?: number; cruises?: number };
 type LandmarkData = { model: string; position: [number, number, number]; colliders: Collider[] };
+export const CRUISE_CYCLE = 2 * (300 / 2.2 + 12);
+/** Two opposing lanes, with slow, tight turns beyond the outermost bridges. */
+export function cruisePose(time: number, index: number) {
+  const straight = 300 / 2.2, turn = 12;
+  let t = ((time + 60 + index * CRUISE_CYCLE / 2) % CRUISE_CYCLE + CRUISE_CYCLE) % CRUISE_CYCLE;
+  const y = Math.sin(time * 1.2 + index * Math.PI) * .025;
+  if (t < straight) return { x: -2.5, y, z: -150 + t * 2.2, yaw: Math.PI };
+  t -= straight;
+  if (t < turn) {
+    const a = t / turn * Math.PI, s = Math.sin(a);
+    // Pull toward mid-channel while turning; a circular U-turn is too wide
+    // for these long hulls. The bow follows the tangent and slows at the apex.
+    return { x: -2.5 * Math.cos(a) ** 3, y, z: 150 + 2.5 * (3 * s - s ** 3), yaw: Math.PI + a };
+  }
+  t -= turn;
+  if (t < straight) return { x: 2.5, y, z: 150 - t * 2.2, yaw: 0 };
+  const a = (t - straight) / turn * Math.PI, s = Math.sin(a);
+  return { x: 2.5 * Math.cos(a) ** 3, y, z: -150 - 2.5 * (3 * s - s ** 3), yaw: a };
+}
 const INITIAL: Status = { loading: true, progress: 0, map: 'crossing', x: 0, z: 10, speed: 0, fps: 0, clock: '17:30', phase: 'evening', error: null };
 
 export class World {
@@ -248,6 +267,15 @@ export class World {
       this.environment = next; this.data = data; this.scene.add(next);
       this.cruises = [];
       next.traverse((o) => { if (o.userData.cruise) this.cruises.push(o); });
+      this.cruises = this.cruises.map(boat => {
+        // Authored meshes use scene coordinates. Center a separate pivot so
+        // turning rotates the boat around its hull, not around the whole map.
+        const center = new THREE.Box3().setFromObject(boat).getCenter(new THREE.Vector3());
+        const pivot = new THREE.Group(); pivot.name = boat.name + ' route'; pivot.userData = { ...boat.userData };
+        next.add(pivot); pivot.add(boat);
+        boat.position.x -= center.x; boat.position.z -= center.z;
+        return pivot;
+      });
       const water = findCanalSurface(next);
       if (water instanceof THREE.Mesh && waterNormals) {
         this.canalWater = new CanalWater(water, waterNormals);
@@ -446,10 +474,9 @@ export class World {
     const vertical = this.travel === 'walk' ? followGround(this.player.y, this.verticalVelocity, oldFloor, floor, dt) : { y: floor, velocity: 0 };
     this.player.y = vertical.y; this.verticalVelocity = vertical.velocity;
     for (const boat of this.cruises) {
-      // Root offsets remain in the safe interval between bridges; no recycling pops.
-      const phase = this.elapsed * .09 + Number(boat.userData.cruiseIndex) * Math.PI;
-      boat.position.z = Math.sin(phase) * 8;
-      boat.position.y = Math.sin(this.elapsed * 1.2 + phase) * .035;
+      const pose = cruisePose(this.elapsed, Number(boat.userData.cruiseIndex));
+      boat.position.set(pose.x, pose.y, pose.z);
+      boat.rotation.y = pose.yaw;
       boat.updateMatrixWorld(true);
     }
   }

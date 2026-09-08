@@ -43,7 +43,7 @@ water.mesh.onBeforeRender(renderer,mirrorScene,mirrorCamera);
 assert.ok(Math.abs(reflectedY-(2*-1.43-6))<1e-6,'Camera mirrors at the actual canal level');
 assert.equal(renderer.shadowMap.autoUpdate,true,'Reflection restores renderer state');
 water.dispose();assert.equal(waterSource.visible,true);
-const {World}=moduleFrom('lib/game/world.ts', n => n==='three'?THREE:n==='./physics'?physics:n.endsWith('.json')?{default:JSON.parse(fs.readFileSync('lib/game/'+n.slice(2),'utf8'))}:{});
+const {World,CRUISE_CYCLE}=moduleFrom('lib/game/world.ts', n => n==='three'?THREE:n==='./physics'?physics:n.endsWith('.json')?{default:JSON.parse(fs.readFileSync('lib/game/'+n.slice(2),'utf8'))}:{});
 const data=JSON.parse(fs.readFileSync('public/models/dotonbori.json','utf8'));
 const {CanalPedestrianSimulation}=moduleFrom('lib/game/canal-pedestrians.ts',()=>physics);
 const crowd=new CanalPedestrianSimulation(data);
@@ -165,30 +165,51 @@ assert.ok(!gltf.nodes.some(n=>n.name.startsWith('Cruise Glazing')),'The photo re
 // Use exported mesh bounds and the actual World.step cruise motion, so a longer
 // replacement hull cannot silently pass through a bridge or retaining wall.
 function vesselBounds(index) {
-  const bounds=new THREE.Box3();
+  const bounds=new THREE.Box3(),parts=[];
   function visit(id,parent) {
     const node=gltf.nodes[id],local=node.matrix?new THREE.Matrix4().fromArray(node.matrix):new THREE.Matrix4().compose(new THREE.Vector3().fromArray(node.translation??[0,0,0]),new THREE.Quaternion().fromArray(node.rotation??[0,0,0,1]),new THREE.Vector3().fromArray(node.scale??[1,1,1]));
     const matrix=parent.clone().multiply(local);
     if(node.mesh!==undefined)for(const primitive of gltf.meshes[node.mesh].primitives){
       const {min,max}=gltf.accessors[primitive.attributes.POSITION];
-      for(const x of [min[0],max[0]])for(const y of [min[1],max[1]])for(const z of [min[2],max[2]])bounds.expandByPoint(new THREE.Vector3(x,y,z).applyMatrix4(matrix));
+      const part=new THREE.Box3();
+      for(const x of [min[0],max[0]])for(const y of [min[1],max[1]])for(const z of [min[2],max[2]])part.expandByPoint(new THREE.Vector3(x,y,z).applyMatrix4(matrix));
+      parts.push(part);bounds.union(part);
     }
     for(const child of node.children??[])visit(child,matrix);
   }
-  visit(index,new THREE.Matrix4());return bounds;
+  visit(index,new THREE.Matrix4());return {bounds,parts};
 }
 const cruiseWorld=world(0,0);
-const vessels=gltf.nodes.flatMap((node,index)=>node.extras?.cruise?[{node,bounds:vesselBounds(index)}]:[]);
+const vessels=gltf.nodes.flatMap((node,index)=>node.extras?.cruise?[{node,...vesselBounds(index)}]:[]);
+for(const {bounds,parts} of vessels) { const center=bounds.getCenter(new THREE.Vector3()),offset=new THREE.Vector3(-center.x,0,-center.z);bounds.translate(offset);parts.forEach(part=>part.translate(offset)); }
 cruiseWorld.cruises=vessels.map(({node})=>{const object=new THREE.Object3D();object.userData=node.extras;return object;});
-for(let time=0;time<=72;time+=.25){
+const crossed=vessels.map(()=>new Set());
+for(let time=0;time<=CRUISE_CYCLE;time+=.1){
   cruiseWorld.elapsed=time;cruiseWorld.step(1/60);
-  vessels.forEach(({bounds},index)=>{
-    const moved=bounds.clone().translate(cruiseWorld.cruises[index].position);
-    assert.ok(moved.min.x>-7.9&&moved.max.x<7.9,'Cruisers clear both retaining walls');
-    for(const bridge of [-48,0,48]){const half=bridge===0?3.8:3.4;assert.ok(moved.max.z<bridge-half||moved.min.z>bridge+half,'The full hull and stern equipment clear every bridge throughout the cruise');}
+  const occupied=[];
+  vessels.forEach(({bounds,parts},index)=>{
+    const boat=cruiseWorld.cruises[index],moved=bounds.clone().applyMatrix4(boat.matrixWorld);
+    occupied.push(moved);
+    assert.ok(moved.min.x>-7.875&&moved.max.x<7.875,'The complete hull clears walls and bridge piers, including during U-turns');
+    assert.ok(moved.min.z>-167&&moved.max.z<167,'Turnarounds finish before the distant canal bend');
+    for(const bridge of [-140,-91,-48,0,48,91,140]) {
+      const half=bridge===0?8.55:3.4;
+      if(moved.max.z<bridge-half||moved.min.z>bridge+half)continue;
+      const x=Math.max(Math.abs(moved.min.x),Math.abs(moved.max.x));
+      const underside=(bridge===0?2.55:1.8)+(bridge===0?.24:.14)*Math.max(0,1-(x/8.5)**2)-.94;
+      assert.ok(moved.max.y+.10<underside,'Passengers and helm clear the bridge soffit by at least 10cm');
+      if(bridge===0)for(const part of parts) {
+        const p=part.clone().applyMatrix4(boat.matrixWorld),t=Math.max(Math.abs(p.min.x),Math.abs(p.max.x))/8.5;
+        const rampBottom=2.79*(1-t*t*(3-2*t))-.60;
+        assert.ok(p.max.y+.10<rampBottom,'Each passenger and equipment group clears the lower perimeter-ramp fascia');
+      }
+      if(Math.abs(boat.position.z-bridge)<.2)crossed[index].add(`${bridge},${Math.cos(boat.rotation.y)>0?'west':'east'}`);
+    }
   });
+  assert.ok(!occupied[0].intersectsBox(occupied[1]),'Opposing boats never intersect');
 }
-console.log('PASS: photo-reference Asahi placement and both open cruisers clear walls and bridges over a full movement cycle.');
+assert.ok(crossed.every(bridges=>bridges.size===14),'Both boats pass under all seven bridges in both directions');
+console.log('PASS: both boats pass under all seven bridges in both directions; passengers clear soffits, full hulls clear piers and U-turns, and opposing boats stay separated.');
 assert.equal(gltf.materials.filter(m=>m.extras?.bakedLightmap).length,3,'Every walkable surface batch has its completed light bake');
 assert.ok(gltf.materials.filter(m=>m.extras?.bake_mode).length>25,'Completed detail bakes must be in the delivered GLB');
 const bake=JSON.parse(fs.readFileSync('assets/bakes/dotonbori.json','utf8'));

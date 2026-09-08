@@ -25,7 +25,7 @@ def build_cruises(n):
             g.sphere(p(a,.34,.09),(.105*scale,.18*scale,.075*scale),dark,10,6)
             g.rod(p(a*2,0,hip+.48),p(a*2.1,.15,hip+.16),.063*scale,coat,10)
             g.rod(p(a*2.1,.15,hip+.16),p(a*1.5,.33,hip+.12),.059*scale,coat,10)
-    # The longer hulls retain clearance throughout their existing eight-meter motion.
+    # Runtime centers these authored hulls on route pivots for bridge passages.
     for index,(x,y) in enumerate([(-3,-24),(3,28)]):
         z=-1.10
         outline=[(-1.80,-6.9),(1.80,-6.9),(1.90,5.3),(1.20,6.8),(0,7.2),(-1.20,6.8),(-1.90,5.3)]
