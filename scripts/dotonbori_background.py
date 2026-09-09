@@ -22,7 +22,7 @@ def build(n):
         front=-d/2
         # Recessed glazing sits behind projecting floor slabs and facade piers.
         box(0,.25,h/2,w,d-.5,h,wall)
-        floor=[3.0,3.45,2.9,3.25][style]
+        floor=[3.0,3.45,2.9,3.25][style]+[0,.25,-.18,.12,.38][index%5]
         far=index>=5
         bays=max(2,round(w/(3.7 if far else [2.55,3.1,2.8,2.45][style])));bay=(w-.7)/bays
         for level in range(1,int((h-1.4)/floor)):
@@ -32,8 +32,10 @@ def build(n):
             if style in [0,1]:box(0,front-.24,z-floor*.5+.17,w,.09,.065,silver)
             for j in range(bays):
                 u=-w/2+.35+(j+.5)*bay;ww=bay-.25;hh=floor-.65
-                lit=(level*7+j*3+index)%7<3
-                face(u,front-.012,z,ww,hh,windows[(index+j+level)%3] if lit else glass)
+                lit=(level*7+j*3+index)%11<2
+                if (index%3==1 and j==0) or (style==2 and level%4==0):
+                    face(u,front-.018,z,ww,hh,wall)
+                else:face(u,front-.012,z,ww,hh,windows[(index+j+level)%3] if lit else glass)
                 box(u-bay/2,front-.1,z,.18,.44,hh+.15,dark if style==1 else wall)
                 if not far:
                     box(u,front-.085,z+.1,ww,.12,.06,dark)
@@ -56,7 +58,7 @@ def build(n):
             face(u,front-.025,1.75,sw-.15,3.1,windows[(j+index)%3] if shops else glass)
             for t in [-.5,0,.5]:box(u+t*(sw-.15),front-.13,1.65,.075,.26,3.2,dark)
             box(u,front-.14,.42,sw,.25,.13,stone)
-            box(u,front-.7,3.28,sw+.08,1.5,.16,dark)
+            if (index+j)%3!=0:box(u,front-.7,3.28,sw+.08,1.5,.16,dark)
             if shops:
                 face(u,front-.74,3.79,sw-.13,.80,n['cream'] if index%2 else n['neonred'])
                 if index<7:
@@ -65,7 +67,7 @@ def build(n):
                 for k in [-1,0,1]:
                     box(u+k*sw*.28,front-.51,2.82,.44,.14,.48,n['blue'] if index%3 else n['red'])
         # A few well-spaced sign cabinets, with exposed brackets and real depth.
-        if shops:
+        if shops and index%3!=2:
             u=w/2-.66;z=min(h*.58,16)
             box(u,front-.48,z,1.2,.55,min(11,h*.55),dark)
             face(u,front-.78,z,1.02,min(10.7,h*.53),n['white'] if index%2 else n['neonred'])
@@ -114,7 +116,8 @@ def build(n):
             for side in [-1,1]:
                 if stop <= limit:
                     # A solid top shares the promenade's AO/irradiance atlas.
-                    g.box((side*14.3,end*(start+stop)/2,-.27),(12,stop-start,.54),n['paving'])
+                    lo,hi=sorted([end*start,end*stop])
+                    n['paving_segment'](n,side,lo,hi,8.3,20.3)
                 else:
                     strip(min(side*8.3,side*20.3),max(side*8.3,side*20.3),0,n['paving'],'Dotonbori distant paving')
                 aa=(a+side*8.3,end*start);bb=(b+side*8.3,end*stop)

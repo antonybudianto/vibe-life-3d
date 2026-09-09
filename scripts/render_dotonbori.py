@@ -58,6 +58,8 @@ for name,position,target,lens in [
     ('extension-second',(-15,151,5.2),(-3,138,1.2),22),
     ('paving-west',(12,60,11),(12,81,0),30),
     ('paving-east',(12,-60,11),(12,-81,0),30),
+    ('infill-evening',(8,45,13),(-18,34,12),22),
+    ('pavement-evening',(14,38,8),(-5,22,1.0),25),
 ]:
     s.camera.location=position;s.camera.data.lens=lens
     s.camera.rotation_euler=(Vector(target)-s.camera.location).to_track_quat('-Z','Y').to_euler()
@@ -77,6 +79,8 @@ for name,position,target,lens in [
     ('snow-brand',(13,8,20),(-18,5,20),26),
     ('bridge-detail',(8,21,7),(0,2.8,2.8),31),
     ('bridge-plaza',(2,17,22),(0,0,2.0),29),
+    ('infill-day',(8,45,13),(-18,34,12),22),
+    ('north-infill',(-9,0,22),(19,0,14),14),
 ]:
     s.camera.location=position;s.camera.data.lens=lens
     s.camera.rotation_euler=(Vector(target)-s.camera.location).to_track_quat('-Z','Y').to_euler()

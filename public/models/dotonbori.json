@@ -24,7 +24,7 @@
     },
     {
       "x": -8.9,
-      "z": 58,
+      "z": 56,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -33,7 +33,7 @@
     },
     {
       "x": -8.9,
-      "z": 37,
+      "z": 39,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -42,7 +42,7 @@
     },
     {
       "x": -8.9,
-      "z": 30,
+      "z": 28,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -51,16 +51,7 @@
     },
     {
       "x": -8.9,
-      "z": 23,
-      "halfX": 0.23,
-      "halfZ": 0.23,
-      "height": 3.32,
-      "cameraMinY": 0,
-      "cameraRadius": 0.28
-    },
-    {
-      "x": -8.9,
-      "z": 16,
+      "z": 18,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -87,7 +78,7 @@
     },
     {
       "x": -8.9,
-      "z": -19,
+      "z": -23,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -96,7 +87,7 @@
     },
     {
       "x": -8.9,
-      "z": -26,
+      "z": -34,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -105,7 +96,7 @@
     },
     {
       "x": -8.9,
-      "z": -33,
+      "z": -57,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -114,25 +105,7 @@
     },
     {
       "x": -8.9,
-      "z": -40,
-      "halfX": 0.23,
-      "halfZ": 0.23,
-      "height": 3.32,
-      "cameraMinY": 0,
-      "cameraRadius": 0.28
-    },
-    {
-      "x": -8.9,
-      "z": -54,
-      "halfX": 0.23,
-      "halfZ": 0.23,
-      "height": 3.32,
-      "cameraMinY": 0,
-      "cameraRadius": 0.28
-    },
-    {
-      "x": -8.9,
-      "z": -61,
+      "z": -66,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -210,7 +183,7 @@
     },
     {
       "x": 8.9,
-      "z": 58,
+      "z": 56,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -219,7 +192,7 @@
     },
     {
       "x": 8.9,
-      "z": 37,
+      "z": 39,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -228,7 +201,7 @@
     },
     {
       "x": 8.9,
-      "z": 30,
+      "z": 28,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -237,16 +210,7 @@
     },
     {
       "x": 8.9,
-      "z": 23,
-      "halfX": 0.23,
-      "halfZ": 0.23,
-      "height": 3.32,
-      "cameraMinY": 0,
-      "cameraRadius": 0.28
-    },
-    {
-      "x": 8.9,
-      "z": 16,
+      "z": 18,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -273,7 +237,7 @@
     },
     {
       "x": 8.9,
-      "z": -19,
+      "z": -23,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -282,7 +246,7 @@
     },
     {
       "x": 8.9,
-      "z": -26,
+      "z": -34,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -291,7 +255,7 @@
     },
     {
       "x": 8.9,
-      "z": -33,
+      "z": -57,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -300,25 +264,7 @@
     },
     {
       "x": 8.9,
-      "z": -40,
-      "halfX": 0.23,
-      "halfZ": 0.23,
-      "height": 3.32,
-      "cameraMinY": 0,
-      "cameraRadius": 0.28
-    },
-    {
-      "x": 8.9,
-      "z": -54,
-      "halfX": 0.23,
-      "halfZ": 0.23,
-      "height": 3.32,
-      "cameraMinY": 0,
-      "cameraRadius": 0.28
-    },
-    {
-      "x": 8.9,
-      "z": -61,
+      "z": -66,
       "halfX": 0.23,
       "halfZ": 0.23,
       "height": 3.32,
@@ -5327,14 +5273,14 @@
       "z": -42,
       "halfX": 5.9,
       "halfZ": 7.85,
-      "height": 32
+      "height": 27
     },
     {
       "x": -24.2,
       "z": -56,
       "halfX": 5.9,
       "halfZ": 5.85,
-      "height": 28
+      "height": 24
     },
     {
       "x": -24.2,
@@ -12728,7 +12674,7 @@
   ],
   "pedestrians": 36,
   "cruises": 2,
-  "artRevision": 11,
+  "artRevision": 12,
   "architecture": [
     {
       "side": -1,
@@ -12812,17 +12758,17 @@
       "side": -1,
       "center": 42,
       "width": 15.7,
-      "height": 32,
+      "height": 27,
       "front": 17.349999999999998,
-      "family": 3,
+      "family": "photographed sign house",
       "landmark": "",
-      "store": ""
+      "reference": "Yasuda Mai 2021"
     },
     {
       "side": -1,
       "center": 56,
       "width": 11.7,
-      "height": 28,
+      "height": 24,
       "front": 19.2,
       "family": 2,
       "landmark": "",
@@ -12883,9 +12829,9 @@
       "width": 7.7,
       "height": 23,
       "front": 17.08,
-      "family": 1,
+      "family": "asymmetric canal infill",
       "landmark": "",
-      "store": ""
+      "reference": "architectural interpretation"
     },
     {
       "side": 1,
@@ -12911,9 +12857,9 @@
       "width": 9.7,
       "height": 24,
       "front": 17.849999999999998,
-      "family": 2,
+      "family": "asymmetric canal infill",
       "landmark": "",
-      "store": ""
+      "reference": "architectural interpretation"
     },
     {
       "side": 1,

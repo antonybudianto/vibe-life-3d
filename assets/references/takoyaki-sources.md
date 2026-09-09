@@ -18,7 +18,11 @@ live in the ignored `work/references/` folder and are not needed to rebuild.
 
 Kukuru occupies the south-bank parcel west of Ebisubashi (game Z -28.5).
 Its main-store-inspired facade faces the playable canal promenade in this
-compressed district, although the real main store faces Dotonbori Street.
+compressed district. The real main-store entrance faces Dotonbori Street,
+but Yasuda Mai's February 2021 photograph also shows a Kukuru octopus on the
+canal elevation below CHINTAI (https://yasudamai.com/fumetsunominami/).
+Revision 12 retains the canal-side octopus on that photographic evidence;
+the modeled counters and overall proportions remain interpretations.
 Acchichi Honpo occupies the north-bank parcel beside the eastern bridge
 (game Z +55), interpreted as Tazaemonbashi. Its orange canopy and rounded
 red octopus distinguish it from Kukuru's dark frontage and long curling arms.

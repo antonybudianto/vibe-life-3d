@@ -4,6 +4,25 @@ A playable third-person exploration prototype, using Blender-authored glTF asset
 
 ## Osaka Dotonbori
 
+Visual revision 12 replaces the generic building beside CHINTAI with a
+photo-informed tiled sign house: the white `不滅のミナミ` cabinet, narrow
+black/gold sign, recessed windows, interrupted balconies, AC units and pipes.
+Two opposite-bank infill parcels have separate asymmetric designs; other
+central and distant buildings use less repetitive glazing, lit floors,
+canopies and service details. These remain a compressed interpretation of the
+district, not a surveyed reconstruction. Glico's panel now measures 20 x 10.38
+scene units, matching the official aspect ratio and dimensions.
+
+Promenades use four subtly varied stone finishes on a continuous global grid,
+flush drains and utility covers, mineral streaks and a darkened waterline.
+Cycles rebakes every paving finish with localized sign-colored illumination.
+Night illumination has darker recesses and less uniform shop spill. Live water
+uses broader moving ripples, a softer five-tap reflection filter and restrained
+sun glints. The 36 visitors retain stair and bridge routes, with additional
+reserved photo groups opposite Glico and short shop stops off the through route.
+The source for the sign house also confirms Kukuru's canal-side octopus; it
+remains in place. Source dates are in `assets/references/central-landmarks-sources.md`.
+
 Central landmark revision 11 rebuilds TSUTAYA EBISUBASHI as a billboard tower
 with a two-level Starbucks frontage, real sign artwork and its green siren
 logo. The panel immediately left of Glico now shows the photographed Snow

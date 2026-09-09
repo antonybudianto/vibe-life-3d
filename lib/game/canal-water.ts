@@ -71,26 +71,31 @@ export class CanalWater {
       void main() {
         #include <logdepthbuf_fragment>
         vec2 p = worldPosition.xz;
-        vec3 a = texture2D(normalMap, p * .25 + vec2(time * .014, -time * .019)).xyz * 2.0 - 1.0;
-        vec3 b = texture2D(normalMap, p * .61 + vec2(-time * .011, time * .009)).xyz * 2.0 - 1.0;
-        vec2 slope = a.xy * .78 + b.xy * .32;
+        vec3 a = texture2D(normalMap, p * .12 + vec2(time * .008, -time * .012)).xyz * 2.0 - 1.0;
+        vec3 b = texture2D(normalMap, p * .34 + vec2(-time * .009, time * .006)).xyz * 2.0 - 1.0;
+        float swell = sin(p.y * .83 + p.x * .31 - time * .62);
+        vec2 slope = a.xy * .55 + b.xy * .16 + vec2(swell * .025, swell * .055);
         vec3 normal = normalize(vec3(slope.x, 1.0, -slope.y));
         vec3 view = normalize(eye - worldPosition);
         float distanceToEye = length(eye - worldPosition);
         vec2 uv = mirrorCoord.xy / mirrorCoord.w;
-        uv += slope * (.025 + .10 / max(distanceToEye, 3.0));
-        vec3 reflection = texture2D(tDiffuse, uv).rgb * .6
-          + texture2D(tDiffuse, uv + vec2(.0006, 0.0)).rgb * .2
-          + texture2D(tDiffuse, uv - vec2(.0006, 0.0)).rgb * .2;
+        uv += slope * (.017 + .07 / max(distanceToEye, 3.0));
+        // A five-tap footprint softens aliasing in narrow neon reflections.
+        vec2 blur = vec2(.0012, .0008) * (1.0 + min(distanceToEye / 45.0, 1.5));
+        vec3 reflection = texture2D(tDiffuse, uv).rgb * .40
+          + texture2D(tDiffuse, uv + vec2(blur.x, 0.0)).rgb * .15
+          + texture2D(tDiffuse, uv - vec2(blur.x, 0.0)).rgb * .15
+          + texture2D(tDiffuse, uv + vec2(0.0, blur.y)).rgb * .15
+          + texture2D(tDiffuse, uv - vec2(0.0, blur.y)).rgb * .15;
         float fresnel = .18 + .82 * pow(1.0 - max(dot(normal, view), 0.0), 4.0);
         vec3 halfVector = normalize(view + sunDirection);
-        float sparkle = pow(max(dot(normal, halfVector), 0.0), 180.0);
+        float sparkle = pow(max(dot(normal, halfVector), 0.0), 96.0);
         vec3 deepWater = vec3(.006, .025, .031);
-        vec3 color = mix(deepWater, reflection, .48 + .52 * fresnel);
+        vec3 color = mix(deepWater, reflection, .35 + .55 * fresnel);
         // Stone spans shield direct sun while retaining reflected undersides.
         float shade = smoothstep(3.8, 4.5, abs(p.y))
           * smoothstep(3.4, 4.1, abs(abs(p.y) - 48.0));
-        color += sunlight * sparkle * .42 * shade;
+        color += sunlight * sparkle * .18 * shade;
         gl_FragColor = vec4(color, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>

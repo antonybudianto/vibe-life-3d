@@ -25,7 +25,7 @@ def build(n):
         -1:[(-65,9.6,22,0,''),(-55.5,8.8,28,2,''),(-46.7,7.5,25,1,''),
             (-38.3,8.7,21,0,''),(-23.8,19.6,34,4,'tsutaya'),
             (-9,9.7,33,0,'asahi'),(11.5,22.7,35,1,'glico'),(28.5,10.7,31,0,'promise'),
-            (42,15.7,32,3,''),(56,11.7,28,2,''),(66.5,8.7,22,0,'')],
+            (42,15.7,27,3,''),(56,11.7,24,2,''),(66.5,8.7,22,0,'')],
         1:[(-65,9.6,27,1,''),(-55,9.7,22,0,''),(-40,18.7,32,3,'wheel'),
            (-24.5,8.7,19,0,''),(-16,7.7,23,1,''),
            (-7,9.7,37,3,'glass-tower'),(7,17.7,22,2,'glass-retail'),(21,9.7,24,2,''),
@@ -40,6 +40,12 @@ def build(n):
             if abs(y)>55:front=19.2
             if hero=='asahi':front=17.95
             n['frontages'][side,y]=front
+            if (side,y) in [(-1,42),(1,-16),(1,21)]:
+                from dotonbori_infill import build as build_infill
+                family=build_infill(n,side,y,w,h,front)
+                collider(side*(front+5),y,5.9,w/2,h)
+                report.append(dict(side=side,center=y,width=w,height=h,front=front,family=family,landmark='',reference='Yasuda Mai 2021' if side<0 else 'architectural interpretation'))
+                continue
             if hero=='tsutaya':
                 from dotonbori_tsutaya import build as build_tsutaya
                 build_tsutaya(n,side,y,w,h,front)
@@ -72,7 +78,7 @@ def build(n):
             collider(side*(front+5),y,5.9,w/2,h)
             for u in [-w/2+.14,w/2-.14]:box(u,-.1,h/2,1.5,.28,h,wall)
             # Every family has its own floor rhythm and bay count.
-            floor=[2.8,3.65,3.0,3.3,3.15][style]
+            floor=[2.8,3.65,3.0,3.3,3.15][style]+(0 if hero else [0,.22,-.17,.35][idx%4])
             bay_count=max(2,round(w/[2.2,3.1,2.7,2.35,3.0][style]))
             usable=w-.70;bay=usable/bay_count
             for level in range(1,int((h-1)/floor)):
@@ -84,7 +90,7 @@ def build(n):
                     u=-usable/2+(j+.5)*bay;ww=bay-.24;hh=floor-.55
                     # Suppress bright windows behind huge opaque landmark prints.
                     covered=(hero=='glico' and abs(u)<9.5 and z>6) or (hero=='promise' and z>9)
-                    lit=not covered and (level<4 or (j+level*3+idx)%5<2)
+                    lit=not covered and ((level<3 and (j+idx)%3!=0) or (j*3+level*7+idx)%11<2)
                     interior=windows[(j+idx+level)%3] if lit else glass
                     g.panel(pos(side,y,u,-.57,z),ww,hh,interior,angle)
                     for edge in [-1,1]:box(u+edge*bay/2,-.12,z,.40 if style==0 else .8,.14,hh+.25,bronze if style==2 else wall)
@@ -192,6 +198,16 @@ def build(n):
                 box(u,-2.8,h+.65,1.6,1.2,1.0,silver)
                 for slat in range(6):box(u-.46+slat*.18,-1.985,h+.67,.04,.075,.7,dark)
                 g.rod(pos(side,y,u,-3.2,h+1.1),pos(side,y,u,-3.2,h+2.1),.13,silver,10)
+            if not hero:
+                # Unequal occupied floors, drainpipes and service ducts break the
+                # repetitive shop-tower silhouette without invented landmark names.
+                u=w*.29 if idx%2 else -w*.31
+                box(u,.25,h*.47,.58,.46,h*.81,silver)
+                for z in range(5,int(h)-2,5):
+                    box(u,.60,z,.20,.64,.12,dark)
+                if idx%3==1:
+                    box(-u,.22,h*.70,.55,w*.32,h*.34,wall)
+                    panel(side,y,-u,h*.68,w*.26,2.0,cream,'事務所',dark,.53)
             for back in [2.0,6.0]:
                 for end in [-1,1]:
                     yy=y+end*(w/2+.025)

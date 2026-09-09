@@ -1,8 +1,26 @@
 # Ebisubashi, TSUTAYA and Snow Brand references
 
-Checked 2026-09-08. Architecture revision 11 remains a compact game district;
+Checked 2026-09-09. Architecture revision 12 remains a compact game district;
 the photographs establish the facade details, not a surveyed scale model or
 a claim that every advertisement is current.
+
+- Glico's official panel specification: 20.00 m high by 10.38 m wide:
+  https://www.glico.com/jp/health/contents/glicosign/
+  Revision 12 uses these dimensions instead of the former 25 x 10.2 panel.
+- The building immediately west of CHINTAI, photographed February 14, 2021:
+  https://yasudamai.com/fumetsunominami/
+  https://yasudamai.com/wp-content/uploads/2021/03/079589c7355697a943c29ffeb941a8fa.jpeg
+  The calligraphy artist's own publication shows a tiled wall, recessed windows,
+  exterior AC units, a black/gold Koyo cabinet and a white vertical
+  `不滅のミナミ` cabinet. `dotonbori_infill.py` models those features at the
+  compressed parcel width. Lettering is newly typeset, not a copy of the photo.
+  Optional inspection copy: `work/references/minami-sign-house.jpg`.
+  The same photo confirms a canal-facing Kukuru octopus below CHINTAI;
+  the main store's street-facing entrance does not imply that the canal-side
+  octopus should be removed. Tenant and campaign dates are not current guarantees.
+- Two opposite-bank infill buildings receive distinct asymmetric facade designs.
+  These and the remaining procedural blocks are architectural interpretations,
+  not surveyed replicas; the canal extension and bridge spacing remain compressed.
 
 - TSUTAYA EBISUBASHI exterior, OSAKA STYLE, November 2023:
   https://osaka.style/news/37282/10-136/

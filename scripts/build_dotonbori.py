@@ -116,15 +116,16 @@ def paving_joints(side,start,stop):
         g.box((side*x,(start+stop)/2,.006),(.012,stop-start,.012),joint)
 
 # Retaining walls and full-width promenade. Water is lower than the walking deck.
+from dotonbori_streetscape import paving_segment, details as streetscape_details
 g.box((0,0,-2.05),(70,150,.7),joint)
 for side in [-1,1]:
-    g.box((side*13.5,0,-.27),(11,140,.54),paving)
+    paving_segment(globals(),side,-70,70)
     g.box((side*8.3,0,-1.1),(.62,140,2.2),stone)
     g.box((side*8.35,0,.035),(.7,140,.07),cap)
     for y in range(-69,70,2):
         g.box((side*8.0,y,-1.02),(.012,.015,1.98),joint)
     paving_joints(side,-70,70)
-    for y in range(-65,66,7):
+    for y in [-65,-56,-39,-28,-18,-9,12,23,34,57,66]:
         if abs(y)<7 or min(abs(y-b) for b in [-48,0,48])<5:continue
         lamp(side*8.9,y)
         g.box((side*7.96,y,-.65),(.05,.36,.65),warm)
@@ -283,7 +284,8 @@ def campaign(side,y,u,h,w,height,name,corners,source='dotonbori-north-v2.png'):
         g.box(pos(side,y,u+edge*(w/2+.09),.81,h),(.35,.12,height+.22),silver)
     for z in [h-height/2-.09,h+height/2+.09]:g.box(pos(side,y,u,.81,z),(.35,w+.3,.12),silver)
 
-campaign(-1,11.5,2.0,19.0,10.2,25.0,'Glico north',[(791,174),(919,174),(919,438),(791,438)])
+# Official sixth-generation panel dimensions, including the masthead.
+campaign(-1,11.5,2.0,19.0,10.38,20.0,'Glico north',[(791,174),(919,174),(919,438),(791,438)])
 # The adjacent sign is Snow Brand / 6P cheese, not the concept's city artwork.
 from dotonbori_billboards import snow_brand
 snow_brand(globals())
@@ -340,6 +342,7 @@ river_details(globals())
 # The two open-deck vessels are added after the static scenery is batched.
 from dotonbori_background import build as build_background
 background=build_background(globals())
+streetscape_details(globals())
 objects=g.flush()
 from dotonbori_cruises import build_cruises
 objects+=build_cruises(globals())
@@ -351,11 +354,14 @@ objects+=build_cruises(globals())
 for side in [-1,1]:
     for i,y in enumerate(range(-150,151,10)):
         bpy.ops.object.light_add(type='AREA',location=(side*17.6,y,3.1));o=bpy.context.object
-        o.name='Dotonbori shop spill';o.data.energy=150;o.data.color=(1,.38,.10);o.data.shape='DISK';o.data.size=4
-        o.rotation_euler=(Vector((side*12,y,0))-o.location).to_track_quat('-Z','Y').to_euler();o['baked_shop']=True;o['base_power']=150
-for y,color in [(7,(.025,.15,1)),(-5,(1,.045,.02)),(20,(1,.49,.025))]:
-    bpy.ops.object.light_add(type='AREA',location=(-17,y,13));o=bpy.context.object;o.data.energy=480;o.data.color=color;o.data.size=6
-    o.rotation_euler=(Vector((0,y,-1))-o.location).to_track_quat('-Z','Y').to_euler();o['baked_shop']=True;o['base_power']=480
+        power=[95,180,65,130,80][(i+(side+1))%5]
+        o.name='Dotonbori shop spill';o.data.energy=power;o.data.color=[(1,.50,.24),(1,.72,.44),(.55,.71,1)][i%3];o.data.shape='DISK';o.data.size=3.2
+        o.rotation_euler=(Vector((side*13.8,y,0))-o.location).to_track_quat('-Z','Y').to_euler();o['baked_shop']=True;o['base_power']=power
+# Sign-matched pools point onto the near pavement instead of across the river.
+for side,y,z,color,power in [(-1,13.5,15,(.08,.28,1),1100),(-1,-9,12,(1,.56,.14),950),(-1,28.5,10,(.16,.32,1),850),(1,-40,10,(1,.38,.07),750)]:
+    bpy.ops.object.light_add(type='AREA',location=(side*16.8,y,z));o=bpy.context.object;o.data.energy=power;o.data.color=color;o.data.shape='RECTANGLE';o.data.size=7;o.data.size_y=5
+    o.name='Dotonbori billboard pavement spill'
+    o.rotation_euler=(Vector((side*12.7,y,0))-o.location).to_track_quat('-Z','Y').to_euler();o['baked_shop']=True;o['base_power']=power
 bpy.ops.object.light_add(type='SUN');bpy.context.object.name='Dotonbori sun'
 bpy.context.scene.world=bpy.data.worlds.new('Dotonbori sky')
 bpy.context.scene['location_id']='dotonbori'
@@ -366,7 +372,7 @@ s=bpy.context.scene;s.camera=cam;s.render.resolution_x=1500;s.render.resolution_
 s['design_reference']='Photo-informed Ebisubashi plaza, retail corner buildings and Ebisu Tower; compact stylized reconstruction'
 s['bridge_navigation']='Rounded Ebisubashi plaza, four straight bank stairs, separate curved perimeter ramps with central entrances and lower landings'
 s['pedestrian_count']=36
-data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-layout['promenadeEnd'],layout['promenadeEnd']],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=11,architecture=architecture,background=background)
+data=dict(id='dotonbori',name='Osaka Dotonbori',spawn=[10.8,0,18],bounds=[-18.8,18.8,-layout['promenadeEnd'],layout['promenadeEnd']],colliders=colliders,surfaces=surfaces,pedestrians=36,cruises=2,artRevision=12,architecture=architecture,background=background)
 (ROOT/'public/models/dotonbori.json').write_text(json.dumps(data,indent=2))
 if '--navigation-only' in sys.argv:
     print('DOTONBORI_NAVIGATION_UPDATED',len(colliders),flush=True)

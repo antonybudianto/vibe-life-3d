@@ -17,7 +17,7 @@ const GRID = .75;
 export class CanalNavigation {
   nodes: Node[] = [];
   banks: number[][] = [[], []];
-  spots: { node: number; yaw: number }[] = [];
+  spots: { node: number; yaw: number; kind: 'bridge' | 'photo' | 'shop' }[] = [];
   private surfaces: WalkSurface[];
   private surfaceCells = new Map<string, WalkSurface[]>();
   constructor(private map: CanalMap) {
@@ -47,9 +47,17 @@ export class CanalNavigation {
     }
     for (const z of BRIDGES) for (const x of [-5, -2.5, 2.5, 5]) for (const end of [-1, 1]) {
       const node = this.nearest({ x, z: z + end * (z === 0 ? Math.max(3.8,Math.sqrt(Math.max(0,6.9**2-x*x)))-.85 : 2.65) });
-      if (seen.has(node)) this.spots.push({ node, yaw: end < 0 ? Math.PI : 0 });
+      if (seen.has(node)) this.spots.push({ node, yaw: z === 0 ? Math.atan2(-18-x,-13.5-this.nodes[node].z) : end < 0 ? Math.PI : 0, kind: 'bridge' });
     }
     if (!this.banks[0].length || !this.banks[1].length || this.spots.length !== 24) throw new Error('Canal pedestrian routes are disconnected');
+    // Small photo groups opposite Glico and short shop queues off the through route.
+    // Resolve onto reachable nodes, leaving the stair landings unobstructed.
+    for (const [x,z,kind] of [[10.5,-17,'photo'],[10.5,-15.5,'photo'],[11.75,-17,'photo'],[11.75,-15.5,'photo'],[15,54,'shop'],[15,55.5,'shop'],[-15,-29,'shop'],[-15,-30.5,'shop']] as const) {
+      const candidates=this.banks[x<0?0:1].filter(id=>!this.spots.some(s=>s.node===id));
+      candidates.sort((a,b)=>distance(this.nodes[a],{x,z})-distance(this.nodes[b],{x,z}));
+      const node=candidates[0];
+      if(node!==undefined&&distance(this.nodes[node],{x,z})<2) this.spots.push({node,yaw:kind==='photo'?-Math.PI/2:Math.sign(x)*Math.PI/2,kind});
+    }
   }
   height(p: Point) {
     if (Math.abs(p.x) > 14.5 || BRIDGES.every(z => Math.abs(p.z - z) > 11)) return 0;
@@ -138,8 +146,9 @@ export class CanalPedestrianSimulation {
     w.journeys++; w.spot = -1; w.activity = 'walking';
     if (w.journeys%3 === 1) {
       const available = nav.spots.map((s,i) => ({...s,i})).filter(s => !this.walkers.some(other => other!==w && other.spot===s.i));
-      available.sort((a,b) => distance(w,nav.nodes[a.node])-distance(w,nav.nodes[b.node]));
-      const spot = available[Math.floor(this.random()*Math.min(8,available.length))];
+      const preference=index%4===0?'shop':index%4===1?'photo':'bridge';
+      available.sort((a,b) => (distance(w,nav.nodes[a.node])-(a.kind===preference?35:0))-(distance(w,nav.nodes[b.node])-(b.kind===preference?35:0)));
+      const spot = available[Math.floor(this.random()*Math.min(4,available.length))];
       if (spot) { w.spot=spot.i; w.destination=spot.node; }
     }
     if (w.spot < 0) {
@@ -170,7 +179,7 @@ export class CanalPedestrianSimulation {
       let target=w.path[0];
       if(target&&distance(w,target)<.13){w.path.shift();target=w.path[0];}
       if(!target) {
-        if(w.spot>=0){w.activity='sightseeing';w.remaining=10+this.random()*16;w.vx=w.vz=0;return;}
+        if(w.spot>=0){w.activity='sightseeing';w.remaining=this.navigation.spots[w.spot].kind==='shop'?7+this.random()*10:12+this.random()*16;w.vx=w.vz=0;return;}
         this.plan(w,i);target=w.path[0];if(!target)return;
       }
       const d=distance(w,target),dx=(target.x-w.x)/Math.max(d,.001),dz=(target.z-w.z)/Math.max(d,.001);

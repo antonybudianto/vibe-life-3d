@@ -47,7 +47,7 @@ const {World,CRUISE_CYCLE}=moduleFrom('lib/game/world.ts', n => n==='three'?THRE
 const data=JSON.parse(fs.readFileSync('public/models/dotonbori.json','utf8'));
 const {CanalPedestrianSimulation}=moduleFrom('lib/game/canal-pedestrians.ts',()=>physics);
 const crowd=new CanalPedestrianSimulation(data);
-const sawSightseeing=new Set(),resumed=new Set(),stairEntrances=new Set();
+const sawSightseeing=new Set(),resumed=new Set(),stairEntrances=new Set(),stopKinds=new Set();
 const frozen=JSON.stringify(crowd.walkers);crowd.update(0,{x:12,y:0,z:18,radius:.32});assert.equal(JSON.stringify(crowd.walkers),frozen,'Paused crowd does not advance');
 for(let tick=0;tick<300*30;tick++) {
   crowd.update(1/30,{x:12,y:0,z:18,radius:.32});
@@ -56,12 +56,18 @@ for(let tick=0;tick<300*30;tick++) {
     assert.ok(crowd.navigation.walkable(w,w.radius+.02),'Walkers stay on clear navigation surfaces');
     assert.ok(Math.abs(w.y-physics.groundHeight(w.x,w.z,data.surfaces))<1e-6,'Feet match authored treads and bridge crowns');
     if(w.activity==='sightseeing') {
-      sawSightseeing.add(i);assert.ok(w.y>1.7&&Math.abs(w.x)<6,'Sightseeing stops are on bridge railings');
+      sawSightseeing.add(i);
+      const spot=crowd.navigation.spots[w.spot];
+      stopKinds.add(spot.kind);
+      if(spot.kind==='bridge')assert.ok(w.y>1.7&&Math.abs(w.x)<6,'Bridge photo stops remain on the railings');
+      else assert.ok(w.y===0&&Math.abs(w.x)>9,'Shop queues and bank photo stops stay on the promenade');
+      assert.ok(Math.hypot(w.x-crowd.navigation.nodes[spot.node].x,w.z-crowd.navigation.nodes[spot.node].z)<.2,'Visitors reach their reserved stop');
     } else if(sawSightseeing.has(i))resumed.add(i);
     for(const z of [-48,0,48])if(Math.abs(w.x)>8.8&&Math.abs(w.x)<13.1&&Math.abs(w.z-z)>4&&w.y>.15)stairEntrances.add(`${z},${Math.sign(w.x)},${Math.sign(w.z-z)}`);
   });
 }
 assert.equal(crowd.walkers.length,36,'Static visitors have been replaced with the live crowd');
+assert.deepEqual([...stopKinds].sort(),['bridge','photo','shop'],'Visitors actually use bridge views, canal photo groups and shop stops');
 assert.ok(crowd.walkers.every(w=>w.travelled>100&&w.crossings>0),'Every visitor walks and reaches the opposite bank');
 assert.equal(stairEntrances.size,12,'Live routes use all twelve stair entrances');
 assert.ok(sawSightseeing.size>=30&&resumed.size>=28,'Visitors pause at railings and resume walking');
@@ -143,6 +149,9 @@ for(const phase of ['day','evening','night','day']) {
 }
 const b=fs.readFileSync('public/models/dotonbori.glb');assert.equal(b.toString('utf8',0,4),'glTF');
 const gltf=JSON.parse(b.toString('utf8',20,20+b.readUInt32LE(12)));
+const glicoPanel=gltf.meshes.find(m=>m.name==='Dotonbori artwork Glico north');
+const glicoBounds=gltf.accessors[glicoPanel.primitives[0].attributes.POSITION];
+assert.ok(Math.abs(glicoBounds.max[1]-glicoBounds.min[1]-20)<.01&&Math.abs(glicoBounds.max[2]-glicoBounds.min[2]-10.38)<.01,'Exported Glico panel matches the official 20 x 10.38 m dimensions');
 // Seven navigable bridges and the larger shared AO atlas add about 1 MB.
 assert.ok(b.length<10.5e6,'The expanded seven-bridge district stays within 10.5 MB');
 assert.equal(gltf.nodes.filter(n=>n.extras?.cruise).length,2);
@@ -210,7 +219,7 @@ for(let time=0;time<=CRUISE_CYCLE;time+=.1){
 }
 assert.ok(crossed.every(bridges=>bridges.size===14),'Both boats pass under all seven bridges in both directions');
 console.log('PASS: both boats pass under all seven bridges in both directions; passengers clear soffits, full hulls clear piers and U-turns, and opposing boats stay separated.');
-assert.equal(gltf.materials.filter(m=>m.extras?.bakedLightmap).length,9,'Walkways, bridges and all six Ebisubashi paving finishes have completed light bakes');
+assert.equal(gltf.materials.filter(m=>m.extras?.bakedLightmap).length,12,'All four promenade finishes, bridges and six Ebisubashi finishes have completed light bakes');
 assert.ok(gltf.materials.filter(m=>m.extras?.bake_mode).length>25,'Completed detail bakes must be in the delivered GLB');
 const bake=JSON.parse(fs.readFileSync('assets/bakes/dotonbori.json','utf8'));
 assert.equal(bake.engine,'CYCLES');assert.ok(bake.vertexBakes.length>30);assert.ok(bake.aoStd>.03);assert.ok(bake.lightmapMaximum>.1);
